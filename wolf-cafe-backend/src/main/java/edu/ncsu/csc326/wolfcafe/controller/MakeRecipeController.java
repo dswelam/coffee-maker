@@ -13,31 +13,33 @@ import org.springframework.web.bind.annotation.RestController;
 
 import edu.ncsu.csc326.wolfcafe.dto.InventoryDto;
 import edu.ncsu.csc326.wolfcafe.dto.RecipeDto;
+import edu.ncsu.csc326.wolfcafe.exception.InvalidIngredientAmountException;
+import edu.ncsu.csc326.wolfcafe.exception.ResourceNotFoundException;
 import edu.ncsu.csc326.wolfcafe.service.InventoryService;
 import edu.ncsu.csc326.wolfcafe.service.MakeRecipeService;
 import edu.ncsu.csc326.wolfcafe.service.RecipeService;
-import lombok.AllArgsConstructor;
 
 /**
  * MakeRecipeController provides the endpoint for making a recipe.
+ *
+ * @author Dania Swelam
  */
 @CrossOrigin ( "*" )
 @RestController
 @RequestMapping ( "/api/makerecipe" )
-@AllArgsConstructor
 public class MakeRecipeController {
 
-    /** Service for inventory. */
+    /** Connection to InventoryService */
     @Autowired
-    private final InventoryService  inventoryService;
+    private InventoryService  inventoryService;
 
-    /** Service for recipes. */
+    /** Connection to RecipeService */
     @Autowired
-    private final RecipeService     recipeService;
+    private RecipeService     recipeService;
 
-    /** Service for making recipes. */
+    /** Connection to MakeRecipeService */
     @Autowired
-    private final MakeRecipeService makeRecipeService;
+    private MakeRecipeService makeRecipeService;
 
     /**
      * REST API method to make coffee by completing a POST request with the ID
@@ -45,27 +47,41 @@ public class MakeRecipeController {
      * the body of the response
      *
      * @param recipeName
-     *            recipe name
+     *            recipe name to make
      * @param amtPaid
      *            amount paid
      * @return The change the customer is due if successful
      */
     @PreAuthorize ( "hasAnyRole('ADMIN', 'STAFF', 'CUSTOMER')" )
     @PostMapping ( "{name}" )
-    public ResponseEntity<Integer> makeRecipe ( @PathVariable ( "name" ) final String recipeName,
+    public ResponseEntity< ? > makeRecipe ( @PathVariable ( "name" ) final String recipeName,
             @RequestBody final Integer amtPaid ) {
-        final RecipeDto recipeDto = recipeService.getRecipeByName( recipeName );
-
-        final int change = makeRecipe( recipeDto, amtPaid );
-        if ( change == amtPaid ) {
-            if ( amtPaid < recipeDto.getPrice() ) {
-                return new ResponseEntity<>( amtPaid, HttpStatus.CONFLICT );
+        RecipeDto recipeDto = null;
+        try {
+            recipeDto = recipeService.getRecipeByName( recipeName );
+            final int change = makeRecipe( recipeDto, amtPaid );
+            return ResponseEntity.ok( change );
+        }
+        catch ( final ResourceNotFoundException e ) {
+            return ResponseEntity.status( HttpStatus.NOT_FOUND ).body( "Recipe not found." );
+        }
+        catch ( final InvalidIngredientAmountException e ) {
+            return ResponseEntity.status( HttpStatus.BAD_REQUEST )
+                    .body( "Insufficient inventory to make beverage. Your money has been returned." );
+        }
+        catch ( final IllegalArgumentException e ) {
+            if ( e.getMessage().contains( "Insufficient Payment" ) ) {
+                return ResponseEntity.status( HttpStatus.CONFLICT )
+                        .body( "Insufficient funds to pay. Your money has been returned." );
+            }
+            else if ( e.getMessage().contains( "Invalid Payment" ) ) {
+                return ResponseEntity.status( HttpStatus.UNPROCESSABLE_ENTITY )
+                        .body( "Invalid payment. Please enter a valid integer." );
             }
             else {
-                return new ResponseEntity<>( amtPaid, HttpStatus.BAD_REQUEST );
+                return ResponseEntity.status( HttpStatus.BAD_REQUEST ).body( e.getMessage() );
             }
         }
-        return ResponseEntity.ok( change );
     }
 
     /**
@@ -79,24 +95,14 @@ public class MakeRecipeController {
      *         exceptions if not
      */
     private int makeRecipe ( final RecipeDto toPurchase, final int amtPaid ) {
-        int change = amtPaid;
         final InventoryDto inventoryDto = inventoryService.getInventory();
-
-        if ( toPurchase.getPrice() <= amtPaid ) {
-            if ( makeRecipeService.makeRecipe( inventoryDto, toPurchase ) ) {
-                change = amtPaid - toPurchase.getPrice();
-                return change;
-            }
-            else {
-                // not enough inventory
-                return change;
-            }
+        if ( amtPaid < toPurchase.getPrice() ) {
+            throw new IllegalArgumentException( "Insufficient Payment" );
         }
-        else {
-            // not enough money
-            return change;
+        if ( !makeRecipeService.makeRecipe( inventoryDto, toPurchase ) ) {
+            throw new InvalidIngredientAmountException( "Insufficient Ingredients" );
         }
-
+        return amtPaid - toPurchase.getPrice();
     }
 
 }

@@ -1,4 +1,3 @@
-
 package edu.ncsu.csc326.wolfcafe.service.impl;
 
 import java.util.List;
@@ -9,6 +8,7 @@ import org.springframework.stereotype.Service;
 
 import edu.ncsu.csc326.wolfcafe.dto.InventoryDto;
 import edu.ncsu.csc326.wolfcafe.entity.Inventory;
+import edu.ncsu.csc326.wolfcafe.entity.Recipe;
 import edu.ncsu.csc326.wolfcafe.exception.InvalidIngredientAmountException;
 import edu.ncsu.csc326.wolfcafe.exception.ResourceNotFoundException;
 import edu.ncsu.csc326.wolfcafe.mapper.InventoryMapper;
@@ -73,7 +73,7 @@ public class InventoryServiceImpl implements InventoryService {
         for ( final Map.Entry<String, Integer> entry : additionalIngredients.entrySet() ) {
             final String ingredient = entry.getKey();
             final Integer amountToAdd = entry.getValue();
-            if ( amountToAdd == null || amountToAdd < 0 ) {
+            if ( amountToAdd == null || amountToAdd <= 0 ) {
                 throw new InvalidIngredientAmountException(
                         "Invalid amount for " + ingredient + ". Must be a positive integer" );
             }
@@ -84,6 +84,47 @@ public class InventoryServiceImpl implements InventoryService {
         inventory.setIngredients( currentIngredients );
         final Inventory savedInventory = inventoryRepository.save( inventory );
         return InventoryMapper.mapToInventoryDto( savedInventory );
+    }
+
+    /**
+     * Checks if there are enough ingredients in inventory for the given recipe.
+     */
+    @Override
+    public boolean hasEnoughIngredients ( final Recipe recipe ) {
+        final InventoryDto inventoryDto = getInventory();
+        final Map<String, Integer> invMap = inventoryDto.getIngredients();
+        final Map<String, Integer> recMap = recipe.getIngredients();
+
+        for ( final Map.Entry<String, Integer> entry : recMap.entrySet() ) {
+            final String name = entry.getKey();
+            final int required = entry.getValue();
+            final int available = invMap.getOrDefault( name, 0 );
+            if ( available < required ) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    /**
+     * Deducts the ingredients for the given recipe from inventory.
+     */
+    @Override
+    public void useIngredients ( final Recipe recipe ) {
+        final Inventory inventory = inventoryRepository.findById( 1L )
+                .orElseThrow( () -> new ResourceNotFoundException( "Inventory does not exist" ) );
+
+        final Map<String, Integer> invMap = inventory.getIngredients();
+        final Map<String, Integer> recMap = recipe.getIngredients();
+
+        for ( final Map.Entry<String, Integer> entry : recMap.entrySet() ) {
+            final String name = entry.getKey();
+            final int amount = entry.getValue();
+            invMap.put( name, invMap.get( name ) - amount );
+        }
+
+        inventory.setIngredients( invMap );
+        inventoryRepository.save( inventory );
     }
 
 }
