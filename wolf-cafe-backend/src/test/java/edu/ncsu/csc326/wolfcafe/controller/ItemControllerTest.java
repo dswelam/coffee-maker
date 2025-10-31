@@ -4,9 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import edu.ncsu.csc326.wolfcafe.TestUtils;
 import edu.ncsu.csc326.wolfcafe.WolfCafeApplication;
-import edu.ncsu.csc326.wolfcafe.dto.IngredientDto;
 import edu.ncsu.csc326.wolfcafe.dto.ItemDto;
-import edu.ncsu.csc326.wolfcafe.repository.IngredientRepository;
 import edu.ncsu.csc326.wolfcafe.repository.ItemRepository;
 import edu.ncsu.csc326.wolfcafe.service.ItemService;
 import org.hamcrest.Matchers;
@@ -22,8 +20,6 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
