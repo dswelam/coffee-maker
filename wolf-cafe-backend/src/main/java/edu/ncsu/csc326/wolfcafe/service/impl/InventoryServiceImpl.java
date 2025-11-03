@@ -128,5 +128,4 @@ public class InventoryServiceImpl implements InventoryService {
         inventory.setIngredients( invMap );
         inventoryRepository.save( inventory );
     }
-
 }
