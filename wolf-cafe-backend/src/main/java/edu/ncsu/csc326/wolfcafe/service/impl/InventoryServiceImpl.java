@@ -17,6 +17,8 @@ import edu.ncsu.csc326.wolfcafe.service.InventoryService;
 
 /**
  * Implementation of the InventoryService interface.
+ *
+ * @author Dania Swelam
  */
 @Service
 public class InventoryServiceImpl implements InventoryService {
