@@ -6,6 +6,8 @@ import java.util.Map;
 /**
  * Used to transfer Inventory data between the client and server. This class
  * will serve as the response in the REST API.
+ *
+ * @author Dania Swelam
  */
 public class InventoryDto {
 

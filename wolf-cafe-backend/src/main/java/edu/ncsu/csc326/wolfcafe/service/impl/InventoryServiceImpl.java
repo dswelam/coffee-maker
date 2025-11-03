@@ -8,7 +8,7 @@ import org.springframework.stereotype.Service;
 
 import edu.ncsu.csc326.wolfcafe.dto.InventoryDto;
 import edu.ncsu.csc326.wolfcafe.entity.Inventory;
-import edu.ncsu.csc326.wolfcafe.entity.Recipe;
+import edu.ncsu.csc326.wolfcafe.entity.Item;
 import edu.ncsu.csc326.wolfcafe.exception.InvalidIngredientAmountException;
 import edu.ncsu.csc326.wolfcafe.exception.ResourceNotFoundException;
 import edu.ncsu.csc326.wolfcafe.mapper.InventoryMapper;
@@ -90,10 +90,10 @@ public class InventoryServiceImpl implements InventoryService {
      * Checks if there are enough ingredients in inventory for the given recipe.
      */
     @Override
-    public boolean hasEnoughIngredients ( final Recipe recipe ) {
+    public boolean hasEnoughIngredients ( final Item item ) {
         final InventoryDto inventoryDto = getInventory();
         final Map<String, Integer> invMap = inventoryDto.getIngredients();
-        final Map<String, Integer> recMap = recipe.getIngredients();
+        final Map<String, Integer> recMap = item.getIngredients();
 
         for ( final Map.Entry<String, Integer> entry : recMap.entrySet() ) {
             final String name = entry.getKey();
@@ -110,12 +110,12 @@ public class InventoryServiceImpl implements InventoryService {
      * Deducts the ingredients for the given recipe from inventory.
      */
     @Override
-    public void useIngredients ( final Recipe recipe ) {
+    public void useIngredients ( final Item item ) {
         final Inventory inventory = inventoryRepository.findById( 1L )
                 .orElseThrow( () -> new ResourceNotFoundException( "Inventory does not exist" ) );
 
         final Map<String, Integer> invMap = inventory.getIngredients();
-        final Map<String, Integer> recMap = recipe.getIngredients();
+        final Map<String, Integer> recMap = item.getIngredients();
 
         for ( final Map.Entry<String, Integer> entry : recMap.entrySet() ) {
             final String name = entry.getKey();
@@ -126,5 +126,4 @@ public class InventoryServiceImpl implements InventoryService {
         inventory.setIngredients( invMap );
         inventoryRepository.save( inventory );
     }
-
 }
