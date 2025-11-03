@@ -42,10 +42,6 @@ public class ItemControllerTest {
     /** Item Service */
     @MockitoBean
     private ItemService itemService;
-    
-    /** Reference to item repository */
-    @Autowired
-    private ItemRepository itemRepository;
 
     /** Object mapper */
     private static final ObjectMapper MAPPER = new ObjectMapper();
