@@ -2,8 +2,10 @@ package edu.ncsu.csc326.wolfcafe.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import edu.ncsu.csc326.wolfcafe.TestUtils;
 import edu.ncsu.csc326.wolfcafe.WolfCafeApplication;
 import edu.ncsu.csc326.wolfcafe.dto.ItemDto;
+import edu.ncsu.csc326.wolfcafe.repository.ItemRepository;
 import edu.ncsu.csc326.wolfcafe.service.ItemService;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.Test;
@@ -18,8 +20,10 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -123,6 +127,26 @@ public class ItemControllerTest {
                 .andExpect(jsonPath("$.name", Matchers.equalTo(ITEM_NAME)))
                 .andExpect(jsonPath("$.description", Matchers.equalTo(ITEM_DESCRIPTION)))
                 .andExpect(jsonPath("$.price", Matchers.equalTo(ITEM_PRICE)));
+    }
+    
+    /**
+     * Test deleting an item
+     * @throws Exception if error
+     */
+    @Test
+    @WithMockUser(username = "staff", roles = "ADMIN")
+    public void testDeleteItem() throws Exception {
+        ItemDto itemDto = new ItemDto();
+        itemDto.setId(27L);
+        itemDto.setName(ITEM_NAME);
+        itemDto.setDescription(ITEM_DESCRIPTION);
+        itemDto.setPrice(ITEM_PRICE);
+
+        mvc.perform( post( API_PATH ).contentType( MediaType.APPLICATION_JSON )
+                .content( TestUtils.asJsonString( itemDto ) ).accept( MediaType.APPLICATION_JSON ) )
+                .andExpect( status().is2xxSuccessful() );
+
+        mvc.perform( delete( API_PATH + "/27" ) ).andDo( print() ).andExpect( status().isOk() );
     }
     
 }
