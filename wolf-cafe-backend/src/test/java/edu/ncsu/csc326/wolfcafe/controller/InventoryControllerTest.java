@@ -27,6 +27,8 @@ import jakarta.persistence.EntityManager;
 
 /**
  * Tests InventoryController
+ *
+ * @author Dania Swelam
  */
 @SpringBootTest
 @AutoConfigureMockMvc
