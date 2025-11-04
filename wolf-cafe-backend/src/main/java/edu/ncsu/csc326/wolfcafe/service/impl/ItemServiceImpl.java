@@ -17,6 +17,7 @@ import lombok.AllArgsConstructor;
  * Implemented item service
  *
  * @author Dania Swelam
+ * @author Diya Patel
  */
 @Service
 @AllArgsConstructor
@@ -30,7 +31,9 @@ public class ItemServiceImpl implements ItemService {
 
     /**
      * Adds given item
-     * @param itemDto item to add
+     *
+     * @param itemDto
+     *            item to add
      * @return added item
      */
     @Override
@@ -42,6 +45,7 @@ public class ItemServiceImpl implements ItemService {
 
     /**
      * Returns all items
+     *
      * @return all items
      */
     @Override
@@ -52,24 +56,56 @@ public class ItemServiceImpl implements ItemService {
 
     /**
      * Updates the item with the given id
-     * @param id id of item to update
-     * @param itemDto information of item to update
+     *
+     * @param id
+     *            id of item to update
+     * @param itemDto
+     *            information of item to update
      * @return updated item
      */
     @Override
     public ItemDto updateItem ( final Long id, final ItemDto itemDto ) {
-        final Item item = itemRepository.findById( id )
+
+        // ensure the item exists (Cannot Edit)
+        final Item existingItem = itemRepository.findById( id )
                 .orElseThrow( () -> new ResourceNotFoundException( "Item not found with id " + id ) );
-        item.setName( itemDto.getName() );
-        item.setDescription( itemDto.getDescription() );
-        item.setPrice( itemDto.getPrice() );
-        final Item updatedItem = itemRepository.save( ( item ) );
-        return modelMapper.map( updatedItem, ItemDto.class );
+
+        // validate price (Invalid Price)
+        if ( itemDto.getPrice() <= 0 ) {
+            throw new IllegalArgumentException( "Invalid Price: must be a positive value." );
+        }
+
+        // validate ingredient list (No Ingredients)
+        if ( itemDto.getIngredients() == null || itemDto.getIngredients().isEmpty() ) {
+            throw new IllegalArgumentException( "No Ingredients: item must include at least one ingredient." );
+        }
+
+        // validate each ingredient’s units (Invalid Unit)
+        for ( final Integer units : itemDto.getIngredients().values() ) {
+            if ( units == null || units <= 0 ) {
+                throw new IllegalArgumentException( "Invalid Unit: all ingredient amounts must be positive integers." );
+            }
+        }
+
+        // update mutable fields
+        existingItem.setName( itemDto.getName() );
+        existingItem.setDescription( itemDto.getDescription() );
+        existingItem.setPrice( itemDto.getPrice() );
+
+        // replace or update ingredient list
+        existingItem.getIngredients().clear();
+        existingItem.getIngredients().putAll( itemDto.getIngredients() );
+
+        // save and return updated DTO
+        final Item updated = itemRepository.save( existingItem );
+        return modelMapper.map( updated, ItemDto.class );
     }
 
     /**
      * Deletes the item with the given id
-     * @param id id of item to delete
+     *
+     * @param id
+     *            id of item to delete
      */
     @Override
     public void deleteItem ( final Long id ) {
@@ -113,7 +149,8 @@ public class ItemServiceImpl implements ItemService {
     /**
      * Checks if item name is duplicate
      *
-     * @param itemName name to check
+     * @param itemName
+     *            name to check
      * @return true if duplicate, false otherwise
      */
     @Override
@@ -126,4 +163,5 @@ public class ItemServiceImpl implements ItemService {
             return false;
         }
     }
+
 }

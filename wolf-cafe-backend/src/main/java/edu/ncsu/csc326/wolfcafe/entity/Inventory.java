@@ -14,9 +14,9 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.MapKeyColumn;
 
 /**
- * Inventory for the WolfCafe. Inventory is a Data Access Object (DAO) is
- * tied to the database using Hibernate libraries. InventoryRepository provides
- * the methods for database CRUD operations.
+ * Inventory for the WolfCafe. Inventory is a Data Access Object (DAO) is tied
+ * to the database using Hibernate libraries. InventoryRepository provides the
+ * methods for database CRUD operations.
  *
  * @author Dania Swelam
  */

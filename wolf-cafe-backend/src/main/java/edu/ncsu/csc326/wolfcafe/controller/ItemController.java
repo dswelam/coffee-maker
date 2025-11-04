@@ -17,14 +17,15 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import edu.ncsu.csc326.wolfcafe.dto.ItemDto;
+import edu.ncsu.csc326.wolfcafe.exception.ResourceNotFoundException;
 import edu.ncsu.csc326.wolfcafe.service.ItemService;
 import lombok.AllArgsConstructor;
 
 /**
- * Controller for API endpoints for an Item
- * for requirements
+ * Controller for API endpoints for an Item for requirements
  *
  * @author Dania Swelam
+ * @author Diya Patel
  */
 @RestController
 @RequestMapping ( "api/items" )
@@ -56,7 +57,8 @@ public class ItemController {
     }
 
     /**
-     * Gets an item by id. Requires the ADMIN, STAFF, CUSTOMER, ANONYMOUS or BARISTA role.
+     * Gets an item by id. Requires the ADMIN, STAFF, CUSTOMER, ANONYMOUS or
+     * BARISTA role.
      *
      * @param id
      *            item id
@@ -70,7 +72,8 @@ public class ItemController {
     }
 
     /**
-     * Returns all items. Requires the ADMIN, STAFF, CUSTOMER, ANONYMOUS, or BARISTA role.
+     * Returns all items. Requires the ADMIN, STAFF, CUSTOMER, ANONYMOUS, or
+     * BARISTA role.
      *
      * @return a list of all items
      */
@@ -84,7 +87,6 @@ public class ItemController {
     /**
      * Updates the item with the given id. Requires ADMIN or STAFF role.
      *
-     * TODO - This method is part of Edit Recipe/Item and has not been implemented aside from TA implementation.
      *
      * @param id
      *            item to update
@@ -94,10 +96,19 @@ public class ItemController {
      */
     @PreAuthorize ( "hasAnyRole('ADMIN', 'STAFF')" )
     @PutMapping ( "{id}" )
-    public ResponseEntity<ItemDto> updateItem ( @PathVariable ( "id" ) final Long id,
-            @RequestBody final ItemDto itemDto ) {
-        final ItemDto updatedItem = itemService.updateItem( id, itemDto );
-        return ResponseEntity.ok( updatedItem );
+    public ResponseEntity< ? > updateItem ( @PathVariable ( "id" ) final Long id, @RequestBody final ItemDto itemDto ) {
+        try {
+            final ItemDto updated = itemService.updateItem( id, itemDto );
+            return ResponseEntity.ok( updated );
+        }
+        catch ( final IllegalArgumentException e ) {
+            // Invalid Price, Invalid Unit, No Ingredients
+            return ResponseEntity.badRequest().body( e.getMessage() );
+        }
+        catch ( final ResourceNotFoundException e ) {
+            // Cannot Edit (item deleted by concurrent user)
+            return ResponseEntity.status( HttpStatus.CONFLICT ).body( e.getMessage() );
+        }
     }
 
     /**

@@ -14,7 +14,9 @@ public interface ItemService {
 
     /**
      * Adds given item
-     * @param itemDto item to add
+     *
+     * @param itemDto
+     *            item to add
      * @return added item
      */
     ItemDto addItem ( ItemDto itemDto );
@@ -43,21 +45,27 @@ public interface ItemService {
 
     /**
      * Returns all items
+     *
      * @return all items
      */
     List<ItemDto> getAllItems ();
 
     /**
      * Updates the item with the given id
-     * @param id id of item to update
-     * @param itemDto information of item to update
+     *
+     * @param id
+     *            id of item to update
+     * @param itemDto
+     *            information of item to update
      * @return updated item
      */
     ItemDto updateItem ( Long id, ItemDto itemDto );
 
     /**
      * Deletes the item with the given id
-     * @param id id of item to delete
+     *
+     * @param id
+     *            id of item to delete
      */
     void deleteItem ( Long id );
 

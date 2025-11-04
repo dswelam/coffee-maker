@@ -64,7 +64,9 @@ public class ItemControllerTest {
 
     /**
      * Test adding an item
-     * @throws Exception if error
+     *
+     * @throws Exception
+     *             if error
      */
     @Test
     @WithMockUser ( username = "staff", roles = "STAFF" )
@@ -90,7 +92,9 @@ public class ItemControllerTest {
 
     /**
      * Tests trying to create an item if the user role is incorrect
-     * @throws Exception if error
+     *
+     * @throws Exception
+     *             if error
      */
     @Test
     public void testAddItemNotAdmin () throws Exception {
@@ -111,7 +115,9 @@ public class ItemControllerTest {
 
     /**
      * Tests getting the item as a staff member
-     * @throws Exception if error
+     *
+     * @throws Exception
+     *             if error
      */
     @Test
     @WithMockUser ( username = "staff", roles = "STAFF" )
@@ -137,7 +143,9 @@ public class ItemControllerTest {
 
     /**
      * Tests getting all items as an admin
-     * @throws Exception if error
+     *
+     * @throws Exception
+     *             if error
      */
     @Test
     @WithMockUser ( username = "admin", roles = "ADMIN" )
@@ -171,7 +179,8 @@ public class ItemControllerTest {
     /**
      * Tests updating an item as an admin
      *
-     * @throws Exception if error
+     * @throws Exception
+     *             if error
      */
     @Test
     @WithMockUser ( username = "admin", roles = "ADMIN" )
@@ -199,7 +208,9 @@ public class ItemControllerTest {
 
     /**
      * Test deleting an item
-     * @throws Exception if error
+     *
+     * @throws Exception
+     *             if error
      */
     @Test
     @WithMockUser ( username = "staff", roles = "STAFF" )
@@ -217,4 +228,78 @@ public class ItemControllerTest {
 
         mvc.perform( delete( API_PATH + "/27" ) ).andDo( print() ).andExpect( status().isOk() );
     }
+
+    /**
+     * Tests updateItem returns 400 for invalid price
+     */
+    @Test
+    @WithMockUser ( username = "admin", roles = "ADMIN" )
+    public void testUpdateItemInvalidPrice () throws Exception {
+        final ItemDto itemDto = new ItemDto( 1L, "Mocha", "Chocolate coffee", -2.0, Map.of( "Espresso", 1 ) );
+
+        // Simulate service throwing exception
+        Mockito.when( itemService.updateItem( ArgumentMatchers.eq( 1L ), ArgumentMatchers.any() ) )
+                .thenThrow( new IllegalArgumentException( "Invalid Price: must be a positive value." ) );
+
+        final String json = MAPPER.writeValueAsString( itemDto );
+
+        mvc.perform( put( API_PATH + "/1" ).contentType( MediaType.APPLICATION_JSON ).characterEncoding( ENCODING )
+                .content( json ) ).andExpect( status().isBadRequest() )
+                .andExpect( jsonPath( "$", Matchers.containsString( "Invalid Price" ) ) );
+    }
+
+    /**
+     * Tests updateItem returns 400 for invalid units
+     */
+    @Test
+    @WithMockUser ( username = "admin", roles = "ADMIN" )
+    public void testUpdateItemInvalidUnits () throws Exception {
+        final ItemDto itemDto = new ItemDto( 1L, "Latte", "Milk coffee", 4.0, Map.of( "Milk", -1 ) );
+
+        Mockito.when( itemService.updateItem( ArgumentMatchers.eq( 1L ), ArgumentMatchers.any() ) ).thenThrow(
+                new IllegalArgumentException( "Invalid Unit: all ingredient amounts must be positive integers." ) );
+
+        final String json = MAPPER.writeValueAsString( itemDto );
+
+        mvc.perform( put( API_PATH + "/1" ).contentType( MediaType.APPLICATION_JSON ).characterEncoding( ENCODING )
+                .content( json ) ).andExpect( status().isBadRequest() )
+                .andExpect( jsonPath( "$", Matchers.containsString( "Invalid Unit" ) ) );
+    }
+
+    /**
+     * Tests updateItem returns 400 for no ingredients
+     */
+    @Test
+    @WithMockUser ( username = "admin", roles = "ADMIN" )
+    public void testUpdateItemNoIngredients () throws Exception {
+        final ItemDto itemDto = new ItemDto( 1L, "Cappuccino", "Foamy coffee", 3.5, Map.of() );
+
+        Mockito.when( itemService.updateItem( ArgumentMatchers.eq( 1L ), ArgumentMatchers.any() ) ).thenThrow(
+                new IllegalArgumentException( "No Ingredients: item must include at least one ingredient." ) );
+
+        final String json = MAPPER.writeValueAsString( itemDto );
+
+        mvc.perform( put( API_PATH + "/1" ).contentType( MediaType.APPLICATION_JSON ).characterEncoding( ENCODING )
+                .content( json ) ).andExpect( status().isBadRequest() )
+                .andExpect( jsonPath( "$", Matchers.containsString( "No Ingredients" ) ) );
+    }
+
+    /**
+     * Tests updateItem returns 409 when item does not exist
+     */
+    @Test
+    @WithMockUser ( username = "admin", roles = "ADMIN" )
+    public void testUpdateItemNotFound () throws Exception {
+        final ItemDto itemDto = new ItemDto( 999L, "Nonexistent", "Missing item", 5.0, Map.of( "Espresso", 1 ) );
+
+        Mockito.when( itemService.updateItem( ArgumentMatchers.eq( 999L ), ArgumentMatchers.any() ) ).thenThrow(
+                new edu.ncsu.csc326.wolfcafe.exception.ResourceNotFoundException( "Item not found with id 999" ) );
+
+        final String json = MAPPER.writeValueAsString( itemDto );
+
+        mvc.perform( put( API_PATH + "/999" ).contentType( MediaType.APPLICATION_JSON ).characterEncoding( ENCODING )
+                .content( json ) ).andExpect( status().isConflict() )
+                .andExpect( jsonPath( "$", Matchers.containsString( "Item not found" ) ) );
+    }
+
 }
