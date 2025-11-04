@@ -17,10 +17,15 @@ const HeaderComponent = () => {
   return (
     <div>
         <header>
-            <nav className='navbar navbar-expand-md navbar-dark bg-dark'>
+            <nav className='navbar navbar-expand-md navbar-dark bg-dark w-100 fixed-top'>
                 <div>
                     <a href='http://localhost:3000' className='navbar-brand'>
-                        WolfCafe
+					<img 
+					    src='/wolf-head.png' 
+					    alt='Wolf logo' 
+					    style={{ width: '40px', height: '40px', marginRight: '10px' }} 
+					  />    
+					WolfCafe
                     </a>
                 </div>
                 <div className='collapse navbar-collapse'>
@@ -28,7 +33,13 @@ const HeaderComponent = () => {
 					{
 						isAuth &&
 						<li className='nav-item'>
-							<NavLink to='/items' className='nav-link'>Items</NavLink>
+							<NavLink to='/items' className='nav-link'>Inventory</NavLink>
+						</li>
+					}
+					{
+						isAuth &&
+						<li className='nav-item'>
+							<NavLink to='/recipes' className='nav-link'>Recipes</NavLink>
 						</li>
 					}
 					</ul>
@@ -51,7 +62,8 @@ const HeaderComponent = () => {
                         <li className='nav-item'>
                             <NavLink to='/login' className='nav-link' onClick={handleLogout}>Logout</NavLink>
                         </li>
-                    }   
+                    } 
+
                 </ul>
             </nav>
         </header>
