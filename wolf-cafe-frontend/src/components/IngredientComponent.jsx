@@ -10,7 +10,6 @@ const IngredientComponent = () => {
 	const { id } = useParams();
 	const navigate = useNavigate();
 
-	// Load ingredient if editing (optional, depends on your IngredientService)
 	useEffect(() => {
 		if (id) {
 			updateIngredient(id)
@@ -34,7 +33,6 @@ const IngredientComponent = () => {
 		setErrors(newErrors);
 		if (Object.keys(newErrors).length > 0) return;
 
-		// Build inventory payload in "add amounts" format
 		const payload = {
 			id: 1, // singleton inventory ID
 			ingredients: {
@@ -51,9 +49,8 @@ const IngredientComponent = () => {
 			});
 	};
 
-	const handleDelete = () => {
+	const DeleteIngredient = () => {
 		if (!id) return;
-		// assuming deleteIngredient handles deletion
 		deleteIngredient(id)
 			.then(() => navigate('/ingredients'))
 			.catch(err => console.error(err));
@@ -121,15 +118,14 @@ const IngredientComponent = () => {
 								Submit
 							</button>
 
-							{id &&
-								<button
-									type='button'
-									className='btn btn-danger'
-									onClick={handleDelete}
-								>
-									Delete
-								</button>
-							}
+							<button
+								type='button'
+								className='btn btn-danger'
+								onClick={DeleteIngredient}
+							>
+								Delete
+							</button>
+
 						</form>
 					</div>
 				</div>

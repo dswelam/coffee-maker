@@ -54,7 +54,7 @@ const ListItemsComponent = () => {
 			}
 			<div>
 				<table className='table table-bordered table-striped' style={{ textAlign: "left" }}>
-					<thead>
+					<thead className='table-dark'>
 						<tr>
 							<th>Name</th>
 							<th>Price</th>
