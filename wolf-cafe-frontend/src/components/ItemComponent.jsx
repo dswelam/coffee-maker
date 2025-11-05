@@ -13,6 +13,8 @@ const TodoComponent = () => {
 
 	const [allIngredients, setAllIngredients] = useState([]);
 	const [selectedIngredients, setSelectedIngredients] = useState([]);
+	const [deleteMessage, setDeleteMessage] = useState('');
+
 
 
 	const { id } = useParams()
@@ -111,18 +113,19 @@ const TodoComponent = () => {
 
 	{/* Added - JaredH, delete button logic for item update page  */ }
 	function deleteItem(e) {
-		e.preventDefault()
-		if (!id) return;
+		const confirmDelete = window.confirm('Are you sure you want to delete this item?');
+		    if (!confirmDelete) return;
 
-		deleteItemById(id)
-			.then((response) => {
-				console.log(response.data);
-				navigate('/items');
-			})
-			.catch((error) => {
-				console.error(error);
-
-			});
+		    deleteItemById(id)
+		        .then(() => {
+					setDeleteMessage('Item deleted successfully!');
+					setTimeout(() => navigate('/items'), 2500);
+		        })
+		        .catch((error) => {
+		            console.error(error);
+					setDeleteMessage('This item may have already been deleted by another user.');
+					setTimeout(() => navigate('/items'), 2500);
+		        });
 	}
 
 	function getGeneralErrors() {
@@ -288,6 +291,10 @@ const TodoComponent = () => {
 
 							<button type='submit' className='btn btn-success me-5' onClick={(e) => saveOrUpdateItem(e)}>Submit</button>
 							<button type='button' className='btn btn-danger' onClick={(e) => deleteItem(e)} >Delete</button>
+							<br /> <br />
+							{deleteMessage && (
+							    <div className="p-2 mb-2 bg-info text-black">{deleteMessage}</div>
+							)}
 
 						</form>
 					</div>

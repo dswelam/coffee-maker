@@ -34,12 +34,19 @@ const ListItemsComponent = () => {
 	}
 
 	function deleteItem(id) {
-		console.log(id)
-		deleteItemById(id).then((response) => {
-			listItems()
-		}).catch(error => {
-			console.error(error)
-		})
+	    const confirmDelete = window.confirm('Are you sure you want to delete this item?');
+	    if (!confirmDelete) return;
+
+	    deleteItemById(id)
+	        .then((response) => {
+	            alert('Item deleted successfully!');
+	            listItems(); 
+	        })
+	        .catch((error) => {
+	            console.error(error);
+	            alert('This item may have already been deleted by another user.');
+	            listItems(); 
+	        });
 	}
 
 
