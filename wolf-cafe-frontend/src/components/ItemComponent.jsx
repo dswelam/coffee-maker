@@ -221,7 +221,7 @@ const TodoComponent = () => {
 							<div className='form-group mb-2'>
 								<label className='form-label'>Item Price:</label>
 								<input
-									type='text'
+									type='number'
 									className='form-control'
 									placeholder='Enter Item Price'
 									name='price'

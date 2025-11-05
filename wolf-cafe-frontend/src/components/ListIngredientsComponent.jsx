@@ -68,14 +68,16 @@ const ListIngredientsComponent = () => {
 								<td>			  {//isAdmin && 
 									(
 										<span
-											style={{ color: 'black', textDecoration: 'none', cursor: 'pointer' }}
+											style={{ color: 'black', textDecoration: 'none', cursor: 'pointer', fontSize: '2rem' }}
 											onClick={() => updateIngredient(ing.name)}
 											onMouseEnter={(e) => (e.target.style.color = 'blue')}
 											onMouseLeave={(e) => (e.target.style.color = 'black')}
 										>
 
 											{ing.name} </span>)}</td>
-								<td>{ing.amount}</td>
+								<td
+								style={{ fontSize: '2rem' }}>
+								{ing.amount}</td>
 							</tr>
 						))
 					)}

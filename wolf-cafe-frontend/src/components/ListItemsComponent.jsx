@@ -53,13 +53,13 @@ const ListItemsComponent = () => {
 				<button className='btn btn-primary mb-2' onClick={addNewItem}>Add Item</button>
 			}
 			<div>
-				<table className='table table-bordered table-striped' style={{ textAlign: "left" }}>
+				<table className='table table-bordered table-striped' style={{ textAlign: "left", tableLayout: 'fixed', width: '100%' }}>
 					<thead className='table-dark'>
 						<tr>
-							<th>Name</th>
-							<th>Price</th>
-							<th>Description</th>
-							<th>Ingredients</th>
+							<th style={{ width: '100px' }}>Name</th>
+							<th style={{ width: '50px' }}>Price</th>
+							<th style={{ width: '100px' }}>Description</th>
+							<th style={{ width: '300px' }}>Ingredients</th>
 						</tr>
 					</thead>
 					<tbody>
@@ -77,11 +77,21 @@ const ListItemsComponent = () => {
 
 												{item.name} </span>)}{!isAdmin && item.name} </td>
 									<td>{item.price}</td>
-									<td>{item.description}</td>
+									<td style={{ width: '200px', wordWrap: 'break-word', overflowWrap: 'break-word' }}>{item.description}</td>
 									<td>
-										{item.ingredients
-											? Object.keys(item.ingredients).join(', ')
-											: 'No ingredients'}
+									{item.ingredients ? (
+									  <div 
+									    style={{ 
+									      display: 'grid', 
+									      gridTemplateColumns: 'repeat(3, 1fr)', // 3 bullet points each row
+									      gap: '5px'
+									    }}
+									  >
+									    {Object.keys(item.ingredients).map((ing, idx) => (
+									      <span key={idx}>• {ing}</span>
+									    ))}
+									  </div>
+									) : 'No ingredients'}
 									</td>
 								</tr>
 							)
