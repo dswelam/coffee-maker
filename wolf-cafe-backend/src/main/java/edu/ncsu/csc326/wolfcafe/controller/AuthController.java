@@ -86,7 +86,7 @@ public class AuthController {
      */
     @PreAuthorize ( "hasRole('ADMIN')" )
     @PutMapping ( "/roles/{roleName}/permissions" )
-    public ResponseEntity< ? > assignPermissions ( @PathVariable final String roleName,
+    public ResponseEntity< ? > assignPermissions ( @PathVariable ( "roleName" ) final String roleName,
             @RequestBody final Collection<Permission> permissions ) {
         try {
             final Role updated = authService.assignPermissions( roleName, permissions );
