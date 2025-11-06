@@ -14,6 +14,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.transaction.annotation.Transactional;
 
 import edu.ncsu.csc326.wolfcafe.dto.InventoryDto;
+import edu.ncsu.csc326.wolfcafe.entity.Item;
 import edu.ncsu.csc326.wolfcafe.exception.InvalidIngredientAmountException;
 import jakarta.persistence.EntityManager;
 
@@ -124,5 +125,56 @@ public class InventoryServiceTest {
         final InvalidIngredientAmountException ex2 = assertThrows( InvalidIngredientAmountException.class,
                 () -> inventoryService.updateInventory( inventoryDto ) );
         assertEquals( ex2.getMessage(), "Invalid amount for Milk. Must be a positive integer" );
+    }
+
+    /**
+     * Tests using ingredients and checking for enough ingredients.
+     */
+    @Test
+    @Transactional
+    void testUseAndCheckIngredients () {
+        final Map<String, Integer> ingredients = new HashMap<>();
+        ingredients.put( "Coffee", 10 );
+        ingredients.put( "Milk", 10 );
+        ingredients.put( "Sugar", 10 );
+        ingredients.put( "Chocolate", 10 );
+
+        final InventoryDto inventoryDto = new InventoryDto( ingredients );
+        inventoryService.createInventory( inventoryDto );
+
+        // Create a recipe/item that uses some ingredients
+        final Map<String, Integer> recipeIngredients = new HashMap<>();
+        recipeIngredients.put( "Coffee", 4 );
+        recipeIngredients.put( "Milk", 5 );
+        recipeIngredients.put( "Sugar", 2 );
+
+        final Item item = new Item();
+        item.setIngredients( recipeIngredients );
+
+        // Check if enough ingredients
+        final boolean hasEnough = inventoryService.hasEnoughIngredients( item );
+        assertEquals( true, hasEnough );
+
+        // Use the ingredients
+        inventoryService.useIngredients( item );
+
+        final InventoryDto updatedInventory = inventoryService.getInventory();
+        assertAll( "Updated InventoryDto contents",
+                () -> assertEquals( 6, updatedInventory.getIngredients().get( "Coffee" ) ),
+                () -> assertEquals( 5, updatedInventory.getIngredients().get( "Milk" ) ),
+                () -> assertEquals( 8, updatedInventory.getIngredients().get( "Sugar" ) ),
+                () -> assertEquals( 10, updatedInventory.getIngredients().get( "Chocolate" ) ) );
+
+        // Check if enough ingredients for another item that requires more than
+        // available
+        final Map<String, Integer> largeRecipeIngredients = new HashMap<>();
+        largeRecipeIngredients.put( "Coffee", 7 );
+        largeRecipeIngredients.put( "Milk", 6 );
+
+        final Item largeItem = new Item();
+        largeItem.setIngredients( largeRecipeIngredients );
+
+        final boolean hasEnoughForLargeItem = inventoryService.hasEnoughIngredients( largeItem );
+        assertEquals( false, hasEnoughForLargeItem );
     }
 }

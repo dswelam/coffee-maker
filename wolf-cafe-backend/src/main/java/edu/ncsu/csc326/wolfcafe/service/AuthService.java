@@ -1,30 +1,51 @@
 package edu.ncsu.csc326.wolfcafe.service;
 
+import java.util.Collection;
+
 import edu.ncsu.csc326.wolfcafe.dto.JwtAuthResponse;
 import edu.ncsu.csc326.wolfcafe.dto.LoginDto;
 import edu.ncsu.csc326.wolfcafe.dto.RegisterDto;
+import edu.ncsu.csc326.wolfcafe.entity.Permission;
+import edu.ncsu.csc326.wolfcafe.entity.Role;
 
 /**
  * Authorization service
  */
 public interface AuthService {
-	/**
-	 * Registers the given user
-	 * @param registerDto new user information
-	 * @return message for success or failure
-	 */
-    String register(RegisterDto registerDto);
+    /**
+     * Registers the given user
+     *
+     * @param registerDto
+     *            new user information
+     * @return message for success or failure
+     */
+    String register ( RegisterDto registerDto );
 
     /**
      * Logins in the given user
-     * @param loginDto username/email and password
+     *
+     * @param loginDto
+     *            username/email and password
      * @return response with authenticated user
      */
-    JwtAuthResponse login(LoginDto loginDto);
-    
+    JwtAuthResponse login ( LoginDto loginDto );
+
     /**
      * Deletes the given user by id
-     * @param id id of user to delete
+     *
+     * @param id
+     *            id of user to delete
      */
-    void deleteUserById(Long id);
+    void deleteUserById ( Long id );
+
+    /**
+     * assigns permissions to the role
+     *
+     * @param roleName
+     *            the name of the role
+     * @param permissions
+     *            the permissions to update
+     * @return the role that was updated
+     */
+    Role assignPermissions ( String roleName, Collection<Permission> permissions );
 }
