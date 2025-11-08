@@ -36,3 +36,8 @@ export const isAdminUser = () => {
     let role = sessionStorage.getItem('role')
     return role != null && role == 'ROLE_ADMIN';
 }
+
+export const isStaffUser = () => {
+    let role = sessionStorage.getItem('role')
+    return role != null && role == 'ROLE_STAFF';
+}

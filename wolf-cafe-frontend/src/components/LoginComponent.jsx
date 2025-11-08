@@ -1,92 +1,131 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { loginAPICall, saveLoggedInUser, storeToken } from '../services/AuthService'
 import { useNavigate } from 'react-router-dom'
 
 const LoginComponent = () => {
 
-    const [usernameOrEmail, setUsernameOrEmail] = useState('')
-    const [password, setPassword] = useState('')
+	const [usernameOrEmail, setUsernameOrEmail] = useState('')
+	const [password, setPassword] = useState('')
 
-    const navigator = useNavigate()
-
-    async function handleLoginForm(e) {
-        e.preventDefault()
-
-        const loginObj = {usernameOrEmail, password}
-
-        console.log(loginObj)
-
-        await loginAPICall(usernameOrEmail, password).then((response) => {
-            console.log(response.data)
-
-            // const token = 'Basic ' + window.btoa(usernameOrEmail + ':' + password);
-            const token = 'Bearer ' + response.data.accessToken
-
-            const role = response.data.role
-
-            storeToken(token)
-            saveLoggedInUser(usernameOrEmail, role)
-
-            navigator('/items')
-
-            window.location.reload(false)
-        }).catch(error => {
-            console.error('ERROR1' + error)
-        })
-    }
+	const [errorMessage, setErrorMessage] = useState('')
 
 
-  return (
-    <div className='container'>
-        <br /><br />
-        <div className='row'>
-            <div className='col-md-6 offset-md-3 offset-md-3'>
-                <div className='card'>
-                    <div className='card-header'>
-                        <h2 className='text-center'>Login Form</h2>
-                    </div>
-                    <div className='card-body'>
-                        <form>
-                            <div className='row mb-3'>
-                                <label className='col-md-3 control-label'>Username</label>
-                                <div className='col-md-9'>
-                                    <input
-                                        type='text'
-                                        name='usernameOrEmail'
-                                        className='form-control'
-                                        placeholder='Enter username or email'
-                                        value={usernameOrEmail}
-                                        onChange={(e) => setUsernameOrEmail(e.target.value)}
-                                    >
-                                    </input>
-                                </div>
-                            </div>
+	const navigator = useNavigate()
 
-                            <div className='row mb-3'>
-                                <label className='col-md-3 control-label'>Password</label>
-                                <div className='col-md-9'>
-                                    <input
-                                        type='password'
-                                        name='password'
-                                        className='form-control'
-                                        placeholder='Enter password'
-                                        value={password}
-                                        onChange={(e) => setPassword(e.target.value)}
-                                    >
-                                    </input>
-                                </div>
-                            </div>
+	useEffect(() => {
+		// prevent scrolling
+		document.body.style.overflow = 'hidden'
 
-                            <div className='form-group mb-3'>
-                                <button className='btn btn-primary' onClick={(e) => handleLoginForm(e)}>Submit</button>
-                            </div>
-                        </form>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-  )
+		// cleanup when component unmounts
+		return () => {
+			document.body.style.overflow = 'auto'
+		}
+	}, [])
+
+
+	async function handleLoginForm(e) {
+		e.preventDefault()
+
+
+		const loginObj = { usernameOrEmail, password }
+
+		console.log(loginObj)
+
+		await loginAPICall(usernameOrEmail, password).then((response) => {
+			console.log(response.data)
+
+			// const token = 'Basic ' + window.btoa(usernameOrEmail + ':' + password);
+			const token = 'Bearer ' + response.data.accessToken
+
+			const role = response.data.role
+
+			storeToken(token)
+			saveLoggedInUser(usernameOrEmail, role)
+
+			navigator('/items')
+
+			window.location.reload(false)
+		}).catch(error => {
+			console.error('Login error:' + error)
+
+
+
+			if (usernameOrEmail.trim() === '') {
+				setErrorMessage('Username or email is required');
+			} else if (password.trim() === '') {
+				setErrorMessage('Password is required');
+			} else {
+				setErrorMessage('Incorrect username or password');
+			}
+
+		})
+	}
+
+
+
+	return (
+		<div
+			className='d-flex justify-content-center align-items-center vh-100' style={{ paddingTop: '5px' }}
+		>
+			<div className='card shadow-lg p-5' style={{ width: '45rem', transform: 'scale(1.1)', backgroundColor: '#fff', borderRadius: '1rem' }}>
+
+
+				<div className='card-header text-center border-0 mb-3 bg-white'>
+					<h2 className='fw-bold mb-0 text-dark'>Welcome Back</h2>
+					<p className='text-secondary mt-2'>Sign in to continue</p>
+				</div>
+
+				<div className='card-body'>
+					<form>
+						<div className='mb-4'>
+							<label className='form-label fs-5 fw-semibold text-dark'>Username</label>
+							<input
+								type='text'
+								name='usernameOrEmail'
+								className='form-control form-control-lg'
+								placeholder='Enter username or email'
+								value={usernameOrEmail}
+								onChange={(e) => setUsernameOrEmail(e.target.value)}
+							/>
+						</div>
+
+						<div className='mb-4'>
+							<label className='form-label fs-5 fw-semibold text-dark'>Password</label>
+							<input
+								type='password'
+								name='password'
+								className='form-control form-control-lg'
+								placeholder='Enter password'
+								value={password}
+								onChange={(e) => setPassword(e.target.value)}
+							/>
+						</div>
+
+						<div className='text-center'>
+							<button
+								className='btn btn-danger btn-lg w-100 fw-bold'
+								onClick={(e) => handleLoginForm(e)}
+								style={{ backgroundColor: '#CC0000'}}
+							>
+								Login
+							</button>
+						</div>
+
+						{errorMessage && (
+							<div className='alert alert-danger mt-4 text-center fs-5 py-3' role='alert'>
+								{errorMessage}
+							</div>
+						)}
+
+					</form>
+				</div>
+			</div>
+
+			<div style={{ position: 'absolute', bottom: '1rem', width: '100%', textAlign: 'center' }}>
+			  <span>WolfCafe © 2025</span>
+			</div>
+		</div>
+	)
 }
 
 export default LoginComponent

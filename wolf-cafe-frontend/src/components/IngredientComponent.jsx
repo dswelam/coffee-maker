@@ -19,6 +19,13 @@ const IngredientComponent = () => {
 				})
 				.catch(err => console.error(err));
 		}
+		// prevent scrolling
+		document.body.style.overflow = 'hidden'
+
+		// cleanup when component unmounts
+		return () => {
+			document.body.style.overflow = 'auto'
+		}
 	}, [id]);
 
 	const saveOrUpdateIngredient = (e) => {
@@ -78,7 +85,7 @@ const IngredientComponent = () => {
 	);
 
 	return (
-		<div className='container'>
+		<div className='container' style={{paddingTop: '40px'}}>
 			<br /><br />
 			<div className='row'>
 				<div className='card col-md-6 offset-md-3'>

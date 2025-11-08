@@ -51,7 +51,7 @@ const ListItemsComponent = () => {
 
 
 	return (
-		<div className='container'>
+		<div className='container' style={{ paddingTop: '40px' }}>
 			<br /> <br />
 			<h2 className='text-center'>Items</h2>
 			<h6 className='text-center'>Click on Item Name to Update Or Delete</h6>

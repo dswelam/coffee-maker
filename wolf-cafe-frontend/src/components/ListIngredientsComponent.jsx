@@ -40,7 +40,7 @@ const ListIngredientsComponent = () => {
 	if (error) return <p className="text-danger">{error}</p>;
 
 	return (
-		<div className="container">
+		<div className="container" style={{ paddingTop: '40px' }}>
 			<br /> <br />
 			<h2>Inventory</h2>
 			<h6 className='text-center'>Click on Ingredient Name to Update Or Delete</h6>
@@ -68,7 +68,7 @@ const ListIngredientsComponent = () => {
 								<td>			  {//isAdmin && 
 									(
 										<span
-											style={{ color: 'black', textDecoration: 'none', cursor: 'pointer', fontSize: '2rem' }}
+											style={{ color: 'black', textDecoration: 'none', cursor: 'pointer', fontSize: '1.5rem' }}
 											onClick={() => updateIngredient(ing.name)}
 											onMouseEnter={(e) => (e.target.style.color = 'blue')}
 											onMouseLeave={(e) => (e.target.style.color = 'black')}
@@ -76,7 +76,7 @@ const ListIngredientsComponent = () => {
 
 											{ing.name} </span>)}</td>
 								<td
-								style={{ fontSize: '2rem' }}>
+								style={{ fontSize: '1.5rem' }}>
 								{ing.amount}</td>
 							</tr>
 						))

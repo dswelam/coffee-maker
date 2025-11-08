@@ -25,6 +25,7 @@ const TodoComponent = () => {
 
 	useEffect(() => {
 		const fetchIngredients = async () => {
+			
 			try {
 				const res = await getInventory();
 				let ingredientNames = [];
@@ -181,7 +182,7 @@ const TodoComponent = () => {
 	}
 
 	return (
-		<div className='container'>
+		<div className='container' style={{ paddingTop: '40px' }}>
 			<br /> <br />
 			<div className='row'>
 				<div className='card col-md-6 offset-md-3 offset-md-3'>

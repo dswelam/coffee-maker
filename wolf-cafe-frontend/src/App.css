@@ -66,4 +66,11 @@
 .btn-danger:hover {
   background-color: #a00000;
 }
+.navbar-nav .nav-link.active {
+  background-color: #fff;
+  color: #000 !important;
+  border-radius: 0.5rem;
+  padding: 0.5rem 1rem;
+}
+
 
