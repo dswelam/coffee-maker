@@ -3,7 +3,6 @@ package edu.ncsu.csc326.wolfcafe.controller;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -34,27 +33,27 @@ public class OrderController {
     /** Link to OrderService */
     @Autowired
     private final OrderService orderService;
-    
+
     /**
      * TODO
      * @param itemName
      * @param amtPaid
      * @return
      */
-    public ResponseEntity<OrderDto> orderItem(String itemName, Integer amtPaid) {
-    	 	// TODO
-    		return null;
+    public ResponseEntity<OrderDto> orderItem ( final String itemName, final Integer amtPaid ) {
+        // TODO
+        return null;
     }
-    
+
     /**
      * TODO
      * @param toPurchase
      * @param amtPaid
      * @return
      */
-    public int orderItem(ItemDto toPurchase, int amtPaid) {
-    		// TODO
-    		return 0;
+    public int orderItem ( final ItemDto toPurchase, final int amtPaid ) {
+        // TODO
+        return 0;
     }
 
     /**
@@ -69,7 +68,7 @@ public class OrderController {
     @PostMapping
     public ResponseEntity<OrderDto> createOrder ( @RequestBody final OrderDto orderDto ) {
         // TODO
-    		return null;
+        return null;
     }
 
     /**
@@ -87,7 +86,7 @@ public class OrderController {
     public ResponseEntity<OrderDto> updateOrder ( @PathVariable ( "id" ) final Long orderId,
             @RequestBody final OrderDto orderDto ) {
         // TODO
-    		return null;
+        return null;
     }
 
     /**
@@ -106,66 +105,66 @@ public class OrderController {
         orderService.deleteOrder( orderId );
         return ResponseEntity.ok( "Order deleted successfully." );
     }
-    
+
     /**
      * TODO
      * @param status
      * @return
      */
-    public ResponseEntity<OrderDto> listQueue(String status) {
-    		// TODO
-    		return null;
+    public ResponseEntity<OrderDto> listQueue ( final String status ) {
+        // TODO
+        return null;
     }
-    
+
     /**
      * TODO
      * @param orderId
      * @param staffId
      * @return
      */
-    public ResponseEntity<OrderDto> prepareOrder(Long orderId, Long staffId) {
-    		// TODO
-    		return null;
+    public ResponseEntity<OrderDto> prepareOrder ( final Long orderId, final Long staffId ) {
+        // TODO
+        return null;
     }
-    
+
     /**
      * TODO
      * @param orderId
      * @param staffId
      * @return
      */
-    public ResponseEntity<OrderDto> markReady(Long orderId, Long staffId) {
-    		// TODO
-    		return null;
+    public ResponseEntity<OrderDto> markReady ( final Long orderId, final Long staffId ) {
+        // TODO
+        return null;
     }
-    
+
     /**
      * TODO
      * @param orderId
      * @return
      */
-    public ResponseEntity<OrderDto> orderFulfilled(Long orderId) {
-    		// TODO
-    		return null;
+    public ResponseEntity<OrderDto> orderFulfilled ( final Long orderId ) {
+        // TODO
+        return null;
     }
-    
+
     /**
      * TODO
      * @param orderId
      * @param byCustomer
      * @return
      */
-    public ResponseEntity<OrderDto> orderCancelled(Long orderId, boolean byCustomer) {
-    		// TODO
-    		return null;
+    public ResponseEntity<OrderDto> orderCancelled ( final Long orderId, final boolean byCustomer ) {
+        // TODO
+        return null;
     }
-    
+
     /**
      * TODO
      * @return
      */
-    public ResponseEntity<List<OrderDto>> listMyOrders() {
-    		// TODO
-    		return null;
+    public ResponseEntity<List<OrderDto>> listMyOrders () {
+        // TODO
+        return null;
     }
 }

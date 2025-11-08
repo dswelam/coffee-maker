@@ -1,5 +1,8 @@
 package edu.ncsu.csc326.wolfcafe.entity;
 
+import java.util.HashSet;
+import java.util.Set;
+
 import jakarta.persistence.CollectionTable;
 import jakarta.persistence.Column;
 import jakarta.persistence.ElementCollection;
@@ -34,16 +37,16 @@ public class Role {
     /** Role id */
     @Id
     @GeneratedValue ( strategy = GenerationType.IDENTITY )
-    private Long                      id;
+    private Long            id;
 
-    /** Roll name */
-    private String                    name;
+    /** Role name */
+    private String          name;
 
     /** Permissions assigned to this role */
     @ElementCollection ( fetch = FetchType.EAGER )
     @CollectionTable ( name = "role_permissions", joinColumns = @JoinColumn ( name = "role_id" ) )
     @Enumerated ( EnumType.STRING )
     @Column ( name = "permission" )
-    private java.util.Set<Permission> permissions = new java.util.HashSet<>();
+    private Set<Permission> permissions = new HashSet<>();
 
 }

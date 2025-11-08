@@ -1,11 +1,17 @@
 package edu.ncsu.csc326.wolfcafe.entity;
 
-import java.util.Map;
+import java.util.ArrayList;
+import java.util.List;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 
 /**
@@ -22,33 +28,34 @@ public class Order {
     /** Order id */
     @Id
     @GeneratedValue ( strategy = GenerationType.IDENTITY )
-    private Long   id;
+    private Long            id;
 
     /** Order customer */
-    private User customer;
-    
+    @ManyToOne ( fetch = FetchType.LAZY, optional = false )
+    @JoinColumn ( name = "customer_id" )
+    private User            customer;
+
     /** Order items
      * 	Key = Item
      * 	Value = Integer (quantity of Item) */
-    private Map<Item, Integer> orderItems;
-    
+    @OneToMany ( mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true )
+    private List<OrderLine> orderItems = new ArrayList<>();
+
     /** Order status */
-    private OrderStatus status;
-    
+    private OrderStatus     status;
+
     /** Order staff */
-    private User preparedBy;
-    
-    /** 
+    @ManyToOne ( fetch = FetchType.LAZY, optional = false )
+    @JoinColumn ( name = "user_prepared" )
+    private User            preparedBy;
+
+    /**
      * Defines all order statuses in the system
      */
     public enum OrderStatus {
-    		PLACED,
-    		IN_PROGRESS,
-    		READY,
-    		FULFILLED,
-    		CANCELLED
+        PLACED, IN_PROGRESS, READY, FULFILLED, CANCELLED
     }
-    
+
     /**
      * Default constructor for Hibernate
      */
@@ -57,62 +64,64 @@ public class Order {
     }
 
     /** Constructor that takes all properties for an Order, including id */
-	public Order(Long id, User customer, Map<Item, Integer> orderItems, OrderStatus status, User preparedBy) {
-		super();
-		this.id = id;
-		this.customer = customer;
-		this.orderItems = orderItems;
-		this.status = status;
-		this.preparedBy = preparedBy;
-	}
+    public Order ( final Long id, final User customer, final List<OrderLine> orderItems, final OrderStatus status,
+            final User preparedBy ) {
+        super();
+        this.id = id;
+        this.customer = customer;
+        this.orderItems = orderItems;
+        this.status = status;
+        this.preparedBy = preparedBy;
+    }
 
-	/** Constructor that takes all properties for an Order EXCEPT for id */
-	public Order(User customer, Map<Item, Integer> orderItems, OrderStatus status, User preparedBy) {
-		super();
-		this.customer = customer;
-		this.orderItems = orderItems;
-		this.status = status;
-		this.preparedBy = preparedBy;
-	}
+    /** Constructor that takes all properties for an Order EXCEPT for id */
+    public Order ( final User customer, final List<OrderLine> orderItems, final OrderStatus status,
+            final User preparedBy ) {
+        super();
+        this.customer = customer;
+        this.orderItems = orderItems;
+        this.status = status;
+        this.preparedBy = preparedBy;
+    }
 
-	public Long getId() {
-		return id;
-	}
+    public Long getId () {
+        return id;
+    }
 
-	public void setId(Long id) {
-		this.id = id;
-	}
+    public void setId ( final Long id ) {
+        this.id = id;
+    }
 
-	public User getCustomer() {
-		return customer;
-	}
+    public User getCustomer () {
+        return customer;
+    }
 
-	public void setCustomer(User customer) {
-		this.customer = customer;
-	}
+    public void setCustomer ( final User customer ) {
+        this.customer = customer;
+    }
 
-	public Map<Item, Integer> getOrderItems() {
-		return orderItems;
-	}
+    public List<OrderLine> getOrderItems () {
+        return orderItems;
+    }
 
-	public void setOrderItems(Map<Item, Integer> orderItems) {
-		this.orderItems = orderItems;
-	}
+    public void setOrderItems ( final List<OrderLine> orderItems ) {
+        this.orderItems = orderItems;
+    }
 
-	public OrderStatus getStatus() {
-		return status;
-	}
+    public OrderStatus getStatus () {
+        return status;
+    }
 
-	public void setStatus(OrderStatus status) {
-		this.status = status;
-	}
+    public void setStatus ( final OrderStatus status ) {
+        this.status = status;
+    }
 
-	public User getPreparedBy() {
-		return preparedBy;
-	}
+    public User getPreparedBy () {
+        return preparedBy;
+    }
 
-	public void setPreparedBy(User preparedBy) {
-		this.preparedBy = preparedBy;
-	}
+    public void setPreparedBy ( final User preparedBy ) {
+        this.preparedBy = preparedBy;
+    }
 
 }

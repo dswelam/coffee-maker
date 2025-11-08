@@ -1,36 +1,41 @@
 package edu.ncsu.csc326.wolfcafe.mapper;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 import edu.ncsu.csc326.wolfcafe.dto.OrderDto;
+import edu.ncsu.csc326.wolfcafe.dto.OrderLineDto;
 import edu.ncsu.csc326.wolfcafe.entity.Order;
+import edu.ncsu.csc326.wolfcafe.entity.OrderLine;
 
 /**
  * Converts between Order entity and OrderDto
- *
- * @author Brooke Wu (bwu25)
  */
 public class OrderMapper {
 
-    /**
-     * Converts an Order entity to OrderDto
-     *
-     * @param order
-     *            Order to convert
-     * @return OrderDto object
-     */
     public static OrderDto mapToOrderDto ( final Order order ) {
-        return new OrderDto( order.getId(), order.getCustomer(), order.getOrderItems(), order.getStatus(), order.getPreparedBy() );
-
+        final List<OrderLineDto> orderLineDtos = order.getOrderItems().stream().map( OrderMapper::mapToOrderLineDto )
+                .collect( Collectors.toList() );
+        return new OrderDto( order.getId(), order.getCustomer(), orderLineDtos, order.getStatus(),
+                order.getPreparedBy() );
     }
 
-    /**
-     * Converts a OrderDto object to a Order entity.
-     *
-     * @param orderDto
-     *            OrderDto to convert
-     * @return Order entity
-     */
     public static Order mapToOrder ( final OrderDto orderDto ) {
-        return new Order( orderDto.getId(), orderDto.getCustomer(), orderDto.getOrderItems(), orderDto.getStatus(), orderDto.getPreparedBy() );
+        final List<OrderLine> orderLines = orderDto.getOrderItems().stream().map( OrderMapper::mapToOrderLine )
+                .collect( Collectors.toList() );
+        return new Order( orderDto.getId(), orderDto.getCustomer(), orderLines, orderDto.getStatus(),
+                orderDto.getPreparedBy() );
     }
 
+    private static OrderLineDto mapToOrderLineDto ( final OrderLine orderLine ) {
+        return new OrderLineDto( orderLine.getId(), orderLine.getItem(), orderLine.getQuantity() );
+    }
+
+    private static OrderLine mapToOrderLine ( final OrderLineDto orderLineDto ) {
+        final OrderLine orderLine = new OrderLine();
+        orderLine.setId( orderLineDto.getId() );
+        orderLine.setItem( orderLineDto.getItem() );
+        orderLine.setQuantity( orderLineDto.getQuantity() );
+        return orderLine;
+    }
 }

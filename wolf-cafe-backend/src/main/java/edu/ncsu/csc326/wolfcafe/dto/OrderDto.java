@@ -1,8 +1,7 @@
 package edu.ncsu.csc326.wolfcafe.dto;
 
-import java.util.Map;
+import java.util.List;
 
-import edu.ncsu.csc326.wolfcafe.entity.Item;
 import edu.ncsu.csc326.wolfcafe.entity.Order.OrderStatus;
 import edu.ncsu.csc326.wolfcafe.entity.User;
 
@@ -15,19 +14,19 @@ import edu.ncsu.csc326.wolfcafe.entity.User;
 public class OrderDto {
 
     /** Order id */
-    private Long   id;
+    private Long               id;
 
     /** Order customer */
-    private User customer;
-    
+    private User               customer;
+
     /** Order items */
-    private Map<Item, Integer> orderItems;
-    
+    private List<OrderLineDto> orderItems;
+
     /** Order status */
-    private OrderStatus status;
-    
+    private OrderStatus        status;
+
     /** Order staff */
-    private User preparedBy;
+    private User               preparedBy;
 
     /**
      * Default constructor for the OrderDto
@@ -37,62 +36,64 @@ public class OrderDto {
     }
 
     /** Constructor that takes all properties for an OrderDto, including id */
-	public OrderDto(Long id, User customer, Map<Item, Integer> orderItems, OrderStatus status, User preparedBy) {
-		super();
-		this.id = id;
-		this.customer = customer;
-		this.orderItems = orderItems;
-		this.status = status;
-		this.preparedBy = preparedBy;
-	}
+    public OrderDto ( final Long id, final User customer, final List<OrderLineDto> orderItems, final OrderStatus status,
+            final User preparedBy ) {
+        super();
+        this.id = id;
+        this.customer = customer;
+        this.orderItems = orderItems;
+        this.status = status;
+        this.preparedBy = preparedBy;
+    }
 
-	/** Constructor that takes all properties for an OrderDto EXCEPT for id */
-	public OrderDto(User customer, Map<Item, Integer> orderItems, OrderStatus status, User preparedBy) {
-		super();
-		this.customer = customer;
-		this.orderItems = orderItems;
-		this.status = status;
-		this.preparedBy = preparedBy;
-	}
+    /** Constructor that takes all properties for an OrderDto EXCEPT for id */
+    public OrderDto ( final User customer, final List<OrderLineDto> orderItems, final OrderStatus status,
+            final User preparedBy ) {
+        super();
+        this.customer = customer;
+        this.orderItems = orderItems;
+        this.status = status;
+        this.preparedBy = preparedBy;
+    }
 
-	public Long getId() {
-		return id;
-	}
+    public Long getId () {
+        return id;
+    }
 
-	public void setId(Long id) {
-		this.id = id;
-	}
+    public void setId ( final Long id ) {
+        this.id = id;
+    }
 
-	public User getCustomer() {
-		return customer;
-	}
+    public User getCustomer () {
+        return customer;
+    }
 
-	public void setCustomer(User customer) {
-		this.customer = customer;
-	}
+    public void setCustomer ( final User customer ) {
+        this.customer = customer;
+    }
 
-	public Map<Item, Integer> getOrderItems() {
-		return orderItems;
-	}
+    public List<OrderLineDto> getOrderItems () {
+        return orderItems;
+    }
 
-	public void setOrderItems(Map<Item, Integer> orderItems) {
-		this.orderItems = orderItems;
-	}
+    public void setOrderItems ( final List<OrderLineDto> orderItems ) {
+        this.orderItems = orderItems;
+    }
 
-	public OrderStatus getStatus() {
-		return status;
-	}
+    public OrderStatus getStatus () {
+        return status;
+    }
 
-	public void setStatus(OrderStatus status) {
-		this.status = status;
-	}
+    public void setStatus ( final OrderStatus status ) {
+        this.status = status;
+    }
 
-	public User getPreparedBy() {
-		return preparedBy;
-	}
+    public User getPreparedBy () {
+        return preparedBy;
+    }
 
-	public void setPreparedBy(User preparedBy) {
-		this.preparedBy = preparedBy;
-	}
+    public void setPreparedBy ( final User preparedBy ) {
+        this.preparedBy = preparedBy;
+    }
 
 }

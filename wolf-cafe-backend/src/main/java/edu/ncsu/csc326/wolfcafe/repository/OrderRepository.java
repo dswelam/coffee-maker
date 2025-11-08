@@ -15,39 +15,34 @@ import edu.ncsu.csc326.wolfcafe.entity.Order.OrderStatus;
  */
 public interface OrderRepository extends JpaRepository<Order, Long> {
 
-	/**
-	 * TODO
-	 * @param id
-	 * @return
-	 */
-    Optional<Order> findById(Long id);
-    
+    /**
+     * TODO
+     * @param id
+     * @return
+     */
+    @Override
+    Optional<Order> findById ( Long id );
+
     /**
      * TODO
      * @param status
      * @return
      */
-    List<Order> findAllByStatus(OrderStatus status);
+    List<Order> findAllByStatus ( OrderStatus status );
 
     /**
      * TODO
      * @param customerId
      * @return
      */
-    List<Order> findAllByCustomerId(Long customerId);
-    
-    /**
-     * TODO
-     * @param order
-     * @return
-     */
-    Order save(Order order);
-    
+    List<Order> findAllByCustomerId ( Long customerId );
+
     /**
      * TODO
      * @param id
      * @return
      */
-    void deleteById(Long id);
-    
+    @Override
+    void deleteById ( Long id );
+
 }
