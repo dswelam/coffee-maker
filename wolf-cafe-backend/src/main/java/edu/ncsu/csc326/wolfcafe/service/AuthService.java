@@ -1,10 +1,12 @@
 package edu.ncsu.csc326.wolfcafe.service;
 
 import java.util.Collection;
+import java.util.List;
 
 import edu.ncsu.csc326.wolfcafe.dto.JwtAuthResponse;
 import edu.ncsu.csc326.wolfcafe.dto.LoginDto;
 import edu.ncsu.csc326.wolfcafe.dto.RegisterDto;
+import edu.ncsu.csc326.wolfcafe.dto.UserDto;
 import edu.ncsu.csc326.wolfcafe.entity.Permission;
 import edu.ncsu.csc326.wolfcafe.entity.Role;
 
@@ -48,4 +50,12 @@ public interface AuthService {
      * @return the role that was updated
      */
     Role assignPermissions ( String roleName, Collection<Permission> permissions );
+
+    /**
+     *
+     * returns the list of current users
+     *
+     * @return the list of current users
+     */
+    List<UserDto> listUsers ();
 }
