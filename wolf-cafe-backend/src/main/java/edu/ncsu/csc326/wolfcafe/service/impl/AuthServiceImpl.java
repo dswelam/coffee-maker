@@ -3,7 +3,6 @@ package edu.ncsu.csc326.wolfcafe.service.impl;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
@@ -17,21 +16,15 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import edu.ncsu.csc326.wolfcafe.dto.TaxDto;
-import edu.ncsu.csc326.wolfcafe.dto.InventoryDto;
 import edu.ncsu.csc326.wolfcafe.dto.JwtAuthResponse;
 import edu.ncsu.csc326.wolfcafe.dto.LoginDto;
 import edu.ncsu.csc326.wolfcafe.dto.RegisterDto;
-import edu.ncsu.csc326.wolfcafe.dto.TaxDto;
 import edu.ncsu.csc326.wolfcafe.entity.Tax;
-import edu.ncsu.csc326.wolfcafe.entity.Inventory;
 import edu.ncsu.csc326.wolfcafe.entity.Permission;
 import edu.ncsu.csc326.wolfcafe.entity.Role;
-import edu.ncsu.csc326.wolfcafe.entity.Tax;
 import edu.ncsu.csc326.wolfcafe.entity.User;
-import edu.ncsu.csc326.wolfcafe.exception.InvalidIngredientAmountException;
 import edu.ncsu.csc326.wolfcafe.exception.ResourceNotFoundException;
 import edu.ncsu.csc326.wolfcafe.exception.WolfCafeAPIException;
-import edu.ncsu.csc326.wolfcafe.mapper.InventoryMapper;
 import edu.ncsu.csc326.wolfcafe.mapper.TaxMapper;
 import edu.ncsu.csc326.wolfcafe.repository.RoleRepository;
 import edu.ncsu.csc326.wolfcafe.repository.TaxRepository;
@@ -217,17 +210,13 @@ public class AuthServiceImpl implements AuthService {
 		// Validate that the tax rate is a positive integer
 		if (taxRate.getCurrentAmount() > 0) {
 	        final List<Tax> tax = taxRepository.findAll();
-	        if ( tax.size() == 0 ) {
-	            final TaxDto newTaxDto = new TaxDto();
-	            newTaxDto.setCurrentAmount(taxRate.getCurrentAmount());
-	            createTax( newTaxDto );
-	        }
-	        else {
+	        if ( tax.size() != 0 ) {
 	        		taxRepository.delete(tax.get(0));
-	            final TaxDto newTaxDto = new TaxDto();
-	            newTaxDto.setCurrentAmount(taxRate.getCurrentAmount());
-	            createTax( newTaxDto );
 	        }
+            
+	        final TaxDto newTaxDto = new TaxDto();
+            newTaxDto.setCurrentAmount(taxRate.getCurrentAmount());
+            createTax( newTaxDto );
 		}
 	}
 

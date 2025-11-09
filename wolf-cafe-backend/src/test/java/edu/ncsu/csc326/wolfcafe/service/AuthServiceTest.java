@@ -1,7 +1,6 @@
 package edu.ncsu.csc326.wolfcafe.service;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -110,5 +109,8 @@ public class AuthServiceTest {
     		assertEquals(2, authService.getTaxRate());
     		authService.setTaxRate(new TaxDto(5));
     		assertEquals(5, authService.getTaxRate());
+    		taxRepository.deleteAll();
+    		authService.setTaxRate(new TaxDto(10));
+    		assertEquals(10, authService.getTaxRate());
     }
 }
