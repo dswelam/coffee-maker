@@ -1,5 +1,7 @@
 package edu.ncsu.csc326.wolfcafe.controller;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
@@ -22,6 +24,7 @@ import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -30,6 +33,7 @@ import edu.ncsu.csc326.wolfcafe.TestUtils;
 import edu.ncsu.csc326.wolfcafe.dto.JwtAuthResponse;
 import edu.ncsu.csc326.wolfcafe.dto.LoginDto;
 import edu.ncsu.csc326.wolfcafe.dto.RegisterDto;
+import edu.ncsu.csc326.wolfcafe.dto.TaxDto;
 import edu.ncsu.csc326.wolfcafe.entity.Permission;
 import edu.ncsu.csc326.wolfcafe.entity.Role;
 import edu.ncsu.csc326.wolfcafe.exception.ResourceNotFoundException;
@@ -55,6 +59,7 @@ public class AuthControllerTest {
 
     /** Mocked AuthService for UC7 */
     @MockitoBean
+    @Autowired
     private AuthService               authService;
 
     /** JSON mapper */
@@ -197,6 +202,22 @@ public class AuthControllerTest {
 
         mvc.perform( put( "/api/auth/roles/ROLE_STAFF/permissions" ).contentType( MediaType.APPLICATION_JSON )
                 .content( json ) ).andExpect( status().isForbidden() );
+    }
+    
+    /**
+     * Tests setting the tax rate
+     * @throws Exception 
+     */
+    @Test
+    @WithMockUser(username = "admin", roles = "ADMIN")
+    public void testSetTaxRate() throws Exception {
+    		MvcResult result = mvc.perform( get( "/api/auth/tax" ) ).andExpect( status().isOk() ).andReturn();
+    		assertEquals(Integer.toString(authService.getTaxRate()), result.getResponse().getContentAsString());
+    		
+        final TaxDto updatedTax = new TaxDto( 5 );
+        mvc.perform( put( "/api/auth/tax" ).contentType( MediaType.APPLICATION_JSON )
+                .content( TestUtils.asJsonString( updatedTax ) ).accept( MediaType.APPLICATION_JSON ) )
+                .andExpect( status().isOk() );
     }
 
 }

@@ -2,11 +2,13 @@ package edu.ncsu.csc326.wolfcafe.controller;
 
 import java.util.Collection;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -16,6 +18,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import edu.ncsu.csc326.wolfcafe.dto.JwtAuthResponse;
 import edu.ncsu.csc326.wolfcafe.dto.LoginDto;
+import edu.ncsu.csc326.wolfcafe.dto.TaxDto;
 import edu.ncsu.csc326.wolfcafe.dto.RegisterDto;
 import edu.ncsu.csc326.wolfcafe.entity.Permission;
 import edu.ncsu.csc326.wolfcafe.entity.Role;
@@ -33,6 +36,7 @@ import lombok.AllArgsConstructor;
 public class AuthController {
 
     /** Link to AuthService */
+	@Autowired
     private final AuthService authService;
 
     /**
@@ -99,5 +103,23 @@ public class AuthController {
             return ResponseEntity.status( HttpStatus.NOT_FOUND ).body( e.getMessage() );
         }
     }
+    
+    /**
+     * Returns the current tax rate set in the system
+     * @return current tax rate as an integer
+     */
+    @GetMapping("/tax")
+    public ResponseEntity<Integer> getTaxRate() {
+    		return ResponseEntity.ok(authService.getTaxRate());
+    }
 
+    /**
+     * Sets the current tax rate in the system, requires the ADMIN role
+     * @param taxDto the tax rate containing the current amount to set
+     */
+    @PreAuthorize ( "hasRole('ADMIN')" )
+    @PutMapping("/tax")
+    public void setTaxRate(@RequestBody final TaxDto taxDto) {
+    		authService.setTaxRate(taxDto);
+    }
 }
