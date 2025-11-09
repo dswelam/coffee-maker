@@ -71,7 +71,7 @@ const LoginComponent = () => {
 
 
 				<div className='card-header text-center border-0 mb-3 bg-white'>
-					<h2 className='fw-bold mb-0 text-dark'>Welcome Back</h2>
+					<h2 className='fw-bold mb-0 text-dark'>Welcome</h2>
 					<p className='text-secondary mt-2'>Sign in to continue</p>
 				</div>
 
