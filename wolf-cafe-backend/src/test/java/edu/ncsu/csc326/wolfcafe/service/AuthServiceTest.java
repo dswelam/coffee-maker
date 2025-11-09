@@ -1,6 +1,7 @@
 package edu.ncsu.csc326.wolfcafe.service;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -13,10 +14,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.transaction.annotation.Transactional;
 
+import edu.ncsu.csc326.wolfcafe.dto.TaxDto;
 import edu.ncsu.csc326.wolfcafe.entity.Permission;
 import edu.ncsu.csc326.wolfcafe.entity.Role;
 import edu.ncsu.csc326.wolfcafe.exception.ResourceNotFoundException;
 import edu.ncsu.csc326.wolfcafe.repository.RoleRepository;
+import edu.ncsu.csc326.wolfcafe.repository.TaxRepository;
 import jakarta.persistence.EntityManager;
 
 /**
@@ -34,6 +37,10 @@ public class AuthServiceTest {
     /** the role repository */
     @Autowired
     private RoleRepository roleRepository;
+    
+    /** the tax repository */
+    @Autowired
+    private TaxRepository taxRepository;
 
     /** Entity manager used to run custom SQL cleanup queries */
     @Autowired
@@ -93,5 +100,15 @@ public class AuthServiceTest {
         assertThrows( ResourceNotFoundException.class, () -> {
             authService.assignPermissions( "ROLE_UNKNOWN", List.of( Permission.ADD_INVENTORY ) );
         } );
+    }
+    
+    /** Test getting and setting the current tax rate in the system
+     * @author Brooke Wu */
+    @Test
+    @Transactional
+    void testSetTaxRate() {
+    		assertEquals(2, authService.getTaxRate());
+    		authService.setTaxRate(new TaxDto(5));
+    		assertEquals(5, authService.getTaxRate());
     }
 }
