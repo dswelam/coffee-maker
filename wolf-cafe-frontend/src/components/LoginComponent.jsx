@@ -26,7 +26,6 @@ const LoginComponent = () => {
 	async function handleLoginForm(e) {
 		e.preventDefault()
 
-
 		const loginObj = { usernameOrEmail, password }
 
 		console.log(loginObj)
@@ -48,8 +47,6 @@ const LoginComponent = () => {
 		}).catch(error => {
 			console.error('Login error:' + error)
 
-
-
 			if (usernameOrEmail.trim() === '') {
 				setErrorMessage('Username or email is required');
 			} else if (password.trim() === '') {
@@ -61,15 +58,11 @@ const LoginComponent = () => {
 		})
 	}
 
-
-
 	return (
 		<div
 			className='d-flex justify-content-center align-items-center vh-100' style={{ paddingTop: '5px' }}
 		>
 			<div className='card shadow-lg p-5' style={{ width: '45rem', transform: 'scale(1.1)', backgroundColor: '#fff', borderRadius: '1rem' }}>
-
-
 				<div className='card-header text-center border-0 mb-3 bg-white'>
 					<h2 className='fw-bold mb-0 text-dark'>Welcome</h2>
 					<p className='text-secondary mt-2'>Sign in to continue</p>
@@ -105,12 +98,11 @@ const LoginComponent = () => {
 							<button
 								className='btn btn-danger btn-lg w-100 fw-bold'
 								onClick={(e) => handleLoginForm(e)}
-								style={{ backgroundColor: '#CC0000'}}
+								style={{ backgroundColor: '#CC0000' }}
 							>
 								Login
 							</button>
 						</div>
-
 						{errorMessage && (
 							<div className='alert alert-danger mt-4 text-center fs-5 py-3' role='alert'>
 								{errorMessage}
@@ -120,9 +112,8 @@ const LoginComponent = () => {
 					</form>
 				</div>
 			</div>
-
 			<div style={{ position: 'absolute', bottom: '1rem', width: '100%', textAlign: 'center' }}>
-			  <span>WolfCafe © 2025</span>
+				<span>WolfCafe © 2025</span>
 			</div>
 		</div>
 	)

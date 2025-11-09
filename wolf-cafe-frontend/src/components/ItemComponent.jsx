@@ -5,27 +5,22 @@ import { useNavigate, useParams } from 'react-router-dom'
 import { getInventory } from '../services/InventoryService';
 
 
-const TodoComponent = () => {
+const ItemComponent = () => {
 
 	const [name, setName] = useState('')
 	const [description, setDescription] = useState('')
 	const [price, setPrice] = useState('')
-
 	const [allIngredients, setAllIngredients] = useState([]);
 	const [selectedIngredients, setSelectedIngredients] = useState([]);
 	const [deleteMessage, setDeleteMessage] = useState('');
-
-
-
-	const { id } = useParams()
-	{/* Jared */ }
 	const [errors, setErrors] = useState({})
 
+	const { id } = useParams()
 	const navigate = useNavigate()
 
 	useEffect(() => {
 		const fetchIngredients = async () => {
-			
+
 			try {
 				const res = await getInventory();
 				let ingredientNames = [];
@@ -46,10 +41,6 @@ const TodoComponent = () => {
 
 		fetchIngredients();
 
-
-
-		fetchIngredients();
-
 		if (id) {
 			getItemById(id).then((response) => {
 				console.log(response.data)
@@ -62,7 +53,7 @@ const TodoComponent = () => {
 			})
 		}
 	}, [id])
-	
+
 	useEffect(() => {
 		// prevent scrolling
 		document.body.style.overflow = 'hidden'
@@ -96,7 +87,6 @@ const TodoComponent = () => {
 		setErrors(newErrors);
 		if (Object.keys(newErrors).length > 0) return;
 
-
 		if (id) {
 			updateItem(id, item).then((response) => {
 				console.log(response.data)
@@ -121,123 +111,111 @@ const TodoComponent = () => {
 		}
 	}
 
-
 	{/* Added - JaredH, delete button logic for item update page  */ }
-	function deleteItem(e) {
+	function deleteItem() {
 		const confirmDelete = window.confirm('Are you sure you want to delete this item?');
-		    if (!confirmDelete) return;
+		if (!confirmDelete) return;
 
-		    deleteItemById(id)
-		        .then(() => {
-					setDeleteMessage('Item deleted successfully!');
-					setTimeout(() => navigate('/items'), 2500);
-		        })
-		        .catch((error) => {
-		            console.error(error);
-					setDeleteMessage('This item may have already been deleted by another user.');
-					setTimeout(() => navigate('/items'), 2500);
-		        });
+		deleteItemById(id)
+			.then(() => {
+				setDeleteMessage('Item deleted successfully!');
+				setTimeout(() => navigate('/items'), 2500);
+			})
+			.catch((error) => {
+				console.error(error);
+				setDeleteMessage('This item may have already been deleted by another user.');
+				setTimeout(() => navigate('/items'), 2500);
+			});
 	}
-
-	function getGeneralErrors() {
-		if (errors.general) {
-			return <div className="p-3 mb-2 bg-danger text-white">{errors.general}</div>
-		}
-	}
-
 
 	{/* Edited - JaredH, added Back Button  */ }
 	const pageTitle = () => (
-	  <div className="text-center mb-4" style={{ paddingTop: '40px' }}>
-	    <button
-	      type="button"
-	      className="btn btn-dark"
-	      onClick={() => navigate('/items')}
-	      style={{ position: 'absolute', top: '10px', right: '10px', fontSize: '18px', color: '#FFFFFF' }}
-	    >
-	      ← Back
-	    </button>
-	    <h2 className="fw-bold">{id ? 'Update Item' : 'Add Item'}</h2>
-	  </div>
+		<div className="text-center mb-4" style={{ paddingTop: '40px' }}>
+			<button
+				type="button"
+				className="btn btn-dark"
+				onClick={() => navigate('/items')}
+				style={{ position: 'absolute', top: '10px', right: '10px', fontSize: '18px', color: '#FFFFFF' }}
+			>
+				← Back
+			</button>
+			<h2 className="fw-bold">{id ? 'Update Item' : 'Add Item'}</h2>
+		</div>
 	)
 
-
 	return (
-	    <div className="d-flex justify-content-center align-items-center vh-100" style={{ paddingTop: '5px' }}>
-	      <div className="card shadow-lg p-5" style={{ width: '45rem', transform: 'scale(0.9)', backgroundColor: '#fff', borderRadius: '1rem' }}>
-	        {pageTitle()}
+		<div className="d-flex justify-content-center align-items-center vh-100" style={{ paddingTop: '5px' }}>
+			<div className="card shadow-lg p-5" style={{ width: '45rem', transform: 'scale(0.9)', backgroundColor: '#fff', borderRadius: '1rem' }}>
+				{pageTitle()}
 
-	        {errors.general && <div className="alert alert-danger text-center">{errors.general}</div>}
-	        {deleteMessage && <div className="alert alert-info text-center">{deleteMessage}</div>}
+				{errors.general && <div className="alert alert-danger text-center">{errors.general}</div>}
+				{deleteMessage && <div className="alert alert-info text-center">{deleteMessage}</div>}
 
-	        <form>
-	          <div className="mb-3">
-	            <label className="form-label fw-semibold">Item Name</label>
-	            <input type="text" className="form-control form-control-lg" placeholder="Enter item name" value={name} onChange={e => setName(e.target.value)} />
-	            {errors.name && <div className="text-danger">{errors.name}</div>}
-	          </div>
+				<form>
+					<div className="mb-3">
+						<label className="form-label fw-semibold">Item Name</label>
+						<input type="text" className="form-control form-control-lg" placeholder="Enter item name" value={name} onChange={e => setName(e.target.value)} />
+						{errors.name && <div className="text-danger">{errors.name}</div>}
+					</div>
 
-	          <div className="mb-3">
-	            <label className="form-label fw-semibold">Item Description</label>
-	            <input type="text" className="form-control form-control-lg" placeholder="Enter description" value={description} onChange={e => setDescription(e.target.value)} />
-	            {errors.description && <div className="text-danger">{errors.description}</div>}
-	          </div>
+					<div className="mb-3">
+						<label className="form-label fw-semibold">Item Description</label>
+						<input type="text" className="form-control form-control-lg" placeholder="Enter description" value={description} onChange={e => setDescription(e.target.value)} />
+						{errors.description && <div className="text-danger">{errors.description}</div>}
+					</div>
 
-	          <div className="mb-3">
-	            <label className="form-label fw-semibold">Item Price</label>
-	            <input type="number" className="form-control form-control-lg" placeholder="Enter price" value={price} onChange={e => setPrice(e.target.value)} />
-	            {errors.price && <div className="text-danger">{errors.price}</div>}
-	          </div>
+					<div className="mb-3">
+						<label className="form-label fw-semibold">Item Price</label>
+						<input type="number" className="form-control form-control-lg" placeholder="Enter price" value={price} onChange={e => setPrice(e.target.value)} />
+						{errors.price && <div className="text-danger">{errors.price}</div>}
+					</div>
 
-	          <div className="mb-3">
-	            <label className="form-label fw-semibold">Ingredients</label>
-	            <div style={{ maxHeight: '200px', overflowY: 'auto', border: '1px solid #ccc', padding: '8px' }}>
-	              {allIngredients.map(ing => (
-	                <div key={ing} className="form-check">
-	                  <input
-	                    className="form-check-input"
-	                    type="checkbox"
-	                    value={ing}
-	                    checked={selectedIngredients.includes(ing)}
-	                    onChange={e => {
-	                      if (e.target.checked) setSelectedIngredients([...selectedIngredients, ing])
-	                      else setSelectedIngredients(selectedIngredients.filter(i => i !== ing))
-	                    }}
-	                  />
-	                  <label className="form-check-label">{ing}</label>
-	                </div>
-	              ))}
-	            </div>
-	          </div>
+					<div className="mb-3">
+						<label className="form-label fw-semibold">Ingredients</label>
+						<div style={{ maxHeight: '200px', overflowY: 'auto', border: '1px solid #ccc', padding: '8px' }}>
+							{allIngredients.map(ing => (
+								<div key={ing} className="form-check">
+									<input
+										className="form-check-input"
+										type="checkbox"
+										value={ing}
+										checked={selectedIngredients.includes(ing)}
+										onChange={e => {
+											if (e.target.checked) setSelectedIngredients([...selectedIngredients, ing])
+											else setSelectedIngredients(selectedIngredients.filter(i => i !== ing))
+										}}
+									/>
+									<label className="form-check-label">{ing}</label>
+								</div>
+							))}
+						</div>
+					</div>
 
-			  <div className={`d-flex mt-4 ${id ? 'justify-content-between' : 'justify-content-center'}`}>
-			    <button 
-			      type="submit" 
-			      className={`btn btn-lg ${id ? 'w-50 me-2' : 'w-50'} fw-bold`} 
-			      onClick={saveOrUpdateItem}
-			      style={{ backgroundColor: '#28a745', color: 'white', border: 'none' }} // green
-			    >
-			      Submit
-			    </button>
+					<div className={`d-flex mt-4 ${id ? 'justify-content-between' : 'justify-content-center'}`}>
+						<button
+							type="submit"
+							className={`btn btn-lg ${id ? 'w-50 me-2' : 'w-50'} fw-bold`}
+							onClick={saveOrUpdateItem}
+							style={{ backgroundColor: '#28a745', color: 'white', border: 'none' }} // green
+						>
+							Submit
+						</button>
 
-			    {id && (
-			      <button 
-			        type="button" 
-			        className="btn btn-lg w-50 fw-bold" 
-			        onClick={deleteItem} 
-			        style={{ backgroundColor: '#CC0000', color: 'white', border: 'none' }} // black
-			      >
-			        Delete
-			      </button>
-			    )}
-			  </div>
+						{id && (
+							<button
+								type="button"
+								className="btn btn-lg w-50 fw-bold"
+								onClick={deleteItem}
+								style={{ backgroundColor: '#CC0000', color: 'white', border: 'none' }} // black
+							>
+								Delete
+							</button>
+						)}
+					</div>
+				</form>
+			</div>
+		</div>
+	)
+}
 
-
-	        </form>
-
-	      </div>
-	    </div>
-	  )
-	}
-
-export default TodoComponent
+export default ItemComponent

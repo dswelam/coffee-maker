@@ -19,6 +19,9 @@ const IngredientComponent = () => {
 				})
 				.catch(err => console.error(err));
 		}
+	}, [id]);
+	
+	useEffect(() => {
 		// prevent scrolling
 		document.body.style.overflow = 'hidden'
 
@@ -26,7 +29,7 @@ const IngredientComponent = () => {
 		return () => {
 			document.body.style.overflow = 'auto'
 		}
-	}, [id]);
+	}, [])
 
 	const saveOrUpdateIngredient = (e) => {
 		e.preventDefault();

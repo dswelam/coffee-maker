@@ -40,7 +40,7 @@ const HeaderComponent = () => {
 								isAuth &&
 								<li className='nav-item'>
 									<NavLink to='/items' className='nav-link'
-										style={{ fontSize: '1.5rem', fontWeight: '600', marginLeft: '3rem'  }}
+										style={{ fontSize: '1.5rem', fontWeight: '600', marginLeft: '3rem' }}
 									>Items</NavLink>
 								</li>
 							}
@@ -51,7 +51,7 @@ const HeaderComponent = () => {
 								isAuth && isAdmin &&
 								<li className='nav-item'>
 									<NavLink to='/staff' className='nav-link'
-										style={{ fontSize: '1.5rem', fontWeight: '600', marginLeft: '3rem'  }}
+										style={{ fontSize: '1.5rem', fontWeight: '600', marginLeft: '3rem' }}
 									>Staff Directory</NavLink>
 								</li>
 							}
@@ -59,7 +59,7 @@ const HeaderComponent = () => {
 								isAuth && isAdmin &&
 								<li className='nav-item'>
 									<NavLink to='/customers' className='nav-link'
-										style={{ fontSize: '1.5rem', fontWeight: '600', marginLeft: '3rem'  }}
+										style={{ fontSize: '1.5rem', fontWeight: '600', marginLeft: '3rem' }}
 									>Customer Directory</NavLink>
 								</li>
 							}
@@ -67,7 +67,7 @@ const HeaderComponent = () => {
 								isAuth && isAdmin &&
 								<li className='nav-item'>
 									<NavLink to='/ingredients' className='nav-link'
-										style={{ fontSize: '1.5rem', fontWeight: '600', marginLeft: '3rem'  }}
+										style={{ fontSize: '1.5rem', fontWeight: '600', marginLeft: '3rem' }}
 									>Inventory</NavLink>
 								</li>
 							}
@@ -80,7 +80,7 @@ const HeaderComponent = () => {
 						{
 							!isAuth &&
 							<li className='nav-item'>
-								<NavLink to='/register' className='nav-link' style={{ fontSize: '1.5rem', fontWeight: '600', marginRight: '3rem'  }}
+								<NavLink to='/register' className='nav-link' style={{ fontSize: '1.5rem', fontWeight: '600', marginRight: '3rem' }}
 								>Register</NavLink>
 							</li>
 						}
@@ -88,7 +88,7 @@ const HeaderComponent = () => {
 							!isAuth &&
 							<li className='nav-item'>
 								<NavLink to='/login' className='nav-link'
-									style={{ fontSize: '1.5rem', fontWeight: '600', marginRight: '3rem'  }}
+									style={{ fontSize: '1.5rem', fontWeight: '600', marginRight: '3rem' }}
 								>Login</NavLink>
 							</li>
 						}
@@ -99,7 +99,7 @@ const HeaderComponent = () => {
 							isAuth &&
 							<li className='nav-item'>
 								<NavLink to='/login' className='nav-link' onClick={handleLogout}
-									style={{ fontSize: '1.5rem', fontWeight: '600', marginRight: '3rem'  }}
+									style={{ fontSize: '1.5rem', fontWeight: '600', marginRight: '3rem' }}
 								>Logout</NavLink>
 							</li>
 						}

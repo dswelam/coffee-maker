@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom'
-import { getAllUsers } from '../services/AuthService';
+import { deleteUser, getAllUsers, isAdminUser } from '../services/AuthService';
 
 const ListStaffComponent = () => {
 	const [users, setUsers] = useState([])
 
 
+	const isAdmin = isAdminUser()
 
 	const navigate = useNavigate()
 	const [error, setError] = useState('');
@@ -38,6 +39,22 @@ const ListStaffComponent = () => {
 		}
 	}, [error]);
 
+	function deleteStaff(id) {
+		const confirmDelete = window.confirm('Are you sure you want to delete this item?');
+		if (!confirmDelete) return;
+
+		deleteUser(id)
+			.then((response) => {
+				alert('User deleted successfully!');
+				listUsers();
+			})
+			.catch((error) => {
+				console.error(error);
+				alert('This User may have already been deleted by another user.');
+				listUsers();
+			});
+	}
+
 	return (
 		<div className="d-flex justify-content-center align-items-center vh-100" style={{ paddingTop: '40px' }}>
 			<div
@@ -54,13 +71,14 @@ const ListStaffComponent = () => {
 				<div className="card-header text-center border-0 mb-4 bg-white">
 					<h2 className="fw-bold text-dark mb-0">Users</h2>
 					<p className="text-secondary mt-2">List of registered users</p>
+					<p className="text-secondary mt-2">Click on User's username to delete</p>
+
 				</div>
 
 				<div className="card-body">
 					<table className="table table-bordered align-middle text-center">
 						<thead className="table-light">
 							<tr>
-								<th className="fs-5">ID</th>
 								<th className="fs-5">Username</th>
 								<th className="fs-5">Email</th>
 								<th className="fs-5">Roles</th>
@@ -70,8 +88,19 @@ const ListStaffComponent = () => {
 							{users.length > 0 ? (
 								users.map((user) => (
 									<tr key={user.id}>
-										<td>{user.id}</td>
-										<td>{user.username}</td>
+										<td>
+											{isAdmin ? (
+												<span
+													style={{ cursor: 'pointer', color: 'black', textDecoration: 'none' }}
+													onClick={() => deleteStaff(user.id)}
+													onMouseEnter={(e) => (e.target.style.color = 'blue')}
+													onMouseLeave={(e) => (e.target.style.color = 'black')}
+												>
+													{user.username}
+												</span>
+											) : (
+												user.username
+											)}</td>
 										<td>{user.email}</td>
 										<td>
 											{user.roles && user.roles.length > 0
