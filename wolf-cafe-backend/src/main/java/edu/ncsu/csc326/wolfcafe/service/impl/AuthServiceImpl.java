@@ -5,6 +5,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -20,6 +21,7 @@ import edu.ncsu.csc326.wolfcafe.dto.JwtAuthResponse;
 import edu.ncsu.csc326.wolfcafe.dto.LoginDto;
 import edu.ncsu.csc326.wolfcafe.dto.RegisterDto;
 import edu.ncsu.csc326.wolfcafe.entity.Tax;
+import edu.ncsu.csc326.wolfcafe.dto.UserDto;
 import edu.ncsu.csc326.wolfcafe.entity.Permission;
 import edu.ncsu.csc326.wolfcafe.entity.Role;
 import edu.ncsu.csc326.wolfcafe.entity.User;
@@ -138,7 +140,7 @@ public class AuthServiceImpl implements AuthService {
     }
 
     /**
-     * assigns permissions to the role
+     * assigns permissions to the staff role
      *
      * @param roleName
      *            the name of the role
@@ -162,8 +164,18 @@ public class AuthServiceImpl implements AuthService {
                 }
             }
         }
+        // Only staff permissions can be updated
+        if ( !"ROLE_STAFF".equalsIgnoreCase( roleName ) ) {
+            throw new IllegalArgumentException( "Only staff role permissions can be modified by admin." );
+        }
 
-        // Update permissions
+        // Validate permissions allowed for staff
+        for ( final Permission p : permissions ) {
+            if ( p == Permission.PURCHASE_ITEM || p == Permission.PURCHASE_RECIPE ) {
+                throw new IllegalArgumentException( "Invalid Permission: Staff cannot purchase items or recipes." );
+            }
+        }
+
         role.setPermissions( new java.util.HashSet<>( permissions ) );
         return roleRepository.save( role );
     }
@@ -219,5 +231,17 @@ public class AuthServiceImpl implements AuthService {
             createTax( newTaxDto );
 		}
 	}
+
+    @Override
+    public List<UserDto> listUsers () {
+        // Retrieve all users from the database
+        final List<User> users = userRepository.findAll();
+
+        // Convert each User entity into a UserDto, and directly maps roles to
+        // collection
+        return users.stream()
+                .map( user -> new UserDto( user.getId(), user.getUsername(), user.getEmail(), user.getRoles() ) )
+                .collect( Collectors.toList() );
+    }
 
 }

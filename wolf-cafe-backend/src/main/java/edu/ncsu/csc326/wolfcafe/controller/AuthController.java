@@ -1,6 +1,7 @@
 package edu.ncsu.csc326.wolfcafe.controller;
 
 import java.util.Collection;
+import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -20,6 +21,7 @@ import edu.ncsu.csc326.wolfcafe.dto.JwtAuthResponse;
 import edu.ncsu.csc326.wolfcafe.dto.LoginDto;
 import edu.ncsu.csc326.wolfcafe.dto.TaxDto;
 import edu.ncsu.csc326.wolfcafe.dto.RegisterDto;
+import edu.ncsu.csc326.wolfcafe.dto.UserDto;
 import edu.ncsu.csc326.wolfcafe.entity.Permission;
 import edu.ncsu.csc326.wolfcafe.entity.Role;
 import edu.ncsu.csc326.wolfcafe.exception.ResourceNotFoundException;
@@ -122,4 +124,17 @@ public class AuthController {
     public void setTaxRate(@RequestBody final TaxDto taxDto) {
     		authService.setTaxRate(taxDto);
     }
+
+    /**
+     * Gets the list of users
+     *
+     * @return the list of users
+     */
+    @PreAuthorize ( "hasRole('ADMIN')" )
+    @GetMapping ( "/users" )
+    public ResponseEntity<List<UserDto>> getAllUsers () {
+        final List<UserDto> users = authService.listUsers();
+        return ResponseEntity.ok( users );
+    }
+
 }

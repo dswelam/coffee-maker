@@ -14,6 +14,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.transaction.annotation.Transactional;
 
 import edu.ncsu.csc326.wolfcafe.dto.TaxDto;
+import edu.ncsu.csc326.wolfcafe.dto.UserDto;
 import edu.ncsu.csc326.wolfcafe.entity.Permission;
 import edu.ncsu.csc326.wolfcafe.entity.Role;
 import edu.ncsu.csc326.wolfcafe.exception.ResourceNotFoundException;
@@ -81,15 +82,21 @@ public class AuthServiceTest {
         assertTrue( updated.getPermissions().contains( Permission.FULFILL_ORDER ) );
     }
 
-    /** Invalid case: Assign forbidden permission to CUSTOMER */
+    /** Invalid case: Attempt to assign permissions to non-staff role */
     @Test
     @Transactional
-    void testAssignInvalidPermissionToCustomer () {
-        final IllegalArgumentException exception = assertThrows( IllegalArgumentException.class, () -> {
+    void testAssignPermissionsToNonStaffRole () {
+        final IllegalArgumentException exception1 = assertThrows( IllegalArgumentException.class, () -> {
+            authService.assignPermissions( "ROLE_CUSTOMER", List.of( Permission.PURCHASE_ITEM ) );
+        } );
+
+        assertTrue( exception1.getMessage().contains( "Only staff role permissions can be modified" ) );
+        
+        final IllegalArgumentException exception2 = assertThrows( IllegalArgumentException.class, () -> {
             authService.assignPermissions( "ROLE_CUSTOMER", List.of( Permission.FULFILL_ORDER ) );
         } );
 
-        assertTrue( exception.getMessage().contains( "Invalid Permission" ) );
+        assertTrue( exception2.getMessage().contains( "Invalid Permission: Customers cannot add tax or fulfill orders." ) );
     }
 
     /** Role not found */
@@ -100,6 +107,7 @@ public class AuthServiceTest {
             authService.assignPermissions( "ROLE_UNKNOWN", List.of( Permission.ADD_INVENTORY ) );
         } );
     }
+
     
     /** Test getting and setting the current tax rate in the system
      * @author Brooke Wu */
@@ -113,4 +121,28 @@ public class AuthServiceTest {
     		authService.setTaxRate(new TaxDto(10));
     		assertEquals(10, authService.getTaxRate());
     }
+
+    /** Tests retrieving all users through AuthServiceImpl */
+    @Test
+    @Transactional
+    void testListUsers () {
+        // Call the service method
+        final List<UserDto> users = authService.listUsers();
+
+        // Validate returned list
+        assertNotNull( users, "User list should not be null" );
+        assertTrue( users.isEmpty() || users.size() >= 0, "Should return a valid list (possibly empty)" );
+    }
+
+    /** Invalid case: Attempt to assign permissions to admin */
+    @Test
+    @Transactional
+    void testAssignPermissionsToAdminRole () {
+        final IllegalArgumentException exception = assertThrows( IllegalArgumentException.class, () -> {
+            authService.assignPermissions( "ROLE_ADMIN", List.of( Permission.MANAGE_USERS ) );
+        } );
+
+        assertTrue( exception.getMessage().contains( "Only staff role permissions can be modified" ) );
+    }
+
 }

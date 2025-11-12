@@ -34,6 +34,7 @@ import edu.ncsu.csc326.wolfcafe.dto.JwtAuthResponse;
 import edu.ncsu.csc326.wolfcafe.dto.LoginDto;
 import edu.ncsu.csc326.wolfcafe.dto.RegisterDto;
 import edu.ncsu.csc326.wolfcafe.dto.TaxDto;
+import edu.ncsu.csc326.wolfcafe.dto.UserDto;
 import edu.ncsu.csc326.wolfcafe.entity.Permission;
 import edu.ncsu.csc326.wolfcafe.entity.Role;
 import edu.ncsu.csc326.wolfcafe.exception.ResourceNotFoundException;
@@ -218,6 +219,22 @@ public class AuthControllerTest {
         mvc.perform( put( "/api/auth/tax" ).contentType( MediaType.APPLICATION_JSON )
                 .content( TestUtils.asJsonString( updatedTax ) ).accept( MediaType.APPLICATION_JSON ) )
                 .andExpect( status().isOk() );
+    }
+
+    /**
+     * Tests retrieving all users, admin only.
+     */
+    @Test
+    @WithMockUser ( username = "admin", roles = "ADMIN" )
+    public void testGetAllUsers () throws Exception {
+        final List<UserDto> mockUsers = List.of( new UserDto( 1L, "admin", "admin@ncsu.edu", List.of() ),
+                new UserDto( 2L, "staff", "staff@ncsu.edu", List.of() ) );
+
+        Mockito.when( authService.listUsers() ).thenReturn( mockUsers );
+
+        mvc.perform( get( "/api/auth/users" ) ).andExpect( status().isOk() )
+                .andExpect( jsonPath( "$[0].username" ).value( "admin" ) )
+                .andExpect( jsonPath( "$[1].username" ).value( "staff" ) );
     }
 
 }
