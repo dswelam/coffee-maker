@@ -23,14 +23,14 @@ public class Tax {
     private Long                 id;
     
     /** Current tax rate as a percentage, default is 2.00% */
-	private int currentAmount;
+	private double currentAmount;
 
 	/**
      * Default constructor for Hibernate
      */
 	public Tax() {
 		super();
-		this.currentAmount = 2;
+		this.currentAmount = 2.00;
 	}
 
     /**
@@ -41,7 +41,7 @@ public class Tax {
      * @param currentAmount
      *            current amount of the tax
      */
-	public Tax(Long id, int currentAmount) {
+	public Tax(Long id, double currentAmount) {
 		super();
 		this.id = id;
 		this.currentAmount = currentAmount;
@@ -53,7 +53,7 @@ public class Tax {
      * @param currentAmount
      *            current amount of the tax
      */
-	public Tax(int currentAmount) {
+	public Tax(double currentAmount) {
 		super();
 		this.currentAmount = currentAmount;
 	}
@@ -82,7 +82,7 @@ public class Tax {
      *
      * @return the current amount
      */
-	public int getCurrentAmount() {
+	public double getCurrentAmount() {
 		return currentAmount;
 	}
 
@@ -92,7 +92,7 @@ public class Tax {
      * @param currentAmount
      *            the current Amount to set
      */
-	public void setCurrentAmount(int currentAmount) {
+	public void setCurrentAmount(double currentAmount) {
 		this.currentAmount = currentAmount;
 	}
 	

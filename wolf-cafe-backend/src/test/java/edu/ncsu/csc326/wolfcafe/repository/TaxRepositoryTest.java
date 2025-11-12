@@ -48,7 +48,7 @@ public class TaxRepositoryTest {
         entityManager.createNativeQuery( "SET FOREIGN_KEY_CHECKS = 1" ).executeUpdate();
 
         // Make sure that Tax always has an id of 1L.
-        tax = new Tax( 2 );
+        tax = new Tax( 2.00 );
         taxRepository.save( tax );
     }
 
@@ -58,7 +58,7 @@ public class TaxRepositoryTest {
     @Test
     public void testSaveAndGetTax () {
         Tax fetchedTax = taxRepository.findById( tax.getId() ).get();
-        Tax expectedTax = new Tax(1L, 2);
+        Tax expectedTax = new Tax(1L, 2.00);
         assertEquals( expectedTax.getId(), fetchedTax.getId() );
         assertEquals( expectedTax.getCurrentAmount(), fetchedTax.getCurrentAmount() );
     }
@@ -70,10 +70,10 @@ public class TaxRepositoryTest {
     public void testUpdateTax () {
         Tax fetchedTax = taxRepository.findById( tax.getId() ).get();
         fetchedTax.setId(2L);
-        fetchedTax.setCurrentAmount(5);
+        fetchedTax.setCurrentAmount(5.25);
 
         Tax updatedTax = taxRepository.save( fetchedTax );
         assertEquals( 2L, updatedTax.getId() );
-        assertEquals( 5, updatedTax.getCurrentAmount() );
+        assertEquals( 5.25, updatedTax.getCurrentAmount() );
     }
 }

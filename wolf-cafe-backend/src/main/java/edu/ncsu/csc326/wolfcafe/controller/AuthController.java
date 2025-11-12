@@ -109,7 +109,7 @@ public class AuthController {
      * @return current tax rate as an integer
      */
     @GetMapping("/tax")
-    public ResponseEntity<Integer> getTaxRate() {
+    public ResponseEntity<Double> getTaxRate() {
     		return ResponseEntity.ok(authService.getTaxRate());
     }
 

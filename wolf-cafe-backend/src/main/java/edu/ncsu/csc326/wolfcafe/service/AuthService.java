@@ -41,9 +41,9 @@ public interface AuthService {
     
     /**
      * Returns the current tax rate of the system
-     * @return current tax rate as an integer (2 = 2.00%)
+     * @return current tax rate as an double (2.00 = 2.00%)
      */
-    int getTaxRate();
+    double getTaxRate();
     
     /**
      * Sets the current tax rate of the system

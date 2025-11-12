@@ -212,7 +212,7 @@ public class AuthControllerTest {
     @WithMockUser(username = "admin", roles = "ADMIN")
     public void testSetTaxRate() throws Exception {
     		MvcResult result = mvc.perform( get( "/api/auth/tax" ) ).andExpect( status().isOk() ).andReturn();
-    		assertEquals(Integer.toString(authService.getTaxRate()), result.getResponse().getContentAsString());
+    		assertEquals(Double.toString(authService.getTaxRate()), result.getResponse().getContentAsString());
     		
         final TaxDto updatedTax = new TaxDto( 5 );
         mvc.perform( put( "/api/auth/tax" ).contentType( MediaType.APPLICATION_JSON )

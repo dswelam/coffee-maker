@@ -185,11 +185,11 @@ public class AuthServiceImpl implements AuthService {
 
     /**
      * Returns the current tax rate of the system
-     * @return current tax rate as an integer (2 = 2.00%)
+     * @return current tax rate as an integer (2.00 = 2.00%)
      */
 	@Override
 	@Transactional
-	public int getTaxRate() {
+	public double getTaxRate() {
         final List<Tax> tax = taxRepository.findAll();
         if ( tax.size() == 0 ) {
             final TaxDto newTaxDto = new TaxDto();
