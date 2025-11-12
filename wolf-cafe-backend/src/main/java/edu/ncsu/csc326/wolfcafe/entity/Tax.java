@@ -30,7 +30,6 @@ public class Tax {
      */
 	public Tax() {
 		super();
-		this.id = 1L;
 		this.currentAmount = 2;
 	}
 

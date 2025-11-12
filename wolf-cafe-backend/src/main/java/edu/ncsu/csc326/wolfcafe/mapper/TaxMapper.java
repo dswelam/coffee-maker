@@ -29,7 +29,7 @@ public class TaxMapper {
      * @return Tax entity
      */
     public static Tax mapToTax ( final TaxDto taxDto ) {
-        return new Tax( 1L, taxDto.getCurrentAmount() );
+        return new Tax( taxDto.getCurrentAmount() );
 
     }
 }
