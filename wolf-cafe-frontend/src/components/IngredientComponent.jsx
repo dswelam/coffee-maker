@@ -20,6 +20,16 @@ const IngredientComponent = () => {
 				.catch(err => console.error(err));
 		}
 	}, [id]);
+	
+	useEffect(() => {
+		// prevent scrolling
+		document.body.style.overflow = 'hidden'
+
+		// cleanup when component unmounts
+		return () => {
+			document.body.style.overflow = 'auto'
+		}
+	}, [])
 
 	const saveOrUpdateIngredient = (e) => {
 		e.preventDefault();
@@ -78,60 +88,116 @@ const IngredientComponent = () => {
 	);
 
 	return (
-		<div className='container'>
-			<br /><br />
-			<div className='row'>
-				<div className='card col-md-6 offset-md-3'>
-					{pageTitle()}
-					{getGeneralErrors()}
+			<div
+				className='d-flex justify-content-center align-items-center vh-100'
+				style={{ paddingTop: '5px' }}
+			>
+				<div
+					className='card shadow-lg p-5'
+					style={{
+						width: '45rem',
+						transform: 'scale(1.05)',
+						backgroundColor: '#fff',
+						borderRadius: '1rem'
+					}}
+				>
+					<div className='card-header text-center border-0 mb-4 bg-white'>
+						<h2 className='fw-bold mb-0 text-dark'>
+							{id ? 'Update Ingredient' : 'Add Ingredient'}
+						</h2>
+						<p className='text-secondary mt-2'>
+							Fill in the details below to {id ? 'update' : 'add'} your ingredient
+						</p>
+					</div>
+
 					<div className='card-body'>
 						<form>
-							<div className='form-group mb-2'>
-								<label className='form-label'>Ingredient Name:</label>
+							<div className='mb-4'>
+								<label className='form-label fs-5 fw-semibold text-dark'>
+									Ingredient Name
+								</label>
 								<input
 									type='text'
-									className='form-control'
-									placeholder='Enter Ingredient Name'
+									className='form-control form-control-lg'
+									placeholder='Enter ingredient name'
 									value={name}
 									onChange={e => setName(e.target.value)}
 								/>
-								{errors.name && <div className="text-danger">{errors.name}</div>}
+								{errors.name && (
+									<div className='text-danger mt-2 fs-6'>{errors.name}</div>
+								)}
 							</div>
 
-							<div className='form-group mb-2'>
-								<label className='form-label'>Amount:</label>
+							<div className='mb-4'>
+								<label className='form-label fs-5 fw-semibold text-dark'>
+									Amount
+								</label>
 								<input
 									type='number'
-									className='form-control'
-									placeholder='Enter Amount'
+									className='form-control form-control-lg'
+									placeholder='Enter amount'
 									value={amount}
 									onChange={e => setAmount(e.target.value)}
 								/>
-								{errors.amount && <div className="text-danger">{errors.amount}</div>}
+								{errors.amount && (
+									<div className='text-danger mt-2 fs-6'>{errors.amount}</div>
+								)}
 							</div>
 
-							<button
-								type='submit'
-								className='btn btn-success me-2'
-								onClick={saveOrUpdateIngredient}
-							>
-								Submit
-							</button>
+							<div className='d-flex gap-3'>
+								<button
+									type='submit'
+									className='btn btn-success btn-lg w-100 fw-bold'
+									onClick={saveOrUpdateIngredient}
+								>
+									Submit
+								</button>
+								{id && (
+									<button
+										type='button'
+										className='btn btn-danger btn-lg w-100 fw-bold'
+										onClick={DeleteIngredient}
+									>
+										Delete
+									</button>
+								)}
+							</div>
 
-							<button
-								type='button'
-								className='btn btn-danger'
-								onClick={DeleteIngredient}
-							>
-								Delete
-							</button>
-
+							{errors.general && (
+								<div
+									className='alert alert-danger mt-4 text-center fs-5 py-3'
+									role='alert'
+								>
+									{errors.general}
+								</div>
+							)}
 						</form>
 					</div>
+
+					<div className='text-center mt-4'>
+						<button
+							type='button'
+							className='btn btn-dark fw-semibold'
+							onClick={() => navigate('/ingredients')}
+						>
+							← Back
+						</button>
+					</div>
+				</div>
+
+				<div
+					style={{
+						position: 'absolute',
+						bottom: '1rem',
+						width: '100%',
+						textAlign: 'center'
+					}}
+				>
+					<span>WolfCafe © 2025</span>
 				</div>
 			</div>
-		</div>
-	);
-};
+		);
+	};
+
 
 export default IngredientComponent;
