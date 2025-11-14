@@ -15,7 +15,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.transaction.annotation.Transactional;
 
-import edu.ncsu.csc326.wolfcafe.config.Roles.UserRoles;
+import edu.ncsu.csc326.wolfcafe.dto.JwtAuthResponse;
+import edu.ncsu.csc326.wolfcafe.dto.LoginDto;
 import edu.ncsu.csc326.wolfcafe.dto.RegisterDto;
 import edu.ncsu.csc326.wolfcafe.dto.UserDto;
 import edu.ncsu.csc326.wolfcafe.entity.Permission;
@@ -132,6 +133,10 @@ public class AuthServiceTest {
                 "JXB16TBD4LC" );
         String registerResult = authService.register(registerDto);
         assertEquals("User registered successfully.", registerResult);
+        
+        final LoginDto loginDto = new LoginDto( "jestes", "JXB16TBD4LC" );
+        JwtAuthResponse response = authService.login(loginDto);
+        assertEquals(response.getRole(), "ROLE_CUSTOMER");
         
         WolfCafeAPIException registerException = assertThrows( WolfCafeAPIException.class, () -> {
             authService.register(registerDto);
