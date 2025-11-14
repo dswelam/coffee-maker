@@ -15,18 +15,15 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import edu.ncsu.csc326.wolfcafe.dto.IngredientDto;
 import edu.ncsu.csc326.wolfcafe.dto.JwtAuthResponse;
 import edu.ncsu.csc326.wolfcafe.dto.LoginDto;
 import edu.ncsu.csc326.wolfcafe.dto.RegisterDto;
 import edu.ncsu.csc326.wolfcafe.dto.UserDto;
-import edu.ncsu.csc326.wolfcafe.entity.Ingredient;
 import edu.ncsu.csc326.wolfcafe.entity.Permission;
 import edu.ncsu.csc326.wolfcafe.entity.Role;
 import edu.ncsu.csc326.wolfcafe.entity.User;
 import edu.ncsu.csc326.wolfcafe.exception.ResourceNotFoundException;
 import edu.ncsu.csc326.wolfcafe.exception.WolfCafeAPIException;
-import edu.ncsu.csc326.wolfcafe.mapper.IngredientMapper;
 import edu.ncsu.csc326.wolfcafe.mapper.UserMapper;
 import edu.ncsu.csc326.wolfcafe.repository.RoleRepository;
 import edu.ncsu.csc326.wolfcafe.repository.UserRepository;
@@ -87,22 +84,6 @@ public class AuthServiceImpl implements AuthService {
         return "User registered successfully.";
     }
     
-    private UserDto getUserByEmail ( String userEmail ) {
-        User user = userRepository.findByUsernameOrEmail( null, userEmail ).orElseThrow(
-                () -> new ResourceNotFoundException( "User does not exist with email " + userEmail ) );
-        return UserMapper.mapToUserDto( user );
-    }
-    
-    private boolean isDuplicateEmail ( String userEmail ) {
-        try {
-            getUserByEmail( userEmail );
-            return true;
-        }
-        catch ( ResourceNotFoundException e ) {
-            return false;
-        }
-    }
-    
     /**
      * Creates the given user (can be of any role), can be used by admin only
      * @param userDto new user information
@@ -124,7 +105,7 @@ public class AuthServiceImpl implements AuthService {
 			throw new IllegalArgumentException("User's password must be a non-empty string");
 		}
 		// The email of the user cannot be a duplicate of an already existing user in the system
-		if (isDuplicateEmail(userDto.getEmail())) {
+		if (userRepository.existsByEmail(userDto.getEmail())) {
 			throw new IllegalArgumentException("User's email address is already used by an existing user");
 		}
 		
