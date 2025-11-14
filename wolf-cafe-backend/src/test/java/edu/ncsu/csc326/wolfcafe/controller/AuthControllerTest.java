@@ -1,5 +1,6 @@
 package edu.ncsu.csc326.wolfcafe.controller;
 
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
@@ -7,6 +8,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 
@@ -36,12 +39,14 @@ import edu.ncsu.csc326.wolfcafe.entity.Permission;
 import edu.ncsu.csc326.wolfcafe.entity.Role;
 import edu.ncsu.csc326.wolfcafe.exception.ResourceNotFoundException;
 import edu.ncsu.csc326.wolfcafe.repository.RoleRepository;
+import edu.ncsu.csc326.wolfcafe.repository.UserRepository;
 import edu.ncsu.csc326.wolfcafe.service.AuthService;
 
 /**
  * Tests the authorization controller.
  *
  * @author Diya Patel
+ * @author Brooke Wu
  */
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -65,6 +70,10 @@ public class AuthControllerTest {
     /** the role repository instance */
     @Autowired
     private RoleRepository            roleRepository;
+    
+    /** the user repository instance */
+    @Autowired
+    private UserRepository            userRepository;
 
     /**
      * adding setup for the test cases
@@ -129,6 +138,96 @@ public class AuthControllerTest {
                 .content( TestUtils.asJsonString( loginDto ) ) ).andExpect( status().isOk() )
                 .andExpect( jsonPath( "$.tokenType" ).value( "Bearer" ) )
                 .andExpect( jsonPath( "$.role" ).value( "ROLE_CUSTOMER" ) );
+    }
+    
+    /**
+     * Tests creating a staff and barista user (as an admin user) and logging in as the created users.
+     * 
+     * @throws Exception
+     * 				if error
+     */
+    @Test
+    @Transactional
+    @WithMockUser ( username = "admin", roles = "ADMIN" )
+    public void testCreateStaffBaristaAndLogin() throws Exception {
+    		// Create a barista user
+		final UserDto baristaUser = new UserDto();
+		baristaUser.setName("Barry");
+		baristaUser.setUsername("barista");
+		baristaUser.setEmail("barry@wolfcafe.com");
+		baristaUser.setPassword("abc123");
+		Collection<Role> baristaRoles = new ArrayList<Role>();
+		baristaRoles.add(roleRepository.findByName("ROLE_BARISTA"));
+		baristaUser.setRoles(baristaRoles);
+		
+	    Mockito.when( authService.createUser(ArgumentMatchers.any() ) ).thenReturn(baristaUser);
+
+        mvc.perform( post( "/api/auth/users" ).contentType( MediaType.APPLICATION_JSON )
+                .content( TestUtils.asJsonString( baristaUser ) ) ).andExpect( status().isCreated() );
+        
+        // Log in as the barista user
+        LoginDto loginDto = new LoginDto( baristaUser.getUsername(), baristaUser.getPassword() );
+
+        JwtAuthResponse mockResponse = new JwtAuthResponse( "fake-token", "Bearer", "ROLE_BARISTA" );
+        Mockito.when( authService.login( ArgumentMatchers.any() ) ).thenReturn( mockResponse );
+
+        mvc.perform( post( "/api/auth/login" ).contentType( MediaType.APPLICATION_JSON )
+                .content( TestUtils.asJsonString( loginDto ) ) ).andExpect( status().isOk() )
+                .andExpect( jsonPath( "$.tokenType" ).value( "Bearer" ) )
+                .andExpect( jsonPath( "$.role" ).value( "ROLE_BARISTA" ) );
+        
+        // Create a staff user
+		final UserDto staffUser = new UserDto();
+		staffUser.setName("Stephanie");
+		staffUser.setUsername("staff");
+		staffUser.setEmail("stephanie@wolfcafe.com");
+		staffUser.setPassword("xyz789");
+		Collection<Role> staffRoles = new ArrayList<Role>();
+		staffRoles.add(roleRepository.findByName("ROLE_STAFF"));
+		staffUser.setRoles(staffRoles);
+		
+	    Mockito.when( authService.createUser(ArgumentMatchers.any() ) ).thenReturn(staffUser);
+
+        mvc.perform( post( "/api/auth/users" ).contentType( MediaType.APPLICATION_JSON )
+                .content( TestUtils.asJsonString( baristaUser ) ) ).andExpect( status().isCreated() );
+        
+        // Log in as the staff user
+        loginDto = new LoginDto( staffUser.getUsername(), staffUser.getPassword() );
+
+        mockResponse = new JwtAuthResponse( "fake-token", "Bearer", "ROLE_STAFF" );
+        Mockito.when( authService.login( ArgumentMatchers.any() ) ).thenReturn( mockResponse );
+
+        mvc.perform( post( "/api/auth/login" ).contentType( MediaType.APPLICATION_JSON )
+                .content( TestUtils.asJsonString( loginDto ) ) ).andExpect( status().isOk() )
+                .andExpect( jsonPath( "$.tokenType" ).value( "Bearer" ) )
+                .andExpect( jsonPath( "$.role" ).value( "ROLE_STAFF" ) );        
+    }
+    
+    /**
+     * Tests attempting to access the createUser() API endpoint when logged in as a user who doesn't have the admin role
+     * @throws Exception
+     * 				if error
+     */
+    @Test
+    @Transactional
+    @WithMockUser ( username = "admin", roles = "STAFF" )
+    public void testCreateUserAsNonAdminRole() throws Exception {
+		// Create a barista user
+		final UserDto baristaUser = new UserDto();
+		baristaUser.setName("Barry");
+		baristaUser.setUsername("barista");
+		baristaUser.setEmail("barry@wolfcafe.com");
+		baristaUser.setPassword("abc123");
+		Collection<Role> baristaRoles = new ArrayList<Role>();
+		baristaRoles.add(roleRepository.findByName("ROLE_BARISTA"));
+		baristaUser.setRoles(baristaRoles);
+		
+	    Mockito.when( authService.createUser(ArgumentMatchers.any() ) ).thenReturn(baristaUser);
+	
+	    mvc.perform( post( "/api/auth/users" ).contentType( MediaType.APPLICATION_JSON )
+	            .content( TestUtils.asJsonString( baristaUser ) ) ).andExpect( status().isForbidden() );
+	    
+	    assertTrue(userRepository.findByUsername(baristaUser.getUsername()).isEmpty());
     }
 
     /**

@@ -59,7 +59,7 @@ public class AuthController {
     @PostMapping("/users")
     public ResponseEntity<UserDto> createUser(@RequestBody final UserDto userDto) {
     		final UserDto savedUserDto = authService.createUser( userDto );
-        return ResponseEntity.ok( savedUserDto );
+        return new ResponseEntity<>( savedUserDto, HttpStatus.CREATED );
     }
 
     /**
