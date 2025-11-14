@@ -16,10 +16,12 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.transaction.annotation.Transactional;
 
 import edu.ncsu.csc326.wolfcafe.config.Roles.UserRoles;
+import edu.ncsu.csc326.wolfcafe.dto.RegisterDto;
 import edu.ncsu.csc326.wolfcafe.dto.UserDto;
 import edu.ncsu.csc326.wolfcafe.entity.Permission;
 import edu.ncsu.csc326.wolfcafe.entity.Role;
 import edu.ncsu.csc326.wolfcafe.exception.ResourceNotFoundException;
+import edu.ncsu.csc326.wolfcafe.exception.WolfCafeAPIException;
 import edu.ncsu.csc326.wolfcafe.repository.RoleRepository;
 import edu.ncsu.csc326.wolfcafe.repository.UserRepository;
 import jakarta.persistence.EntityManager;
@@ -125,6 +127,23 @@ public class AuthServiceTest {
     @Test
     @Transactional
     void testCreateUsers() {
+    		// Create a Customer user
+        RegisterDto registerDto = new RegisterDto( "Jordan Estes", "jestes", "vitae.erat@yahoo.edu",
+                "JXB16TBD4LC" );
+        String registerResult = authService.register(registerDto);
+        assertEquals("User registered successfully.", registerResult);
+        
+        WolfCafeAPIException registerException = assertThrows( WolfCafeAPIException.class, () -> {
+            authService.register(registerDto);
+        } );
+        assertTrue( registerException.getMessage().contains( "Username already exists." ) );
+        
+        registerDto.setUsername("unique");
+        registerException = assertThrows( WolfCafeAPIException.class, () -> {
+            authService.register(registerDto);
+        } );
+        assertTrue( registerException.getMessage().contains( "Email already exists." ) );
+    	
     		// Create a Barista user
     		final UserDto baristaUser = new UserDto();
     		baristaUser.setName("Barry");
