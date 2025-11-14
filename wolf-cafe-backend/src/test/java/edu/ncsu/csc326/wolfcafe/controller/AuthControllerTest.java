@@ -207,8 +207,8 @@ public class AuthControllerTest {
     @Test
     @WithMockUser ( username = "admin", roles = "ADMIN" )
     public void testGetAllUsers () throws Exception {
-        final List<UserDto> mockUsers = List.of( new UserDto( 1L, "admin", "admin@ncsu.edu", List.of() ),
-                new UserDto( 2L, "staff", "staff@ncsu.edu", List.of() ) );
+        final List<UserDto> mockUsers = List.of( new UserDto( 1L, "admin", "admin", "admin@ncsu.edu", List.of() ),
+                new UserDto( 2L, "staff", "staff", "staff@ncsu.edu", List.of() ) );
 
         Mockito.when( authService.listUsers() ).thenReturn( mockUsers );
 
