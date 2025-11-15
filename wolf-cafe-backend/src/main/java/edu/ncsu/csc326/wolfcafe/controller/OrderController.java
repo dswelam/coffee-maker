@@ -3,6 +3,7 @@ package edu.ncsu.csc326.wolfcafe.controller;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -14,6 +15,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import edu.ncsu.csc326.wolfcafe.dto.IngredientDto;
 import edu.ncsu.csc326.wolfcafe.dto.ItemDto;
 import edu.ncsu.csc326.wolfcafe.dto.OrderDto;
 import edu.ncsu.csc326.wolfcafe.service.OrderService;
@@ -57,6 +59,7 @@ public class OrderController {
     }
 
     /**
+     * TODO: Why are only the STAFF and ADMIN roles allowed to access this endpoint?
      * REST API method to provide POST access to the Order model.
      *
      * @param orderDto
@@ -67,8 +70,8 @@ public class OrderController {
     @PreAuthorize ( "hasAnyRole('STAFF', 'ADMIN')" )
     @PostMapping
     public ResponseEntity<OrderDto> createOrder ( @RequestBody final OrderDto orderDto ) {
-        // TODO
-        return null;
+        final OrderDto savedOrderDto = orderService.createOrder( orderDto );
+        return ResponseEntity.ok( savedOrderDto );
     }
 
     /**
@@ -85,8 +88,11 @@ public class OrderController {
     @PutMapping ( "{id}" )
     public ResponseEntity<OrderDto> updateOrder ( @PathVariable ( "id" ) final Long orderId,
             @RequestBody final OrderDto orderDto ) {
-        // TODO
-        return null;
+        if ( orderService.getOrderById( orderId ) == null ) {
+            return new ResponseEntity<>( orderDto, HttpStatus.NOT_FOUND );
+        }
+        final OrderDto savedOrderDto = orderService.updateOrder( orderId, orderDto );
+        return ResponseEntity.ok( savedOrderDto );
     }
 
     /**
