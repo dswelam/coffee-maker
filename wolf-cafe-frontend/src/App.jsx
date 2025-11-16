@@ -8,7 +8,7 @@ import RegisterComponent from './components/RegisterComponent'
 import LoginComponent from './components/LoginComponent'
 import ListIngredientsComponent from './components/ListIngredientsComponent'
 import IngredientComponent from './components/IngredientComponent'
-
+import ListStaffComponent from './components/ListStaffComponent'
 
 import { isUserLoggedIn } from './services/AuthService'
 
@@ -36,6 +36,7 @@ function App() {
 		<Route path='/ingredients' element={<AuthenticatedRoute><ListIngredientsComponent /></AuthenticatedRoute>}></Route>
 		<Route path='/add-ingredient' element={<AuthenticatedRoute><IngredientComponent /></AuthenticatedRoute>}></Route>
 		<Route path='/update-ingredient/:ingredientName' element={<AuthenticatedRoute><IngredientComponent /></AuthenticatedRoute>}></Route>
+		<Route path='/staff' element={<AuthenticatedRoute><ListStaffComponent /></AuthenticatedRoute>}></Route>
 
 
 

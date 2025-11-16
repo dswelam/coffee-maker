@@ -18,6 +18,7 @@ import org.springframework.transaction.annotation.Transactional;
 import edu.ncsu.csc326.wolfcafe.dto.JwtAuthResponse;
 import edu.ncsu.csc326.wolfcafe.dto.LoginDto;
 import edu.ncsu.csc326.wolfcafe.dto.RegisterDto;
+import edu.ncsu.csc326.wolfcafe.dto.TaxDto;
 import edu.ncsu.csc326.wolfcafe.dto.UserDto;
 import edu.ncsu.csc326.wolfcafe.entity.Permission;
 import edu.ncsu.csc326.wolfcafe.entity.Role;
@@ -25,6 +26,7 @@ import edu.ncsu.csc326.wolfcafe.exception.ResourceNotFoundException;
 import edu.ncsu.csc326.wolfcafe.exception.WolfCafeAPIException;
 import edu.ncsu.csc326.wolfcafe.repository.RoleRepository;
 import edu.ncsu.csc326.wolfcafe.repository.UserRepository;
+import edu.ncsu.csc326.wolfcafe.repository.TaxRepository;
 import jakarta.persistence.EntityManager;
 
 /**
@@ -43,6 +45,10 @@ public class AuthServiceTest {
     /** the role repository */
     @Autowired
     private RoleRepository roleRepository;
+    
+    /** the tax repository */
+    @Autowired
+    private TaxRepository taxRepository;
 
     /** the user repository */
     @Autowired
@@ -96,11 +102,17 @@ public class AuthServiceTest {
     @Test
     @Transactional
     void testAssignPermissionsToNonStaffRole () {
-        final IllegalArgumentException exception = assertThrows( IllegalArgumentException.class, () -> {
-            authService.assignPermissions( "ROLE_CUSTOMER", List.of( Permission.ADD_INVENTORY ) );
+        final IllegalArgumentException exception1 = assertThrows( IllegalArgumentException.class, () -> {
+            authService.assignPermissions( "ROLE_CUSTOMER", List.of( Permission.PURCHASE_ITEM ) );
         } );
 
-        assertTrue( exception.getMessage().contains( "Only staff role permissions can be modified" ) );
+        assertTrue( exception1.getMessage().contains( "Only staff role permissions can be modified" ) );
+        
+        final IllegalArgumentException exception2 = assertThrows( IllegalArgumentException.class, () -> {
+            authService.assignPermissions( "ROLE_CUSTOMER", List.of( Permission.FULFILL_ORDER ) );
+        } );
+
+        assertTrue( exception2.getMessage().contains( "Invalid Permission: Customers cannot add tax or fulfill orders." ) );
     }
 
     /** Role not found */
@@ -110,6 +122,20 @@ public class AuthServiceTest {
         assertThrows( ResourceNotFoundException.class, () -> {
             authService.assignPermissions( "ROLE_UNKNOWN", List.of( Permission.ADD_INVENTORY ) );
         } );
+    }
+
+    
+    /** Test getting and setting the current tax rate in the system
+     * @author Brooke Wu */
+    @Test
+    @Transactional
+    void testSetTaxRate() {
+    		assertEquals(2, authService.getTaxRate());
+    		authService.setTaxRate(new TaxDto(5));
+    		assertEquals(5, authService.getTaxRate());
+    		taxRepository.deleteAll();
+    		authService.setTaxRate(new TaxDto(10));
+    		assertEquals(10, authService.getTaxRate());
     }
 
     /** Tests retrieving all users through AuthServiceImpl */
