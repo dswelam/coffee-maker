@@ -50,9 +50,6 @@ public class OrderServiceImpl implements OrderService {
 			}
 		}
 		
-		// TODO: Is this method also responsible for checking if the payment is sufficient? There is no payment
-		// property on an OrderDto
-		
 		// Save the order to the database
 		Order order = OrderMapper.mapToOrder( orderDto );
         Order savedOrder = orderRepository.save( order );

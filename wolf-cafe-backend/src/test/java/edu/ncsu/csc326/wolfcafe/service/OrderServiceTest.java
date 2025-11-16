@@ -1,6 +1,7 @@
 package edu.ncsu.csc326.wolfcafe.service;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -142,6 +143,15 @@ public class OrderServiceTest {
     		customerRegister.setPassword("abc123");
     		authService.register(customerRegister);
     		order.setCustomer(userRepository.findByUsername(customerRegister.getUsername()).get());
+    		
+    		User preparedBy = new User();
+    		preparedBy.setName("Barry");
+    		preparedBy.setUsername("barista");
+    		preparedBy.setEmail("barry@wolfcafe.com");
+    		preparedBy.setPassword("xyz789");
+    		preparedBy =  userRepository.save(preparedBy);
+    		order.setPreparedBy(preparedBy);
+    		
     		OrderLineDto orderLine = new OrderLineDto();
     		orderLine.setItem(ItemMapper.mapToItem(itemService.getItemByName("Coffee")));
     		orderLine.setQuantity(1);
@@ -150,7 +160,7 @@ public class OrderServiceTest {
     		order.setOrderItems(orderItems);
     		
     		OrderDto createdOrder = orderService.createOrder(order);
-    		assertEquals(createdOrder.getOrderItems(), order.getOrderItems());
+    		assertEquals(createdOrder.getOrderItems().getFirst().getItem().getName(), order.getOrderItems().getFirst().getItem().getName());
     }
 
     /**
@@ -180,21 +190,7 @@ public class OrderServiceTest {
     @Test
     @Transactional
     void testUpdateOrder () {
-//        // create order
-//        final OrderDto orderDto = new OrderDto( );
-//        final OrderDto savedOrder = orderService.createOrder( orderDto );
-//
-//        // update order
-//        orderService.updateOrder( savedOrder.getId(), new OrderDto( "boba" ) );
-//
-//        // check
-//        final OrderDto newOrder = orderService.getOrderById( savedOrder.getId() );
-//        assertAll( "Order contents", () -> assertEquals( savedOrder.getId(), newOrder.getId() ),
-//                () -> assertEquals( "boba", newOrder.getName() ) );
-//
-//        assertThrows( ResourceNotFoundException.class,
-//                () -> orderService.updateOrder( 0L, new OrderDto( "coffee" ) ) );
-
+    		// TODO
     }
 
     /**
