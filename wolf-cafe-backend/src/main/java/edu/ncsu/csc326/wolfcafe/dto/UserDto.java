@@ -14,6 +14,8 @@ public class UserDto {
 
     /** the user id */
     private Long             id;
+    /** the name of the user */
+    private String name;
     /** the username of the user */
     private String           username;
     /** the users email */
@@ -34,6 +36,8 @@ public class UserDto {
      *
      * @param id
      *            the user id
+     * @param name
+     *            the name for the user
      * @param username
      *            the username for the user
      * @param email
@@ -43,9 +47,10 @@ public class UserDto {
      * @param roles
      *            the collection of roles
      */
-    public UserDto ( final Long id, final String username, final String email, final String password,
+    public UserDto ( final Long id, final String name, final String username, final String email, final String password,
             final Collection<Role> roles ) {
         this.id = id;
+        this.name = name;
         this.username = username;
         this.email = email;
         this.password = password;
@@ -57,6 +62,8 @@ public class UserDto {
      *
      * @param id
      *            the id of the user
+     * @param name
+     *            the name for the user
      * @param username
      *            the username of the user
      * @param email
@@ -64,7 +71,7 @@ public class UserDto {
      * @param roles
      *            the roles of the user
      */
-    public UserDto ( final Long id, final String username, final String email, final Collection<Role> roles ) {
+    public UserDto ( final Long id, final String name, final String username, final String email, final Collection<Role> roles ) {
         this.id = id;
         this.username = username;
         this.email = email;
@@ -89,8 +96,27 @@ public class UserDto {
     public void setId ( final Long id ) {
         this.id = id;
     }
+    
+	/**
+     * gets the name of the user
+     *
+     * @return name of the user
+     */
+    public String getName() {
+		return name;
+	}
 
     /**
+     * sets the name for the user
+     *
+     * @param name
+     *            the name of the user
+     */
+	public void setName(String name) {
+		this.name = name;
+	}
+
+	/**
      * gets the username of the user
      *
      * @return username of the user

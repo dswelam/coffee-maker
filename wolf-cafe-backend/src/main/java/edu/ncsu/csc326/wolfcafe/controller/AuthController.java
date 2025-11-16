@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import edu.ncsu.csc326.wolfcafe.dto.IngredientDto;
 import edu.ncsu.csc326.wolfcafe.dto.JwtAuthResponse;
 import edu.ncsu.csc326.wolfcafe.dto.LoginDto;
 import edu.ncsu.csc326.wolfcafe.dto.TaxDto;
@@ -52,6 +53,16 @@ public class AuthController {
     public ResponseEntity<String> register ( @RequestBody final RegisterDto registerDto ) {
         final String response = authService.register( registerDto );
         return new ResponseEntity<>( response, HttpStatus.CREATED );
+    }
+    
+    /** Registers a new user of any role with the system.
+     * 
+     */
+    @PreAuthorize ( "hasRole('ADMIN')" )
+    @PostMapping("/users")
+    public ResponseEntity<UserDto> createUser(@RequestBody final UserDto userDto) {
+    		final UserDto savedUserDto = authService.createUser( userDto );
+        return new ResponseEntity<>( savedUserDto, HttpStatus.CREATED );
     }
 
     /**

@@ -27,6 +27,7 @@ import edu.ncsu.csc326.wolfcafe.entity.Role;
 import edu.ncsu.csc326.wolfcafe.entity.User;
 import edu.ncsu.csc326.wolfcafe.exception.ResourceNotFoundException;
 import edu.ncsu.csc326.wolfcafe.exception.WolfCafeAPIException;
+import edu.ncsu.csc326.wolfcafe.mapper.UserMapper;
 import edu.ncsu.csc326.wolfcafe.mapper.TaxMapper;
 import edu.ncsu.csc326.wolfcafe.repository.RoleRepository;
 import edu.ncsu.csc326.wolfcafe.repository.TaxRepository;
@@ -88,6 +89,36 @@ public class AuthServiceImpl implements AuthService {
 
         return "User registered successfully.";
     }
+    
+    /**
+     * Creates the given user (can be of any role), can be used by admin only
+     * @param userDto new user information
+     * @return response with created user
+     */
+	@Override
+	public UserDto createUser(UserDto userDto) {
+        // Validate the user
+		// The name of the user must be a non-empty string
+		if ( userDto.getName().length() == 0 ) {
+            throw new IllegalArgumentException("User's name must be a non-empty string");
+        }
+		// The email address of the user must contain the "@" symbol
+		if (!userDto.getEmail().contains("@")) {
+			throw new IllegalArgumentException("User's email address is not in a valid format");
+		}
+		// The password of the user must be a non-empty string
+		if (userDto.getPassword().length() == 0) {
+			throw new IllegalArgumentException("User's password must be a non-empty string");
+		}
+		// The email of the user cannot be a duplicate of an already existing user in the system
+		if (userRepository.existsByEmail(userDto.getEmail())) {
+			throw new IllegalArgumentException("User's email address is already used by an existing user");
+		}
+		
+		User user = UserMapper.mapToUser( userDto );
+        User savedUser = userRepository.save( user );
+        return UserMapper.mapToUserDto( savedUser );
+	}
 
     /**
      * Logins in the given user
@@ -240,7 +271,7 @@ public class AuthServiceImpl implements AuthService {
         // Convert each User entity into a UserDto, and directly maps roles to
         // collection
         return users.stream()
-                .map( user -> new UserDto( user.getId(), user.getUsername(), user.getEmail(), user.getRoles() ) )
+                .map( user -> new UserDto( user.getId(), user.getName(), user.getUsername(), user.getEmail(), user.getRoles() ) )
                 .collect( Collectors.toList() );
     }
 

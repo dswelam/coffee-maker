@@ -16,13 +16,20 @@ import edu.ncsu.csc326.wolfcafe.entity.Role;
  */
 public interface AuthService {
     /**
-     * Registers the given user
+     * Registers the given customer user
      *
      * @param registerDto
      *            new user information
      * @return message for success or failure
      */
     String register ( RegisterDto registerDto );
+    
+    /**
+     * Creates the given user (can be of any role), can be used by admin only
+     * @param userDto new user information
+     * @return response with created user
+     */
+    UserDto createUser(UserDto userDto);
 
     /**
      * Logins in the given user
