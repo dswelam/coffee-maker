@@ -14,17 +14,22 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+import edu.ncsu.csc326.wolfcafe.dto.TaxDto;
 import edu.ncsu.csc326.wolfcafe.dto.JwtAuthResponse;
 import edu.ncsu.csc326.wolfcafe.dto.LoginDto;
 import edu.ncsu.csc326.wolfcafe.dto.RegisterDto;
+import edu.ncsu.csc326.wolfcafe.entity.Tax;
 import edu.ncsu.csc326.wolfcafe.dto.UserDto;
 import edu.ncsu.csc326.wolfcafe.entity.Permission;
 import edu.ncsu.csc326.wolfcafe.entity.Role;
 import edu.ncsu.csc326.wolfcafe.entity.User;
 import edu.ncsu.csc326.wolfcafe.exception.ResourceNotFoundException;
 import edu.ncsu.csc326.wolfcafe.exception.WolfCafeAPIException;
+import edu.ncsu.csc326.wolfcafe.mapper.TaxMapper;
 import edu.ncsu.csc326.wolfcafe.repository.RoleRepository;
+import edu.ncsu.csc326.wolfcafe.repository.TaxRepository;
 import edu.ncsu.csc326.wolfcafe.repository.UserRepository;
 import edu.ncsu.csc326.wolfcafe.security.JwtTokenProvider;
 import edu.ncsu.csc326.wolfcafe.service.AuthService;
@@ -36,7 +41,8 @@ import lombok.AllArgsConstructor;
 @Service
 @AllArgsConstructor
 public class AuthServiceImpl implements AuthService {
-
+	/** Tax repository  */
+	private final TaxRepository taxRepository;
     /** User repository */
     private final UserRepository        userRepository;
     /** Role repository */
@@ -149,6 +155,15 @@ public class AuthServiceImpl implements AuthService {
             throw new ResourceNotFoundException( "Role not found with name " + roleName );
         }
 
+        // validate the permission
+        if ( "ROLE_CUSTOMER".equalsIgnoreCase( roleName ) ) {
+            for ( final Permission p : permissions ) {
+                if ( p == Permission.ADD_INVENTORY || p == Permission.FULFILL_ORDER ) {
+                    throw new IllegalArgumentException(
+                            "Invalid Permission: Customers cannot add tax or fulfill orders." );
+                }
+            }
+        }
         // Only staff permissions can be updated
         if ( !"ROLE_STAFF".equalsIgnoreCase( roleName ) ) {
             throw new IllegalArgumentException( "Only staff role permissions can be modified by admin." );
@@ -164,6 +179,58 @@ public class AuthServiceImpl implements AuthService {
         role.setPermissions( new java.util.HashSet<>( permissions ) );
         return roleRepository.save( role );
     }
+    
+    /**
+     * Creates the tax rate.
+     *
+     * @param taxDto
+     *            tax rate to create
+     * @return updated tax rate after creation
+     */
+    @Override
+    @Transactional
+    public TaxDto createTax ( final TaxDto taxDto ) {
+        final Tax tax = TaxMapper.mapToTax( taxDto );
+        final Tax savedTax = taxRepository.save( tax );
+        return TaxMapper.mapToTaxDto( savedTax );
+    }
+
+    /**
+     * Returns the current tax rate of the system
+     * @return current tax rate as an integer (2.00 = 2.00%)
+     */
+	@Override
+	@Transactional
+	public double getTaxRate() {
+        final List<Tax> tax = taxRepository.findAll();
+        if ( tax.size() == 0 ) {
+            final TaxDto newTaxDto = new TaxDto();
+            newTaxDto.setCurrentAmount(2);
+            final TaxDto savedTaxDto = createTax( newTaxDto );
+            return savedTaxDto.getCurrentAmount();
+        }
+        return TaxMapper.mapToTaxDto( tax.get( 0 ) ).getCurrentAmount();
+	}
+
+	/**
+     * Sets the current tax rate of the system
+     * @param taxRate the tax rate to set
+     */
+	@Override
+	@Transactional
+	public void setTaxRate(TaxDto taxRate) {		
+		// Validate that the tax rate is a positive integer
+		if (taxRate.getCurrentAmount() > 0) {
+	        final List<Tax> tax = taxRepository.findAll();
+	        if ( tax.size() != 0 ) {
+	        		taxRepository.delete(tax.get(0));
+	        }
+            
+	        final TaxDto newTaxDto = new TaxDto();
+            newTaxDto.setCurrentAmount(taxRate.getCurrentAmount());
+            createTax( newTaxDto );
+		}
+	}
 
     @Override
     public List<UserDto> listUsers () {

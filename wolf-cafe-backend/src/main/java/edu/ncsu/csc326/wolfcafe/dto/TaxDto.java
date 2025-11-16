@@ -17,5 +17,5 @@ import lombok.Setter;
 public class TaxDto {
 
 	/** Current tax rate as a percentage, default is 2.00% */
-	private int currentAmount;
+	private double currentAmount;
 }
