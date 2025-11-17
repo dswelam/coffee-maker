@@ -263,6 +263,83 @@ public class AuthServiceTest {
     }
 
     /**
+     * Test update user functionality
+     */
+    @Test
+    @Transactional
+    void testUpdateUser () {
+        // Create a user to update
+        final UserDto userDto = new UserDto();
+        userDto.setName( "Bob" );
+        userDto.setUsername( "bobthebarista" );
+        userDto.setEmail( "bob@wolfcafe.com" );
+        userDto.setPassword( "password123" );
+        final Collection<Role> roles = new ArrayList<>();
+        roles.add( roleRepository.findByName( "ROLE_BARISTA" ) );
+        userDto.setRoles( roles );
+        final UserDto createdUser = authService.createUser( userDto );
+
+        // Valid update with role change
+        final UserDto updateDto = new UserDto();
+        updateDto.setName( "Bobby" );
+        updateDto.setUsername( "bobbythebarista" );
+        updateDto.setEmail( "bobby@wolfcafe.com" );
+        updateDto.setPassword( "newpassword" );
+        final Collection<Role> newRoles = new ArrayList<>();
+        newRoles.add( roleRepository.findByName( "ROLE_STAFF" ) );
+        updateDto.setRoles( newRoles );
+        final UserDto updatedUser = authService.updateUser( createdUser.getId(), updateDto );
+        assertEquals( "Bobby", updatedUser.getName() );
+        assertEquals( "bobbythebarista", updatedUser.getUsername() );
+        assertEquals( "bobby@wolfcafe.com", updatedUser.getEmail() );
+        assertEquals( newRoles, updatedUser.getRoles() );
+
+        // Invalid name (empty)
+        updateDto.setName( "" );
+        final WolfCafeAPIException ex1 = assertThrows( WolfCafeAPIException.class, () -> {
+            authService.updateUser( createdUser.getId(), updateDto );
+        } );
+        assertTrue( ex1.getMessage().contains( "Invalid name" ) );
+
+        // Invalid name (non-letter)
+        updateDto.setName( "12345" );
+        final WolfCafeAPIException ex2 = assertThrows( WolfCafeAPIException.class, () -> {
+            authService.updateUser( createdUser.getId(), updateDto );
+        } );
+        assertTrue( ex2.getMessage().contains( "Invalid name" ) );
+
+        // Invalid email (bad format)
+        updateDto.setName( "Bobby" );
+        updateDto.setEmail( "bobbywolfcafe.com" );
+        final WolfCafeAPIException ex3 = assertThrows( WolfCafeAPIException.class, () -> {
+            authService.updateUser( createdUser.getId(), updateDto );
+        } );
+        assertTrue( ex3.getMessage().contains( "Invalid email" ) );
+
+        // Invalid password (empty)
+        updateDto.setEmail( "bobby@wolfcafe.com" );
+        updateDto.setPassword( "" );
+        final WolfCafeAPIException ex4 = assertThrows( WolfCafeAPIException.class, () -> {
+            authService.updateUser( createdUser.getId(), updateDto );
+        } );
+        assertTrue( ex4.getMessage().contains( "Invalid password" ) );
+
+        // Duplicate email
+        final UserDto otherUserDto = new UserDto();
+        otherUserDto.setName( "Bob" );
+        otherUserDto.setUsername( "bob" );
+        otherUserDto.setEmail( "bob@wolfcafe.com" );
+        otherUserDto.setPassword( "bobpassword" );
+        otherUserDto.setRoles( roles );
+        authService.createUser( otherUserDto );
+
+        updateDto.setPassword( "newpassword" );
+        updateDto.setEmail( "bob@wolfcafe.com" );
+        final WolfCafeAPIException ex5 = assertThrows( WolfCafeAPIException.class, () -> {
+            authService.updateUser( createdUser.getId(), updateDto );
+        } );
+        assertTrue( ex5.getMessage().contains( "Email already exists" ) );
+    }
      * UC10: Successfully delete a normal user.
      */
     @Test

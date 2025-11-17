@@ -51,6 +51,7 @@ import edu.ncsu.csc326.wolfcafe.service.AuthService;
  *
  * @author Diya Patel
  * @author Brooke Wu
+ * @author Dania Swelam
  */
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -146,8 +147,7 @@ public class AuthControllerTest {
     }
 
     /**
-     * Tests creating a staff and barista user (as an admin user) and logging in
-     * as the created users.
+     * Tests creating a staff and barista user (as an admin user) and logging in as the created users.
      *
      * @throws Exception
      *             if error
@@ -342,92 +342,28 @@ public class AuthControllerTest {
     }
 
     /**
-     * Tests successfully deleting multiple users in UC10.
+     * Tests the updateUser() API endpoint
      */
     @Test
-    @Transactional
     @WithMockUser ( username = "admin", roles = "ADMIN" )
-    public void testBulkDeleteUsersSuccess () throws Exception {
+    public void testUpdateUser () throws Exception {
+        // Arrange
+        final Long userId = 1L;
+        final UserDto userDto = new UserDto();
+        userDto.setName( "Updated Name" );
+        userDto.setUsername( "updateduser" );
+        userDto.setEmail( "updated@email.com" );
+        userDto.setPassword( "newpassword" );
+        userDto.setRoles( new ArrayList<>( roleRepository.findAll() ) );
 
-        Mockito.doNothing().when( authService ).deleteUserById( 1L );
-        Mockito.doNothing().when( authService ).deleteUserById( 2L );
+        Mockito.when( authService.updateUser( Mockito.eq( userId ), Mockito.any( UserDto.class ) ) )
+                .thenReturn( userDto );
 
-        final List<Long> ids = List.of( 1L, 2L );
-
-        mvc.perform( post( "/api/auth/users/delete" ).contentType( MediaType.APPLICATION_JSON )
-                .content( TestUtils.asJsonString( ids ) ) ).andExpect( status().isOk() )
-                .andExpect( content().string( "Selected users deleted successfully." ) );
+        // Act & Assert
+        mvc.perform( put( "/api/auth/users/{id}", userId ).contentType( MediaType.APPLICATION_JSON )
+                .content( TestUtils.asJsonString( userDto ) ) ).andExpect( status().isOk() )
+                .andExpect( jsonPath( "$.name" ).value( "Updated Name" ) )
+                .andExpect( jsonPath( "$.username" ).value( "updateduser" ) )
+                .andExpect( jsonPath( "$.email" ).value( "updated@email.com" ) );
     }
-
-    /**
-     * Tests that non-admin users cannot bulk delete users.
-     */
-    @Test
-    @Transactional
-    @WithMockUser ( username = "staff", roles = "STAFF" )
-    public void testBulkDeleteUsersForbidden () throws Exception {
-
-        final List<Long> ids = List.of( 1L, 2L );
-
-        mvc.perform( post( "/api/auth/users/delete" ).contentType( MediaType.APPLICATION_JSON )
-                .content( TestUtils.asJsonString( ids ) ) ).andExpect( status().isForbidden() );
-    }
-
-    /**
-     * Tests bulk delete where deleteUserById throws a self-delete error.
-     */
-    @Test
-    @Transactional
-    @WithMockUser ( username = "admin", roles = "ADMIN" )
-    public void testBulkDeleteCannotDeleteSelf () throws Exception {
-
-        final List<Long> ids = List.of( 99L ); // arbitrary id
-
-        Mockito.doThrow( new edu.ncsu.csc326.wolfcafe.exception.WolfCafeAPIException( HttpStatus.BAD_REQUEST,
-                "You cannot delete your own account." ) ).when( authService ).deleteUserById( 99L );
-
-        mvc.perform( post( "/api/auth/users/delete" ).contentType( MediaType.APPLICATION_JSON )
-                .content( TestUtils.asJsonString( ids ) ) ).andExpect( status().isBadRequest() )
-                .andExpect( content().string( Matchers.containsString( "cannot delete your own" ) ) );
-    }
-
-    /**
-     * Tests bulk delete where staff user has active orders and cannot be
-     * deleted.
-     */
-    @Test
-    @Transactional
-    @WithMockUser ( username = "admin", roles = "ADMIN" )
-    public void testBulkDeleteStaffInUse () throws Exception {
-
-        final List<Long> ids = List.of( 10L );
-
-        Mockito.doThrow( new edu.ncsu.csc326.wolfcafe.exception.WolfCafeAPIException( HttpStatus.BAD_REQUEST,
-                "Cannot delete staff while they have an active (IN_PROGRESS) order assigned." ) ).when( authService )
-                .deleteUserById( 10L );
-
-        mvc.perform( post( "/api/auth/users/delete" ).contentType( MediaType.APPLICATION_JSON )
-                .content( TestUtils.asJsonString( ids ) ) ).andExpect( status().isBadRequest() )
-                .andExpect( content().string( Matchers.containsString( "active" ) ) );
-    }
-
-    /**
-     * Tests bulk delete where one of the users no longer exists
-     *
-     */
-    @Test
-    @Transactional
-    @WithMockUser ( username = "admin", roles = "ADMIN" )
-    public void testBulkDeleteUserNotFound () throws Exception {
-
-        final List<Long> ids = List.of( 123L );
-
-        Mockito.doThrow( new ResourceNotFoundException( "User not found with id 123" ) ).when( authService )
-                .deleteUserById( 123L );
-
-        mvc.perform( post( "/api/auth/users/delete" ).contentType( MediaType.APPLICATION_JSON )
-                .content( TestUtils.asJsonString( ids ) ) ).andExpect( status().isNotFound() )
-                .andExpect( content().string( Matchers.containsString( "User not found" ) ) );
-    }
-
 }

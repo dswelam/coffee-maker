@@ -42,6 +42,7 @@ import lombok.AllArgsConstructor;
 /**
  * Implemented AuthService
  *
+ * @author Dania Swelam
  * @author Diya Patel
  */
 @Service
@@ -330,4 +331,65 @@ public class AuthServiceImpl implements AuthService {
                 user.getEmail(), user.getRoles() ) ).collect( Collectors.toList() );
     }
 
+    /**
+     * Updates the given user by id
+     *
+     * @param id
+     *            id of user to update
+     * @param userDto
+     *            updated user information
+     * @return response with updated user
+     */
+    @Override
+    public UserDto updateUser ( final Long id, final UserDto userDto ) {
+        final User existingUser = userRepository.findById( id )
+                .orElseThrow( () -> new ResourceNotFoundException( "User not found with id " + id ) );
+
+        // [Invalid Name] Check: non-empty and letters only
+        if ( userDto.getName() == null || userDto.getName().trim().isEmpty()
+                || !userDto.getName().matches( "[a-zA-Z ]+" ) ) {
+            throw new WolfCafeAPIException( HttpStatus.BAD_REQUEST,
+                    "Invalid name: must be a non-empty string with letters." );
+        }
+
+        // [Invalid Email] Check: non-empty and valid format
+        if ( userDto.getEmail() == null || userDto.getEmail().trim().isEmpty()
+                || !userDto.getEmail().matches( "^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$" ) ) {
+            throw new WolfCafeAPIException( HttpStatus.BAD_REQUEST,
+                    "Invalid email: must be a non-empty string with a valid format." );
+        }
+
+        // [Duplicate] Check: email changed and already exists
+        if ( !existingUser.getEmail().equals( userDto.getEmail() )
+                && userRepository.existsByEmail( userDto.getEmail() ) ) {
+            throw new WolfCafeAPIException( HttpStatus.BAD_REQUEST, "Email already exists." );
+        }
+
+        // [Invalid Password] Check: if password is provided, must be non-empty
+        if ( userDto.getPassword() != null && userDto.getPassword().trim().isEmpty() ) {
+            throw new WolfCafeAPIException( HttpStatus.BAD_REQUEST, "Invalid password: must be a non-empty string." );
+        }
+
+        // Update fields
+        existingUser.setName( userDto.getName() );
+        existingUser.setUsername( userDto.getUsername() );
+        existingUser.setEmail( userDto.getEmail() );
+        existingUser.setRoles( userDto.getRoles() );
+
+        if ( userDto.getPassword() != null && !userDto.getPassword().isEmpty() ) {
+            existingUser.setPassword( passwordEncoder.encode( userDto.getPassword() ) );
+        }
+
+        final User updatedUser = userRepository.save( existingUser );
+        return UserMapper.mapToUserDto( updatedUser );
+    }
 }
+
+/**
+ * GENERATIVE AI WAS USED IN THE CREATION OF THIS FILE:
+ *
+ * Model: GitHub Copilot GPT-4.1
+ * Prompts:
+ * - "Generate an implementation of updating a user in Java using Spring Boot."
+ * - "Enhance the user update method to include validation checks for name, email, and password."
+ */

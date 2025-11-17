@@ -31,6 +31,8 @@ import lombok.AllArgsConstructor;
 
 /**
  * Controller for authentication functionality.
+ *
+ * @author Dania Swelam
  */
 @CrossOrigin ( "*" )
 @RestController
@@ -57,13 +59,23 @@ public class AuthController {
 
     /**
      * Registers a new user of any role with the system.
-     *
      */
     @PreAuthorize ( "hasRole('ADMIN')" )
     @PostMapping ( "/users" )
     public ResponseEntity<UserDto> createUser ( @RequestBody final UserDto userDto ) {
         final UserDto savedUserDto = authService.createUser( userDto );
         return new ResponseEntity<>( savedUserDto, HttpStatus.CREATED );
+    }
+
+    /**
+     * Updates an existing user of any role with the system.
+     */
+    @PreAuthorize ( "hasRole('ADMIN')" )
+    @PutMapping ( "/users/{id}" )
+    public ResponseEntity<UserDto> updateUser ( @PathVariable ( "id" ) final Long id,
+            @RequestBody final UserDto userDto ) {
+        final UserDto updatedUserDto = authService.updateUser( id, userDto );
+        return new ResponseEntity<>( updatedUserDto, HttpStatus.OK );
     }
 
     /**
