@@ -1,18 +1,29 @@
-package edu.ncsu.csc326.wolfcafe.service;
+package edu.ncsu.csc326.wolfcafe.controller;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.hamcrest.Matchers;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentMatchers;
+import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.http.MediaType;
+import org.springframework.security.test.context.support.WithMockUser;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
 
+import edu.ncsu.csc326.wolfcafe.TestUtils;
 import edu.ncsu.csc326.wolfcafe.dto.InventoryDto;
 import edu.ncsu.csc326.wolfcafe.dto.ItemDto;
 import edu.ncsu.csc326.wolfcafe.dto.OrderDto;
@@ -22,31 +33,39 @@ import edu.ncsu.csc326.wolfcafe.entity.User;
 import edu.ncsu.csc326.wolfcafe.mapper.ItemMapper;
 import edu.ncsu.csc326.wolfcafe.repository.OrderRepository;
 import edu.ncsu.csc326.wolfcafe.repository.UserRepository;
+import edu.ncsu.csc326.wolfcafe.service.AuthService;
+import edu.ncsu.csc326.wolfcafe.service.InventoryService;
+import edu.ncsu.csc326.wolfcafe.service.ItemService;
 import jakarta.persistence.EntityManager;
 
 /**
- * Test class for the OrderService and its implementation
+ * Tests the Order controller.
  *
  * @author Brooke Wu
  */
 @SpringBootTest
-public class OrderServiceTest {
-	
+@AutoConfigureMockMvc
+public class OrderControllerTest {
+
+    /** Admin password from application.properties */
+    @Value ( "${app.admin-user-password}" )
+    private String                    adminUserPassword;
+
+    /** Mocked MVC for testing */
+    @Autowired
+    private MockMvc                   mvc;
+
+    /** Mocked AuthService */
+    @MockitoBean
+    private AuthService               authService;
+    
     /** Reference to EntityManager for cleanup */
     @Autowired
     private EntityManager     entityManager;
-
-    /** The service being tested. */
-    @Autowired
-    private OrderService    orderService;
     
     /** The inventory service */
     @Autowired
     private InventoryService inventoryService;
-    
-    /** The auth service */
-    @Autowired
-    private AuthService authService;
     
     /** The item service */
     @Autowired
@@ -59,7 +78,7 @@ public class OrderServiceTest {
     /** The user repository */
     @Autowired
     private UserRepository userRepository;
-
+    
     /**
      * Sets up the test case.
      *
@@ -111,12 +130,15 @@ public class OrderServiceTest {
     }
 
     /**
-     * Test method for
-     * {@link edu.ncsu.csc326.coffee_maker.services.OrderService#createOrder(edu.ncsu.csc326.coffee_maker.dto.OrderDto)}.
+     * Tests creating a customer user and logging in.
+     *
+     * @throws Exception
+     *             if error
      */
     @Test
     @Transactional
-    void testCreateOrder () {
+    @WithMockUser ( username = "admin", roles = "ADMIN" )
+    public void testCreateOrder () throws Exception {
         ItemDto item = new ItemDto();
         item.setName("Coffee");
         item.setPrice(4.35);
@@ -135,12 +157,12 @@ public class OrderServiceTest {
         inventory = inventoryService.createInventory(inventory);
         
     		OrderDto order = new OrderDto();
-    		RegisterDto customerRegister = new RegisterDto();
+    		User customerRegister = new User();
     		customerRegister.setName("Customer");
     		customerRegister.setUsername("customer");
     		customerRegister.setEmail("customer@mail.com");
     		customerRegister.setPassword("abc123");
-    		authService.register(customerRegister);
+    		userRepository.save(customerRegister);
     		order.setCustomer(userRepository.findByUsername(customerRegister.getUsername()).get());
     		
     		User preparedBy = new User();
@@ -158,48 +180,10 @@ public class OrderServiceTest {
     		orderItems.add(orderLine);
     		order.setOrderItems(orderItems);
     		
-    		OrderDto createdOrder = orderService.createOrder(order);
-    		assertEquals(createdOrder.getOrderItems().getFirst().getItem().getName(), order.getOrderItems().getFirst().getItem().getName());
-    }
+        mvc.perform( post( "/api/orders" ).contentType( MediaType.APPLICATION_JSON )
+                .content( TestUtils.asJsonString( order ) ).accept( MediaType.APPLICATION_JSON ) )
+                .andExpect( status().isOk() );
 
-    /**
-     * Test method for
-     * {@link edu.ncsu.csc326.coffee_maker.services.OrderService#isDuplicateName(java.lang.String)}.
-     */
-    @Test
-    @Transactional
-    void testIsDuplicateName () {
-    		// TODO
-    }
-
-    /**
-     * Test method for
-     * {@link edu.ncsu.csc326.coffee_maker.services.OrderService#getAllOrders()}.
-     */
-    @Test
-    @Transactional
-    void testGetAllOrders () {
-    		// TODO
-    }
-
-    /**
-     * Test method for
-     * {@link edu.ncsu.csc326.coffee_maker.services.OrderService#updateOrder(java.lang.Long, edu.ncsu.csc326.coffee_maker.dto.OrderDto)}.
-     */
-    @Test
-    @Transactional
-    void testUpdateOrder () {
-    		// TODO
-    }
-
-    /**
-     * Test method for
-     * {@link edu.ncsu.csc326.coffee_maker.services.OrderService#deleteOrder(java.lang.Long)}.
-     */
-    @Test
-    @Transactional
-    void testDeleteOrder () {
-        // TODO
     }
 
 }
