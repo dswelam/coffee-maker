@@ -22,6 +22,7 @@ import edu.ncsu.csc326.wolfcafe.dto.LoginDto;
 import edu.ncsu.csc326.wolfcafe.dto.RegisterDto;
 import edu.ncsu.csc326.wolfcafe.dto.TaxDto;
 import edu.ncsu.csc326.wolfcafe.dto.UserDto;
+import edu.ncsu.csc326.wolfcafe.entity.Order.OrderStatus;
 import edu.ncsu.csc326.wolfcafe.entity.Permission;
 import edu.ncsu.csc326.wolfcafe.entity.Role;
 import edu.ncsu.csc326.wolfcafe.entity.User;
@@ -334,7 +335,7 @@ public class AuthServiceTest {
 
         order.setCustomer( customer ); // must NOT be null
         order.setPreparedBy( staffEntity ); // must NOT be null
-        order.setStatus( edu.ncsu.csc326.wolfcafe.entity.Order.OrderStatus.IN_PROGRESS );
+        order.setStatus( OrderStatus.IN_PROGRESS );
 
         entityManager.persist( order );
         entityManager.flush(); // push to DB so deleteUserById sees it
