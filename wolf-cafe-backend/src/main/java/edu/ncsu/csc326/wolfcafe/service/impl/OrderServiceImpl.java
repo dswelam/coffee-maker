@@ -1,5 +1,6 @@
 package edu.ncsu.csc326.wolfcafe.service.impl;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map.Entry;
 
@@ -49,17 +50,22 @@ public class OrderServiceImpl implements OrderService {
         // Before creating the order, need to check if the inventory has
         // sufficient ingredients to make the items on the order
         final List<OrderLineDto> orderItems = orderDto.getOrderItems();
+        final List<OrderLineDto> toRemove = new ArrayList<>();
+
+        // Collect the order items that cannot be fulfilled in a separate list
+        // then remove them after the iteration. This change was necessary to
+        // avoid
+        // a ConcurrentModificationException when removing items from the list
         for ( final OrderLineDto orderLine : orderItems ) {
             final ItemDto item = ItemMapper.mapToItemDto( orderLine.getItem() );
             if ( !checkInventory( inventory, item ) ) {
-                // TODO: How to handle not being able to create this specific
-                // item on the order?
-                // For now, just remove it from orderItems silently (without
-                // throwing an Exception)
-                orderItems.remove( orderLine );
+                toRemove.add( orderLine );
             }
         }
+        orderItems.removeAll( toRemove );
         orderDto.setOrderItems( orderItems );
+        // Set the order status to PLACED - this was missing previously
+        orderDto.setStatus( OrderStatus.PLACED );
 
         // Save the order to the database
         final Order order = OrderMapper.mapToOrder( orderDto );

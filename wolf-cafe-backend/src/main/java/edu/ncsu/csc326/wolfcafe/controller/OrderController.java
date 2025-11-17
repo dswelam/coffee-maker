@@ -165,7 +165,7 @@ public class OrderController {
      * @param orderId ID of the order to mark as fulfilled
      * @return The updated order
      */
-    @PreAuthorize ( "hasAnyRole('STAFF', 'ADMIN')" )
+    @PreAuthorize ( "hasAnyRole('STAFF', 'ADMIN', 'CUSTOMER', 'BARISTA')" )
     @PutMapping ( "/{id}/fulfill" )
     public ResponseEntity<OrderDto> orderFulfilled ( @PathVariable ( "id" ) final Long orderId ) {
         final OrderDto order = orderService.orderFulfilled( orderId );

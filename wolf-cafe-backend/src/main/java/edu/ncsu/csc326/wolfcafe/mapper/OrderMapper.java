@@ -23,8 +23,12 @@ public class OrderMapper {
     public static Order mapToOrder ( final OrderDto orderDto ) {
         final List<OrderLine> orderLines = orderDto.getOrderItems().stream().map( OrderMapper::mapToOrderLine )
                 .collect( Collectors.toList() );
-        return new Order( orderDto.getId(), orderDto.getCustomer(), orderLines, orderDto.getStatus(),
+        final Order order = new Order( orderDto.getId(), orderDto.getCustomer(), orderLines, orderDto.getStatus(),
                 orderDto.getPreparedBy() );
+        for ( final OrderLine line : orderLines ) {
+            line.setOrder( order );
+        }
+        return order;
     }
 
     private static OrderLineDto mapToOrderLineDto ( final OrderLine orderLine ) {
