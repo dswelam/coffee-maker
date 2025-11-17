@@ -3,6 +3,7 @@ package edu.ncsu.csc326.wolfcafe.controller;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -64,11 +65,11 @@ public class OrderController {
      * @return ResponseEntity indicating success if the Order could be
      *         saved to the inventory, or an error if it could not be
      */
-    @PreAuthorize ( "hasAnyRole('STAFF', 'ADMIN')" )
+    @PreAuthorize ( "hasAnyRole('STAFF', 'ADMIN', 'CUSTOMER', 'ANONYMOUS')" )
     @PostMapping
     public ResponseEntity<OrderDto> createOrder ( @RequestBody final OrderDto orderDto ) {
-        // TODO
-        return null;
+        final OrderDto savedOrderDto = orderService.createOrder( orderDto );
+        return ResponseEntity.ok( savedOrderDto );
     }
 
     /**
@@ -85,8 +86,11 @@ public class OrderController {
     @PutMapping ( "{id}" )
     public ResponseEntity<OrderDto> updateOrder ( @PathVariable ( "id" ) final Long orderId,
             @RequestBody final OrderDto orderDto ) {
-        // TODO
-        return null;
+        if ( orderService.getOrderById( orderId ) == null ) {
+            return new ResponseEntity<>( orderDto, HttpStatus.NOT_FOUND );
+        }
+        final OrderDto savedOrderDto = orderService.updateOrder( orderId, orderDto );
+        return ResponseEntity.ok( savedOrderDto );
     }
 
     /**

@@ -6,6 +6,7 @@ import edu.ncsu.csc326.wolfcafe.dto.InventoryDto;
 import edu.ncsu.csc326.wolfcafe.dto.ItemDto;
 import edu.ncsu.csc326.wolfcafe.dto.OrderDto;
 import edu.ncsu.csc326.wolfcafe.entity.Order.OrderStatus;
+import edu.ncsu.csc326.wolfcafe.exception.ResourceNotFoundException;
 
 /**
  * Interface defining Order behaviors
@@ -13,29 +14,55 @@ import edu.ncsu.csc326.wolfcafe.entity.Order.OrderStatus;
  * @author Brooke Wu (bwu25)
  */
 public interface OrderService {
-
+	
     /**
-     * TODO
-     * @param inventoryDto
-     * @param itemDto
-     * @return
+     * Create and save a new order
+     *
+     * @param orderDto
+     *            order to create
+     * @return the DTO for the order including an ID
      */
-    public boolean placeOrder ( InventoryDto inventoryDto, ItemDto itemDto );
+	public OrderDto createOrder(OrderDto orderDto);
 
     /**
-     * TODO
-     * @param itemId
-     * @param tip
-     * @param payment
-     * @return
+     * Check if the inventory has sufficient quantity of ingredients to make the item and deducts 
+     * the appropriate quantity of ingredients from the inventory to make the item if so
+     * @param inventoryDto the inventory instance 
+     * @param itemDto the item to make
+     * @return true if the item can be made, false if not
+     */
+    public boolean checkInventory ( InventoryDto inventoryDto, ItemDto itemDto );
+
+    /**
+     * Checks that the payment is sufficient and calculates the change
+     * @param itemId the id of the item // TODO: Can't there be multiple items on an order?
+     * @param tip // TODO: Why is this needed?
+     * @param payment the amount paid by the customer
+     * @return change to return to the user
      */
     public int placeOrder ( Long itemId, int tip, int payment );
+    
+    /**
+     * Get an order by its ID
+     *
+     * @param orderId
+     *            id of the order to get
+     * @return the DTO for the order
+     * @throws ResourceNotFoundException
+     *             if the order doesn't exist
+     */
+	OrderDto getOrderById(Long orderId);
 
     /**
-     * TODO
+     * Update an order with all new fields
+     *
      * @param orderId
+     *            id of the order to update
      * @param orderDto
-     * @return
+     *            order to replace old one with
+     * @return the DTO for the order
+     * @throws ResourceNotFoundException
+     *             if the order doesn't exist
      */
     public OrderDto updateOrder ( Long orderId, OrderDto orderDto );
 

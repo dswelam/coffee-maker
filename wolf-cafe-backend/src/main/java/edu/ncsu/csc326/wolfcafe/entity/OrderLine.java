@@ -18,7 +18,7 @@ public class OrderLine {
     @GeneratedValue ( strategy = GenerationType.IDENTITY )
     private Long    id;
 
-    @ManyToOne ( optional = false, fetch = FetchType.LAZY )
+    @ManyToOne ( optional = true, fetch = FetchType.LAZY )
     @JoinColumn ( name = "order_id" )
     private Order   order;
 
