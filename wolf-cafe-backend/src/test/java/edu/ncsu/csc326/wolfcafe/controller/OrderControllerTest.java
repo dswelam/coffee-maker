@@ -1,8 +1,9 @@
 package edu.ncsu.csc326.wolfcafe.controller;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import java.util.ArrayList;
@@ -70,10 +71,6 @@ public class OrderControllerTest {
     /** The item service */
     @Autowired
     private ItemService      itemService;
-
-    /** The order controller */
-    @Autowired
-    private OrderController  orderController;
 
     /** The order service */
     @Autowired
@@ -195,13 +192,136 @@ public class OrderControllerTest {
     }
 
     /**
-     * Tests changing the status for an order to IN_PROGRESS.
+     * Tests updating an order.
+     */
+    @Test
+    @Transactional
+    @WithMockUser ( username = "customer", roles = { "CUSTOMER" } )
+    public void testUpdateOrder () throws Exception {
+        // Create barista user
+        User barista = new User();
+        barista.setName( "Barry" );
+        barista.setUsername( "barista" );
+        barista.setEmail( "barista@mail.com" );
+        barista.setPassword( "xyz789" );
+        barista = userRepository.save( barista );
+
+        // Create customer user
+        User customer = new User();
+        customer.setName( "Customer" );
+        customer.setUsername( "customer" );
+        customer.setEmail( "customer@mail.com" );
+        customer.setPassword( "abc123" );
+        customer = userRepository.save( customer );
+
+        // Create item
+        ItemDto item = new ItemDto();
+        item.setName( "Coffee" );
+        item.setPrice( 4.35 );
+        final Map<String, Integer> ingredients = new HashMap<>();
+        ingredients.put( "Chocolate", 3 );
+        ingredients.put( "Sugar", 2 );
+        ingredients.put( "Milk", 1 );
+        item.setIngredients( ingredients );
+        item = itemService.addItem( item );
+
+        // Create order
+        final OrderLineDto orderLine = new OrderLineDto();
+        orderLine.setItem( ItemMapper.mapToItem( itemService.getItemByName( "Coffee" ) ) );
+        orderLine.setQuantity( 1 );
+        List<OrderLineDto> orderItems = new ArrayList<>();
+        orderItems.add( orderLine );
+
+        OrderDto order = new OrderDto();
+        order.setCustomer( customer );
+        order.setPreparedBy( barista );
+        order.setStatus( OrderStatus.PLACED );
+        order.setOrderItems( orderItems );
+        order = orderService.createOrder( order );
+
+        // Test NOT_FOUND case first
+        mvc.perform( put( "/api/orders/999999" ).contentType( MediaType.APPLICATION_JSON )
+                .content( TestUtils.asJsonString( order ) ).accept( MediaType.APPLICATION_JSON ) )
+                .andExpect( status().isNotFound() );
+
+        // Check if order items exist and add them if not
+        if ( order.getOrderItems() == null || order.getOrderItems().isEmpty() ) {
+            orderLine.setQuantity( 2 );
+            orderItems = new ArrayList<>();
+            orderItems.add( orderLine );
+            order.setOrderItems( orderItems );
+        }
+        else {
+            // Update existing order quantity
+            order.getOrderItems().get( 0 ).setQuantity( 2 );
+        }
+
+        mvc.perform( put( "/api/orders/" + order.getId() ).contentType( MediaType.APPLICATION_JSON )
+                .content( TestUtils.asJsonString( order ) ).accept( MediaType.APPLICATION_JSON ) )
+                .andExpect( status().isOk() ).andExpect( jsonPath( "$.orderItems[0].quantity" ).value( 2 ) );
+    }
+
+    /**
+     * Tests updating an order.
+     *
+     * @throws Exception if error
+     */
+    @Test
+    @Transactional
+    @WithMockUser ( username = "barista", roles = { "BARISTA" } )
+    public void testViewAllOrders () throws Exception {
+        User barista = new User();
+        barista.setName( "Barry" );
+        barista.setUsername( "barista" );
+        barista.setEmail( "barista@mail.com" );
+        barista.setPassword( "xyz789" );
+        barista = userRepository.save( barista );
+
+        User customer = new User();
+        customer.setName( "Customer" );
+        customer.setUsername( "customer" );
+        customer.setEmail( "customer@mail.com" );
+        customer.setPassword( "abc123" );
+        customer = userRepository.save( customer );
+
+        ItemDto item = new ItemDto();
+        item.setName( "Coffee" );
+        item.setPrice( 4.35 );
+        final Map<String, Integer> ingredients = new HashMap<>();
+        ingredients.put( "Chocolate", 3 );
+        ingredients.put( "Sugar", 2 );
+        ingredients.put( "Milk", 1 );
+        item.setIngredients( ingredients );
+        item = itemService.addItem( item );
+
+        final OrderLineDto orderLine = new OrderLineDto();
+        orderLine.setItem( ItemMapper.mapToItem( itemService.getItemByName( "Coffee" ) ) );
+        orderLine.setQuantity( 1 );
+        final List<OrderLineDto> orderItems = new ArrayList<>();
+        orderItems.add( orderLine );
+
+        OrderDto order = new OrderDto();
+        order.setCustomer( customer );
+        order.setPreparedBy( barista );
+        order.setStatus( OrderStatus.PLACED );
+        order.setOrderItems( orderItems );
+        order = orderService.createOrder( order );
+
+        mvc.perform( get( "/api/orders/queue?status=PLACED" ).accept( MediaType.APPLICATION_JSON ) )
+                .andExpect( status().isOk() ).andExpect( jsonPath( "$.length()" ).value( 1 ) )
+                .andExpect( jsonPath( "$[0].customer.username" ).value( "customer" ) );
+    }
+
+    /**
+     * Tests preparing an order.
+     *
+     * @throws Exception
+     *             if error
      */
     @Test
     @Transactional
     @WithMockUser ( username = "barista", roles = { "BARISTA" } )
     public void testPrepareOrder () throws Exception {
-        // Create customer and order
         final User customer = new User();
         customer.setName( "Customer" );
         customer.setUsername( "customer" );
@@ -226,32 +346,33 @@ public class OrderControllerTest {
         item.setIngredients( ingredients );
         item = itemService.addItem( item );
 
-        OrderDto order = new OrderDto();
-        order.setCustomer( customer );
-        order.setStatus( OrderStatus.PLACED );
         final OrderLineDto orderLine = new OrderLineDto();
         orderLine.setItem( ItemMapper.mapToItem( itemService.getItemByName( "Coffee" ) ) );
         orderLine.setQuantity( 1 );
         final List<OrderLineDto> orderItems = new ArrayList<>();
         orderItems.add( orderLine );
+
+        OrderDto order = new OrderDto();
+        order.setCustomer( customer );
+        order.setStatus( OrderStatus.PLACED );
         order.setOrderItems( orderItems );
         order = orderService.createOrder( order );
 
-        // Prepare order
-        final var response = orderController.prepareOrder( order.getId() );
-        assertEquals( 200, response.getStatusCode().value() );
-        assertEquals( OrderStatus.IN_PROGRESS, response.getBody().getStatus() );
-        assertEquals( "barista", response.getBody().getPreparedBy().getUsername() );
+        mvc.perform( put( "/api/orders/" + order.getId() + "/prepare" ).accept( MediaType.APPLICATION_JSON ) )
+                .andExpect( status().isOk() ).andExpect( jsonPath( "$.status" ).value( "IN_PROGRESS" ) )
+                .andExpect( jsonPath( "$.preparedBy.username" ).value( "barista" ) );
     }
 
     /**
-     * Tests changing the status for an order to READY.
+     * Tests preparing an order.
+     *
+     * @throws Exception
+     *             if error
      */
     @Test
     @Transactional
     @WithMockUser ( username = "barista", roles = { "BARISTA" } )
     public void testMarkReady () throws Exception {
-        // Setup order in IN_PROGRESS
         final User customer = new User();
         customer.setName( "Customer" );
         customer.setUsername( "customer" );
@@ -276,31 +397,32 @@ public class OrderControllerTest {
         item.setIngredients( ingredients );
         item = itemService.addItem( item );
 
-        OrderDto order = new OrderDto();
-        order.setCustomer( customer );
-        order.setStatus( OrderStatus.IN_PROGRESS );
         final OrderLineDto orderLine = new OrderLineDto();
         orderLine.setItem( ItemMapper.mapToItem( itemService.getItemByName( "Coffee" ) ) );
         orderLine.setQuantity( 1 );
         final List<OrderLineDto> orderItems = new ArrayList<>();
         orderItems.add( orderLine );
+
+        OrderDto order = new OrderDto();
+        order.setCustomer( customer );
+        order.setStatus( OrderStatus.IN_PROGRESS );
         order.setOrderItems( orderItems );
         order = orderService.createOrder( order );
 
-        // Mark ready
-        final var response = orderController.markReady( order.getId() );
-        assertEquals( 200, response.getStatusCode().value() );
-        assertEquals( OrderStatus.READY, response.getBody().getStatus() );
+        mvc.perform( put( "/api/orders/" + order.getId() + "/ready" ).accept( MediaType.APPLICATION_JSON ) )
+                .andExpect( status().isOk() ).andExpect( jsonPath( "$.status" ).value( "READY" ) );
     }
 
     /**
-     * Tests changing the status for an order to FULLFILLED.
+     * Tests fulfilling an order.
+     *
+     * @throws Exception
+     *             if error
      */
     @Test
     @Transactional
     @WithMockUser ( username = "customer", roles = { "CUSTOMER" } )
     public void testOrderFulfilled () throws Exception {
-        // Setup order in READY
         final User customer = new User();
         customer.setName( "Customer" );
         customer.setUsername( "customer" );
@@ -318,31 +440,32 @@ public class OrderControllerTest {
         item.setIngredients( ingredients );
         item = itemService.addItem( item );
 
-        OrderDto order = new OrderDto();
-        order.setCustomer( customer );
-        order.setStatus( OrderStatus.READY );
         final OrderLineDto orderLine = new OrderLineDto();
         orderLine.setItem( ItemMapper.mapToItem( itemService.getItemByName( "Coffee" ) ) );
         orderLine.setQuantity( 1 );
         final List<OrderLineDto> orderItems = new ArrayList<>();
         orderItems.add( orderLine );
+
+        OrderDto order = new OrderDto();
+        order.setCustomer( customer );
+        order.setStatus( OrderStatus.READY );
         order.setOrderItems( orderItems );
         order = orderService.createOrder( order );
 
-        // Fulfill order
-        final var response = orderController.orderFulfilled( order.getId() );
-        assertEquals( 200, response.getStatusCode().value() );
-        assertEquals( OrderStatus.FULFILLED, response.getBody().getStatus() );
+        mvc.perform( put( "/api/orders/" + order.getId() + "/fulfill" ).accept( MediaType.APPLICATION_JSON ) )
+                .andExpect( status().isOk() ).andExpect( jsonPath( "$.status" ).value( "FULFILLED" ) );
     }
 
     /**
-     * Tests changing the status for an order to CANCELLED.
+     * Tests cancelling an order.
+     *
+     * @throws Exception
+     *             if error
      */
     @Test
     @Transactional
     @WithMockUser ( username = "customer", roles = { "CUSTOMER" } )
     public void testOrderCancelled () throws Exception {
-        // Setup order in PLACED
         final User customer = new User();
         customer.setName( "Customer" );
         customer.setUsername( "customer" );
@@ -360,31 +483,32 @@ public class OrderControllerTest {
         item.setIngredients( ingredients );
         item = itemService.addItem( item );
 
-        OrderDto order = new OrderDto();
-        order.setCustomer( customer );
-        order.setStatus( OrderStatus.PLACED );
         final OrderLineDto orderLine = new OrderLineDto();
         orderLine.setItem( ItemMapper.mapToItem( itemService.getItemByName( "Coffee" ) ) );
         orderLine.setQuantity( 1 );
         final List<OrderLineDto> orderItems = new ArrayList<>();
         orderItems.add( orderLine );
+
+        OrderDto order = new OrderDto();
+        order.setCustomer( customer );
+        order.setStatus( OrderStatus.PLACED );
         order.setOrderItems( orderItems );
         order = orderService.createOrder( order );
 
-        // Cancel order
-        final var response = orderController.orderCancelled( order.getId() );
-        assertEquals( 200, response.getStatusCode().value() );
-        assertEquals( OrderStatus.CANCELLED, response.getBody().getStatus() );
+        mvc.perform( put( "/api/orders/" + order.getId() + "/cancel" ).accept( MediaType.APPLICATION_JSON ) )
+                .andExpect( status().isOk() ).andExpect( jsonPath( "$.status" ).value( "CANCELLED" ) );
     }
 
     /**
      * Tests listing orders by customer.
+     *
+     * @throws Exception
+     *             if error
      */
     @Test
     @Transactional
     @WithMockUser ( username = "customer", roles = { "CUSTOMER" } )
     public void testListOrdersByCustomer () throws Exception {
-        // Setup customer and two orders
         final User customer = new User();
         customer.setName( "Customer" );
         customer.setUsername( "customer" );
@@ -403,25 +527,23 @@ public class OrderControllerTest {
         item = itemService.addItem( item );
 
         for ( int i = 0; i < 2; i++ ) {
-            final OrderDto order = new OrderDto();
-            order.setCustomer( customer );
-            order.setStatus( OrderStatus.PLACED );
             final OrderLineDto orderLine = new OrderLineDto();
             orderLine.setItem( ItemMapper.mapToItem( itemService.getItemByName( "Coffee" ) ) );
             orderLine.setQuantity( 1 );
             final List<OrderLineDto> orderItems = new ArrayList<>();
             orderItems.add( orderLine );
+
+            final OrderDto order = new OrderDto();
+            order.setCustomer( customer );
+            order.setStatus( OrderStatus.PLACED );
             order.setOrderItems( orderItems );
             orderService.createOrder( order );
         }
 
-        final var response = orderController.listMyOrders();
-        assertEquals( 200, response.getStatusCode().value() );
-        assertNotNull( response.getBody() );
-        assertEquals( 2, response.getBody().size() );
-        for ( final OrderDto o : response.getBody() ) {
-            assertEquals( "customer", o.getCustomer().getUsername() );
-        }
+        mvc.perform( get( "/api/orders/myorders" ).accept( MediaType.APPLICATION_JSON ) ).andExpect( status().isOk() )
+                .andExpect( jsonPath( "$.length()" ).value( 2 ) )
+                .andExpect( jsonPath( "$[0].customer.username" ).value( "customer" ) )
+                .andExpect( jsonPath( "$[1].customer.username" ).value( "customer" ) );
     }
 }
 

@@ -93,7 +93,7 @@ public class OrderController {
     public ResponseEntity<OrderDto> updateOrder ( @PathVariable ( "id" ) final Long orderId,
             @RequestBody final OrderDto orderDto ) {
         if ( orderService.getOrderById( orderId ) == null ) {
-            return new ResponseEntity<>( orderDto, HttpStatus.NOT_FOUND );
+            return new ResponseEntity<>( HttpStatus.NOT_FOUND );
         }
         final OrderDto savedOrderDto = orderService.updateOrder( orderId, orderDto );
         return ResponseEntity.ok( savedOrderDto );
