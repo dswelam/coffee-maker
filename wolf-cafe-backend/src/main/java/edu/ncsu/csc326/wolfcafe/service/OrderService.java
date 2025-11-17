@@ -12,9 +12,10 @@ import edu.ncsu.csc326.wolfcafe.exception.ResourceNotFoundException;
  * Interface defining Order behaviors
  *
  * @author Brooke Wu (bwu25)
+ * @author Dania Swelam (dswelam)
  */
 public interface OrderService {
-	
+
     /**
      * Create and save a new order
      *
@@ -22,12 +23,12 @@ public interface OrderService {
      *            order to create
      * @return the DTO for the order including an ID
      */
-	public OrderDto createOrder(OrderDto orderDto);
+    public OrderDto createOrder ( OrderDto orderDto );
 
     /**
-     * Check if the inventory has sufficient quantity of ingredients to make the item and deducts 
+     * Check if the inventory has sufficient quantity of ingredients to make the item and deducts
      * the appropriate quantity of ingredients from the inventory to make the item if so
-     * @param inventoryDto the inventory instance 
+     * @param inventoryDto the inventory instance
      * @param itemDto the item to make
      * @return true if the item can be made, false if not
      */
@@ -41,7 +42,7 @@ public interface OrderService {
      * @return change to return to the user
      */
     public int placeOrder ( Long itemId, int tip, int payment );
-    
+
     /**
      * Get an order by its ID
      *
@@ -51,7 +52,7 @@ public interface OrderService {
      * @throws ResourceNotFoundException
      *             if the order doesn't exist
      */
-	OrderDto getOrderById(Long orderId);
+    OrderDto getOrderById ( Long orderId );
 
     /**
      * Update an order with all new fields
@@ -73,47 +74,47 @@ public interface OrderService {
     public void deleteOrder ( Long orderId );
 
     /**
-     * TODO
-     * @param status
-     * @return
+     * List orders by their status
+     * @param status the status to filter by
+     * @return list of orders with the given status
      */
     public List<OrderDto> listOrders ( OrderStatus status );
 
     /**
-     * TODO
-     * @param orderId
-     * @param staffId
-     * @return
+     * Action to prepare an order
+     * @param orderId The order to prepare by ID
+     * @param staffId The staff member preparing the order by ID
+     * @return The updated order DTO
      */
-    public OrderDto prepareOrder ( Long orderId, Long staffId );
+    public OrderDto prepareOrder ( Long orderId, String staffUsername );
 
     /**
-     * TODO
-     * @param orderId
-     * @param staffId
-     * @return
+     * Order is marked as ready for pickup
+     * @param orderId The order to mark as ready by ID
+     * @param staffUsername The staff member marking the order as ready by username
+     * @return The updated order DTO
      */
-    public OrderDto markReady ( Long orderId, Long staffId );
+    public OrderDto markReady ( Long orderId, String staffUsername );
 
     /**
-     * TODO
-     * @param orderId
-     * @return
+     * Action to mark an order as fulfilled
+     * @param orderId The order to mark as fulfilled by ID
+     * @return The updated order DTO
      */
     public OrderDto orderFulfilled ( Long orderId );
 
     /**
-     * TODO
-     * @param orderId
-     * @param byCustomer
-     * @return
+     * Action to cancel an order
+     * @param orderId The order to cancel by ID
+     * @param username The user cancelling the order by username
+     * @return The updated order DTO
      */
-    public OrderDto orderCancelled ( Long orderId, boolean byCustomer );
+    public OrderDto cancelOrder ( Long orderId );
 
     /**
-     * TODO
+     * List all orders for a given customer
      * @param customerId
-     * @return
+     * @return list of orders for a customer
      */
-    public List<OrderDto> listMyOrders ( Long customerId );
+    public List<OrderDto> getCustomersOrders ( String username );
 }
