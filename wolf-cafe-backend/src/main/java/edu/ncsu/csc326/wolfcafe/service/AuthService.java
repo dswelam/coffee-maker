@@ -13,6 +13,8 @@ import edu.ncsu.csc326.wolfcafe.entity.Role;
 
 /**
  * Authorization service
+ *
+ * @author Dania Swelam
  */
 public interface AuthService {
     /**
@@ -23,13 +25,20 @@ public interface AuthService {
      * @return message for success or failure
      */
     String register ( RegisterDto registerDto );
-    
+
     /**
      * Creates the given user (can be of any role), can be used by admin only
      * @param userDto new user information
      * @return response with created user
      */
-    UserDto createUser(UserDto userDto);
+    UserDto createUser ( UserDto userDto );
+
+    /**
+     * Updates the given user information
+     * @param userDto updated user information
+     * @return response with updated user
+     */
+    UserDto updateUser ( Long id, UserDto userDto );
 
     /**
      * Logins in the given user
@@ -47,18 +56,18 @@ public interface AuthService {
      *            id of user to delete
      */
     void deleteUserById ( Long id );
-    
+
     /**
      * Returns the current tax rate of the system
      * @return current tax rate as an double (2.00 = 2.00%)
      */
-    double getTaxRate();
-    
+    double getTaxRate ();
+
     /**
      * Sets the current tax rate of the system
      * @param taxRate the tax rate to set
      */
-    void setTaxRate(TaxDto taxRate);
+    void setTaxRate ( TaxDto taxRate );
 
     /**
      * assigns permissions to the role
@@ -71,14 +80,14 @@ public interface AuthService {
      */
     Role assignPermissions ( String roleName, Collection<Permission> permissions );
 
-	/**
-	 * Creates the tax rate.
-	 *
-	 * @param taxDto
-	 *            tax rate to create
-	 * @return updated tax rate after creation
-	 */
-	TaxDto createTax(TaxDto taxDto);
+    /**
+     * Creates the tax rate.
+     *
+     * @param taxDto
+     *            tax rate to create
+     * @return updated tax rate after creation
+     */
+    TaxDto createTax ( TaxDto taxDto );
 
     /**
      *

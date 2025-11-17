@@ -17,11 +17,10 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import edu.ncsu.csc326.wolfcafe.dto.IngredientDto;
 import edu.ncsu.csc326.wolfcafe.dto.JwtAuthResponse;
 import edu.ncsu.csc326.wolfcafe.dto.LoginDto;
-import edu.ncsu.csc326.wolfcafe.dto.TaxDto;
 import edu.ncsu.csc326.wolfcafe.dto.RegisterDto;
+import edu.ncsu.csc326.wolfcafe.dto.TaxDto;
 import edu.ncsu.csc326.wolfcafe.dto.UserDto;
 import edu.ncsu.csc326.wolfcafe.entity.Permission;
 import edu.ncsu.csc326.wolfcafe.entity.Role;
@@ -31,6 +30,8 @@ import lombok.AllArgsConstructor;
 
 /**
  * Controller for authentication functionality.
+ *
+ * @author Dania Swelam
  */
 @CrossOrigin ( "*" )
 @RestController
@@ -39,7 +40,7 @@ import lombok.AllArgsConstructor;
 public class AuthController {
 
     /** Link to AuthService */
-	@Autowired
+    @Autowired
     private final AuthService authService;
 
     /**
@@ -54,15 +55,26 @@ public class AuthController {
         final String response = authService.register( registerDto );
         return new ResponseEntity<>( response, HttpStatus.CREATED );
     }
-    
+
     /** Registers a new user of any role with the system.
-     * 
+     *
      */
     @PreAuthorize ( "hasRole('ADMIN')" )
-    @PostMapping("/users")
-    public ResponseEntity<UserDto> createUser(@RequestBody final UserDto userDto) {
-    		final UserDto savedUserDto = authService.createUser( userDto );
+    @PostMapping ( "/users" )
+    public ResponseEntity<UserDto> createUser ( @RequestBody final UserDto userDto ) {
+        final UserDto savedUserDto = authService.createUser( userDto );
         return new ResponseEntity<>( savedUserDto, HttpStatus.CREATED );
+    }
+
+    /**
+     * Updates an existing user of any role with the system.
+     */
+    @PreAuthorize ( "hasRole('ADMIN')" )
+    @PutMapping ( "/users/{id}" )
+    public ResponseEntity<UserDto> updateUser ( @PathVariable ( "id" ) final Long id,
+            @RequestBody final UserDto userDto ) {
+        final UserDto updatedUserDto = authService.updateUser( id, userDto );
+        return new ResponseEntity<>( updatedUserDto, HttpStatus.OK );
     }
 
     /**
@@ -116,14 +128,14 @@ public class AuthController {
             return ResponseEntity.status( HttpStatus.NOT_FOUND ).body( e.getMessage() );
         }
     }
-    
+
     /**
      * Returns the current tax rate set in the system
      * @return current tax rate as an integer
      */
-    @GetMapping("/tax")
-    public ResponseEntity<Double> getTaxRate() {
-    		return ResponseEntity.ok(authService.getTaxRate());
+    @GetMapping ( "/tax" )
+    public ResponseEntity<Double> getTaxRate () {
+        return ResponseEntity.ok( authService.getTaxRate() );
     }
 
     /**
@@ -131,9 +143,9 @@ public class AuthController {
      * @param taxDto the tax rate containing the current amount to set
      */
     @PreAuthorize ( "hasRole('ADMIN')" )
-    @PutMapping("/tax")
-    public void setTaxRate(@RequestBody final TaxDto taxDto) {
-    		authService.setTaxRate(taxDto);
+    @PutMapping ( "/tax" )
+    public void setTaxRate ( @RequestBody final TaxDto taxDto ) {
+        authService.setTaxRate( taxDto );
     }
 
     /**
