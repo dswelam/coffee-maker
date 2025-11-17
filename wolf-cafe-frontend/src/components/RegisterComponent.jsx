@@ -11,16 +11,6 @@ const RegisterComponent = () => {
 	const [errorMessage, setErrorMessage] = useState('')
 
 
-	useEffect(() => {
-		// prevent scrolling
-		document.body.style.overflow = 'hidden'
-
-		// cleanup when component unmounts
-		return () => {
-			document.body.style.overflow = 'auto'
-		}
-	}, [])
-
 	function handleRegistrationForm(e) {
 		e.preventDefault();
 
@@ -42,7 +32,7 @@ const RegisterComponent = () => {
 		>
 			<div
 				className='card shadow-lg p-5'
-				style={{ width: '45rem', transform: 'scale(1)', backgroundColor: '#fff', borderRadius: '1rem' }}
+				style={{ width: '45rem', transform: 'scale(0.9)', backgroundColor: '#fff', borderRadius: '1rem' }}
 			>
 				<div className='card-header text-center border-0 mb-3 bg-white'>
 					<h2 className='fw-bold mb-0 text-dark'>Create Account</h2>
@@ -94,6 +84,12 @@ const RegisterComponent = () => {
 							/>
 						</div>
 
+						{errorMessage && (
+							<div className='alert alert-danger mt-4 text-center fs-5 py-3'>
+								{errorMessage}
+							</div>
+						)}
+						
 						<div className='text-center'>
 							<button
 								className='btn btn-danger btn-lg w-100 fw-bold'
@@ -103,17 +99,8 @@ const RegisterComponent = () => {
 								Register
 							</button>
 						</div>
-						{errorMessage && (
-							<div className='alert alert-danger mt-4 text-center fs-5 py-3'>
-								{errorMessage}
-							</div>
-						)}
 					</form>
 				</div>
-			</div>
-
-			<div style={{ position: 'absolute', bottom: '1rem', width: '100%', textAlign: 'center' }}>
-				<span>WolfCafe © 2025</span>
 			</div>
 		</div>
 	)

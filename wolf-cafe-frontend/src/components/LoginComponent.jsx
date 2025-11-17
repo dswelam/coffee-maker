@@ -60,9 +60,9 @@ const LoginComponent = () => {
 
 	return (
 		<div
-			className='d-flex justify-content-center align-items-center vh-100' style={{ paddingTop: '5px' }}
+			className='d-flex justify-content-center align-items-center vh-50'
 		>
-			<div className='card shadow-lg p-5' style={{ width: '45rem', transform: 'scale(1.1)', backgroundColor: '#fff', borderRadius: '1rem' }}>
+			<div className='card shadow-lg p-5' style={{ width: '45rem', transform: 'scale(0.9)', backgroundColor: '#fff', borderRadius: '1rem' }}>
 				<div className='card-header text-center border-0 mb-3 bg-white'>
 					<h2 className='fw-bold mb-0 text-dark'>Welcome</h2>
 					<p className='text-secondary mt-2'>Sign in to continue</p>
@@ -112,9 +112,7 @@ const LoginComponent = () => {
 					</form>
 				</div>
 			</div>
-			<div style={{ position: 'absolute', bottom: '1rem', width: '100%', textAlign: 'center' }}>
-				<span>WolfCafe © 2025</span>
-			</div>
+
 		</div>
 	)
 }
