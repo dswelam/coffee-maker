@@ -1,7 +1,7 @@
 package edu.ncsu.csc326.wolfcafe.controller;
 
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
@@ -50,6 +50,7 @@ import edu.ncsu.csc326.wolfcafe.service.AuthService;
  *
  * @author Diya Patel
  * @author Brooke Wu
+ * @author Dania Swelam
  */
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -74,7 +75,7 @@ public class AuthControllerTest {
     /** the role repository instance */
     @Autowired
     private RoleRepository            roleRepository;
-    
+
     /** the user repository instance */
     @Autowired
     private UserRepository            userRepository;
@@ -143,32 +144,32 @@ public class AuthControllerTest {
                 .andExpect( jsonPath( "$.tokenType" ).value( "Bearer" ) )
                 .andExpect( jsonPath( "$.role" ).value( "ROLE_CUSTOMER" ) );
     }
-    
+
     /**
      * Tests creating a staff and barista user (as an admin user) and logging in as the created users.
-     * 
+     *
      * @throws Exception
      * 				if error
      */
     @Test
     @Transactional
     @WithMockUser ( username = "admin", roles = "ADMIN" )
-    public void testCreateStaffBaristaAndLogin() throws Exception {
-    		// Create a barista user
-		final UserDto baristaUser = new UserDto();
-		baristaUser.setName("Barry");
-		baristaUser.setUsername("barista");
-		baristaUser.setEmail("barry@wolfcafe.com");
-		baristaUser.setPassword("abc123");
-		Collection<Role> baristaRoles = new ArrayList<Role>();
-		baristaRoles.add(roleRepository.findByName("ROLE_BARISTA"));
-		baristaUser.setRoles(baristaRoles);
-		
-	    Mockito.when( authService.createUser(ArgumentMatchers.any() ) ).thenReturn(baristaUser);
+    public void testCreateStaffBaristaAndLogin () throws Exception {
+        // Create a barista user
+        final UserDto baristaUser = new UserDto();
+        baristaUser.setName( "Barry" );
+        baristaUser.setUsername( "barista" );
+        baristaUser.setEmail( "barry@wolfcafe.com" );
+        baristaUser.setPassword( "abc123" );
+        final Collection<Role> baristaRoles = new ArrayList<Role>();
+        baristaRoles.add( roleRepository.findByName( "ROLE_BARISTA" ) );
+        baristaUser.setRoles( baristaRoles );
+
+        Mockito.when( authService.createUser( ArgumentMatchers.any() ) ).thenReturn( baristaUser );
 
         mvc.perform( post( "/api/auth/users" ).contentType( MediaType.APPLICATION_JSON )
                 .content( TestUtils.asJsonString( baristaUser ) ) ).andExpect( status().isCreated() );
-        
+
         // Log in as the barista user
         LoginDto loginDto = new LoginDto( baristaUser.getUsername(), baristaUser.getPassword() );
 
@@ -179,22 +180,22 @@ public class AuthControllerTest {
                 .content( TestUtils.asJsonString( loginDto ) ) ).andExpect( status().isOk() )
                 .andExpect( jsonPath( "$.tokenType" ).value( "Bearer" ) )
                 .andExpect( jsonPath( "$.role" ).value( "ROLE_BARISTA" ) );
-        
+
         // Create a staff user
-		final UserDto staffUser = new UserDto();
-		staffUser.setName("Stephanie");
-		staffUser.setUsername("staff");
-		staffUser.setEmail("stephanie@wolfcafe.com");
-		staffUser.setPassword("xyz789");
-		Collection<Role> staffRoles = new ArrayList<Role>();
-		staffRoles.add(roleRepository.findByName("ROLE_STAFF"));
-		staffUser.setRoles(staffRoles);
-		
-	    Mockito.when( authService.createUser(ArgumentMatchers.any() ) ).thenReturn(staffUser);
+        final UserDto staffUser = new UserDto();
+        staffUser.setName( "Stephanie" );
+        staffUser.setUsername( "staff" );
+        staffUser.setEmail( "stephanie@wolfcafe.com" );
+        staffUser.setPassword( "xyz789" );
+        final Collection<Role> staffRoles = new ArrayList<Role>();
+        staffRoles.add( roleRepository.findByName( "ROLE_STAFF" ) );
+        staffUser.setRoles( staffRoles );
+
+        Mockito.when( authService.createUser( ArgumentMatchers.any() ) ).thenReturn( staffUser );
 
         mvc.perform( post( "/api/auth/users" ).contentType( MediaType.APPLICATION_JSON )
                 .content( TestUtils.asJsonString( baristaUser ) ) ).andExpect( status().isCreated() );
-        
+
         // Log in as the staff user
         loginDto = new LoginDto( staffUser.getUsername(), staffUser.getPassword() );
 
@@ -204,9 +205,9 @@ public class AuthControllerTest {
         mvc.perform( post( "/api/auth/login" ).contentType( MediaType.APPLICATION_JSON )
                 .content( TestUtils.asJsonString( loginDto ) ) ).andExpect( status().isOk() )
                 .andExpect( jsonPath( "$.tokenType" ).value( "Bearer" ) )
-                .andExpect( jsonPath( "$.role" ).value( "ROLE_STAFF" ) );        
+                .andExpect( jsonPath( "$.role" ).value( "ROLE_STAFF" ) );
     }
-    
+
     /**
      * Tests attempting to access the createUser() API endpoint when logged in as a user who doesn't have the admin role
      * @throws Exception
@@ -215,23 +216,23 @@ public class AuthControllerTest {
     @Test
     @Transactional
     @WithMockUser ( username = "admin", roles = "STAFF" )
-    public void testCreateUserAsNonAdminRole() throws Exception {
-		// Create a barista user
-		final UserDto baristaUser = new UserDto();
-		baristaUser.setName("Barry");
-		baristaUser.setUsername("barista");
-		baristaUser.setEmail("barry@wolfcafe.com");
-		baristaUser.setPassword("abc123");
-		Collection<Role> baristaRoles = new ArrayList<Role>();
-		baristaRoles.add(roleRepository.findByName("ROLE_BARISTA"));
-		baristaUser.setRoles(baristaRoles);
-		
-	    Mockito.when( authService.createUser(ArgumentMatchers.any() ) ).thenReturn(baristaUser);
-	
-	    mvc.perform( post( "/api/auth/users" ).contentType( MediaType.APPLICATION_JSON )
-	            .content( TestUtils.asJsonString( baristaUser ) ) ).andExpect( status().isForbidden() );
-	    
-	    assertTrue(userRepository.findByUsername(baristaUser.getUsername()).isEmpty());
+    public void testCreateUserAsNonAdminRole () throws Exception {
+        // Create a barista user
+        final UserDto baristaUser = new UserDto();
+        baristaUser.setName( "Barry" );
+        baristaUser.setUsername( "barista" );
+        baristaUser.setEmail( "barry@wolfcafe.com" );
+        baristaUser.setPassword( "abc123" );
+        final Collection<Role> baristaRoles = new ArrayList<Role>();
+        baristaRoles.add( roleRepository.findByName( "ROLE_BARISTA" ) );
+        baristaUser.setRoles( baristaRoles );
+
+        Mockito.when( authService.createUser( ArgumentMatchers.any() ) ).thenReturn( baristaUser );
+
+        mvc.perform( post( "/api/auth/users" ).contentType( MediaType.APPLICATION_JSON )
+                .content( TestUtils.asJsonString( baristaUser ) ) ).andExpect( status().isForbidden() );
+
+        assertTrue( userRepository.findByUsername( baristaUser.getUsername() ).isEmpty() );
     }
 
     /**
@@ -303,17 +304,17 @@ public class AuthControllerTest {
         mvc.perform( put( "/api/auth/roles/ROLE_STAFF/permissions" ).contentType( MediaType.APPLICATION_JSON )
                 .content( json ) ).andExpect( status().isForbidden() );
     }
-    
+
     /**
      * Tests setting the tax rate
-     * @throws Exception 
+     * @throws Exception
      */
     @Test
-    @WithMockUser(username = "admin", roles = "ADMIN")
-    public void testSetTaxRate() throws Exception {
-    		MvcResult result = mvc.perform( get( "/api/auth/tax" ) ).andExpect( status().isOk() ).andReturn();
-    		assertEquals(Double.toString(authService.getTaxRate()), result.getResponse().getContentAsString());
-    		
+    @WithMockUser ( username = "admin", roles = "ADMIN" )
+    public void testSetTaxRate () throws Exception {
+        final MvcResult result = mvc.perform( get( "/api/auth/tax" ) ).andExpect( status().isOk() ).andReturn();
+        assertEquals( Double.toString( authService.getTaxRate() ), result.getResponse().getContentAsString() );
+
         final TaxDto updatedTax = new TaxDto( 5 );
         mvc.perform( put( "/api/auth/tax" ).contentType( MediaType.APPLICATION_JSON )
                 .content( TestUtils.asJsonString( updatedTax ) ).accept( MediaType.APPLICATION_JSON ) )
@@ -336,4 +337,29 @@ public class AuthControllerTest {
                 .andExpect( jsonPath( "$[1].username" ).value( "staff" ) );
     }
 
+    /**
+     * Tests the updateUser() API endpoint
+     */
+    @Test
+    @WithMockUser ( username = "admin", roles = "ADMIN" )
+    public void testUpdateUser () throws Exception {
+        // Arrange
+        final Long userId = 1L;
+        final UserDto userDto = new UserDto();
+        userDto.setName( "Updated Name" );
+        userDto.setUsername( "updateduser" );
+        userDto.setEmail( "updated@email.com" );
+        userDto.setPassword( "newpassword" );
+        userDto.setRoles( new ArrayList<>( roleRepository.findAll() ) );
+
+        Mockito.when( authService.updateUser( Mockito.eq( userId ), Mockito.any( UserDto.class ) ) )
+                .thenReturn( userDto );
+
+        // Act & Assert
+        mvc.perform( put( "/api/auth/users/{id}", userId ).contentType( MediaType.APPLICATION_JSON )
+                .content( TestUtils.asJsonString( userDto ) ) ).andExpect( status().isOk() )
+                .andExpect( jsonPath( "$.name" ).value( "Updated Name" ) )
+                .andExpect( jsonPath( "$.username" ).value( "updateduser" ) )
+                .andExpect( jsonPath( "$.email" ).value( "updated@email.com" ) );
+    }
 }
