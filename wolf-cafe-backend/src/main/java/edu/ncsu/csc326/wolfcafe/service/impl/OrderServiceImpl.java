@@ -6,16 +6,13 @@ import java.util.Map.Entry;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import edu.ncsu.csc326.wolfcafe.dto.IngredientDto;
 import edu.ncsu.csc326.wolfcafe.dto.InventoryDto;
 import edu.ncsu.csc326.wolfcafe.dto.ItemDto;
 import edu.ncsu.csc326.wolfcafe.dto.OrderDto;
 import edu.ncsu.csc326.wolfcafe.dto.OrderLineDto;
-import edu.ncsu.csc326.wolfcafe.entity.Ingredient;
 import edu.ncsu.csc326.wolfcafe.entity.Order;
 import edu.ncsu.csc326.wolfcafe.entity.Order.OrderStatus;
 import edu.ncsu.csc326.wolfcafe.exception.ResourceNotFoundException;
-import edu.ncsu.csc326.wolfcafe.mapper.IngredientMapper;
 import edu.ncsu.csc326.wolfcafe.mapper.ItemMapper;
 import edu.ncsu.csc326.wolfcafe.mapper.OrderMapper;
 import edu.ncsu.csc326.wolfcafe.repository.OrderRepository;
@@ -43,12 +40,16 @@ public class OrderServiceImpl implements OrderService {
 		InventoryDto inventory = inventoryService.getInventory();
 		
 		// Before creating the order, need to check if the inventory has sufficient ingredients to make the items on the order
-		for (OrderLineDto orderLine : orderDto.getOrderItems()) {
+		List<OrderLineDto> orderItems = orderDto.getOrderItems();
+		for (OrderLineDto orderLine : orderItems) {
 			ItemDto item = ItemMapper.mapToItemDto(orderLine.getItem());
-			if (!placeOrder(inventory, item)) {
+			if (!checkInventory(inventory, item)) {
 				// TODO: How to handle not being able to create this specific item on the order?
+				// For now, just remove it from orderItems silently (without throwing an Exception)
+				orderItems.remove(orderLine);
 			}
 		}
+		orderDto.setOrderItems(orderItems);
 		
 		// Save the order to the database
 		Order order = OrderMapper.mapToOrder( orderDto );
@@ -57,7 +58,7 @@ public class OrderServiceImpl implements OrderService {
 	}
 
 	@Override
-	public boolean placeOrder(InventoryDto inventoryDto, ItemDto itemDto) {
+	public boolean checkInventory(InventoryDto inventoryDto, ItemDto itemDto) {
 		InventoryDto updatedInventory = inventoryDto;
 		
 		// First, loop through each ingredient needed for the item

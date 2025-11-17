@@ -25,14 +25,13 @@ public interface OrderService {
 	public OrderDto createOrder(OrderDto orderDto);
 
     /**
-     * TODO: Would it be better to name this method something like "checkInventory" instead?
      * Check if the inventory has sufficient quantity of ingredients to make the item and deducts 
      * the appropriate quantity of ingredients from the inventory to make the item if so
      * @param inventoryDto the inventory instance 
      * @param itemDto the item to make
      * @return true if the item can be made, false if not
      */
-    public boolean placeOrder ( InventoryDto inventoryDto, ItemDto itemDto );
+    public boolean checkInventory ( InventoryDto inventoryDto, ItemDto itemDto );
 
     /**
      * Checks that the payment is sufficient and calculates the change

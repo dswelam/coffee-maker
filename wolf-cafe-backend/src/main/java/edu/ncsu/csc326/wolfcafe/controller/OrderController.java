@@ -15,7 +15,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import edu.ncsu.csc326.wolfcafe.dto.IngredientDto;
 import edu.ncsu.csc326.wolfcafe.dto.ItemDto;
 import edu.ncsu.csc326.wolfcafe.dto.OrderDto;
 import edu.ncsu.csc326.wolfcafe.service.OrderService;
@@ -59,7 +58,6 @@ public class OrderController {
     }
 
     /**
-     * TODO: Why are only the STAFF and ADMIN roles allowed to access this endpoint?
      * REST API method to provide POST access to the Order model.
      *
      * @param orderDto
@@ -67,7 +65,7 @@ public class OrderController {
      * @return ResponseEntity indicating success if the Order could be
      *         saved to the inventory, or an error if it could not be
      */
-    @PreAuthorize ( "hasAnyRole('STAFF', 'ADMIN')" )
+    @PreAuthorize ( "hasAnyRole('STAFF', 'ADMIN', 'CUSTOMER', 'ANONYMOUS')" )
     @PostMapping
     public ResponseEntity<OrderDto> createOrder ( @RequestBody final OrderDto orderDto ) {
         final OrderDto savedOrderDto = orderService.createOrder( orderDto );

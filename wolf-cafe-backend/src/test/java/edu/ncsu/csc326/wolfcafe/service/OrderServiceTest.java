@@ -164,16 +164,6 @@ public class OrderServiceTest {
 
     /**
      * Test method for
-     * {@link edu.ncsu.csc326.coffee_maker.services.OrderService#isDuplicateName(java.lang.String)}.
-     */
-    @Test
-    @Transactional
-    void testIsDuplicateName () {
-    		// TODO
-    }
-
-    /**
-     * Test method for
      * {@link edu.ncsu.csc326.coffee_maker.services.OrderService#getAllOrders()}.
      */
     @Test
