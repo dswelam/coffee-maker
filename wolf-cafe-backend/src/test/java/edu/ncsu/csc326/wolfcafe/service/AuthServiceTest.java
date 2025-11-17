@@ -22,6 +22,7 @@ import edu.ncsu.csc326.wolfcafe.dto.LoginDto;
 import edu.ncsu.csc326.wolfcafe.dto.RegisterDto;
 import edu.ncsu.csc326.wolfcafe.dto.TaxDto;
 import edu.ncsu.csc326.wolfcafe.dto.UserDto;
+import edu.ncsu.csc326.wolfcafe.entity.Order;
 import edu.ncsu.csc326.wolfcafe.entity.Order.OrderStatus;
 import edu.ncsu.csc326.wolfcafe.entity.Permission;
 import edu.ncsu.csc326.wolfcafe.entity.Role;
@@ -331,7 +332,7 @@ public class AuthServiceTest {
         final User staffEntity = userRepository.findById( staffId ).get();
 
         // 3. Create a valid IN_PROGRESS order tied to BOTH
-        final edu.ncsu.csc326.wolfcafe.entity.Order order = new edu.ncsu.csc326.wolfcafe.entity.Order();
+        final Order order = new Order();
 
         order.setCustomer( customer ); // must NOT be null
         order.setPreparedBy( staffEntity ); // must NOT be null
@@ -379,19 +380,18 @@ public class AuthServiceTest {
         final User staffEntity = userRepository.findById( staffId ).get();
 
         // 3. Create valid ORDER for customer
-        final edu.ncsu.csc326.wolfcafe.entity.Order order = new edu.ncsu.csc326.wolfcafe.entity.Order();
+        final Order order = new Order();
 
         order.setCustomer( customerEntity ); // required: cannot be null
         order.setPreparedBy( staffEntity ); // required: cannot be null
-        order.setStatus( edu.ncsu.csc326.wolfcafe.entity.Order.OrderStatus.PLACED );
+        order.setStatus( OrderStatus.PLACED );
 
         entityManager.persist( order );
         entityManager.flush();
 
         // 4. Verify order exists
-        final List<edu.ncsu.csc326.wolfcafe.entity.Order> ordersBefore = entityManager
-                .createQuery( "SELECT o FROM Order o WHERE o.customer.id = :id",
-                        edu.ncsu.csc326.wolfcafe.entity.Order.class )
+        final List<Order> ordersBefore = entityManager
+                .createQuery( "SELECT o FROM Order o WHERE o.customer.id = :id", Order.class )
                 .setParameter( "id", custId ).getResultList();
 
         assertEquals( 1, ordersBefore.size() );
@@ -399,9 +399,8 @@ public class AuthServiceTest {
         // 5. Delete customer → cascade delete orders
         authService.deleteUserById( custId );
 
-        final List<edu.ncsu.csc326.wolfcafe.entity.Order> ordersAfter = entityManager
-                .createQuery( "SELECT o FROM Order o WHERE o.customer.id = :id",
-                        edu.ncsu.csc326.wolfcafe.entity.Order.class )
+        final List<Order> ordersAfter = entityManager
+                .createQuery( "SELECT o FROM Order o WHERE o.customer.id = :id", Order.class )
                 .setParameter( "id", custId ).getResultList();
 
         assertEquals( 0, ordersAfter.size() );
