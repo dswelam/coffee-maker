@@ -1,7 +1,7 @@
 package edu.ncsu.csc326.wolfcafe.controller;
 
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
@@ -23,6 +23,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
@@ -74,7 +75,7 @@ public class AuthControllerTest {
     /** the role repository instance */
     @Autowired
     private RoleRepository            roleRepository;
-    
+
     /** the user repository instance */
     @Autowired
     private UserRepository            userRepository;
@@ -143,32 +144,33 @@ public class AuthControllerTest {
                 .andExpect( jsonPath( "$.tokenType" ).value( "Bearer" ) )
                 .andExpect( jsonPath( "$.role" ).value( "ROLE_CUSTOMER" ) );
     }
-    
+
     /**
-     * Tests creating a staff and barista user (as an admin user) and logging in as the created users.
-     * 
+     * Tests creating a staff and barista user (as an admin user) and logging in
+     * as the created users.
+     *
      * @throws Exception
-     * 				if error
+     *             if error
      */
     @Test
     @Transactional
     @WithMockUser ( username = "admin", roles = "ADMIN" )
-    public void testCreateStaffBaristaAndLogin() throws Exception {
-    		// Create a barista user
-		final UserDto baristaUser = new UserDto();
-		baristaUser.setName("Barry");
-		baristaUser.setUsername("barista");
-		baristaUser.setEmail("barry@wolfcafe.com");
-		baristaUser.setPassword("abc123");
-		Collection<Role> baristaRoles = new ArrayList<Role>();
-		baristaRoles.add(roleRepository.findByName("ROLE_BARISTA"));
-		baristaUser.setRoles(baristaRoles);
-		
-	    Mockito.when( authService.createUser(ArgumentMatchers.any() ) ).thenReturn(baristaUser);
+    public void testCreateStaffBaristaAndLogin () throws Exception {
+        // Create a barista user
+        final UserDto baristaUser = new UserDto();
+        baristaUser.setName( "Barry" );
+        baristaUser.setUsername( "barista" );
+        baristaUser.setEmail( "barry@wolfcafe.com" );
+        baristaUser.setPassword( "abc123" );
+        final Collection<Role> baristaRoles = new ArrayList<Role>();
+        baristaRoles.add( roleRepository.findByName( "ROLE_BARISTA" ) );
+        baristaUser.setRoles( baristaRoles );
+
+        Mockito.when( authService.createUser( ArgumentMatchers.any() ) ).thenReturn( baristaUser );
 
         mvc.perform( post( "/api/auth/users" ).contentType( MediaType.APPLICATION_JSON )
                 .content( TestUtils.asJsonString( baristaUser ) ) ).andExpect( status().isCreated() );
-        
+
         // Log in as the barista user
         LoginDto loginDto = new LoginDto( baristaUser.getUsername(), baristaUser.getPassword() );
 
@@ -179,22 +181,22 @@ public class AuthControllerTest {
                 .content( TestUtils.asJsonString( loginDto ) ) ).andExpect( status().isOk() )
                 .andExpect( jsonPath( "$.tokenType" ).value( "Bearer" ) )
                 .andExpect( jsonPath( "$.role" ).value( "ROLE_BARISTA" ) );
-        
+
         // Create a staff user
-		final UserDto staffUser = new UserDto();
-		staffUser.setName("Stephanie");
-		staffUser.setUsername("staff");
-		staffUser.setEmail("stephanie@wolfcafe.com");
-		staffUser.setPassword("xyz789");
-		Collection<Role> staffRoles = new ArrayList<Role>();
-		staffRoles.add(roleRepository.findByName("ROLE_STAFF"));
-		staffUser.setRoles(staffRoles);
-		
-	    Mockito.when( authService.createUser(ArgumentMatchers.any() ) ).thenReturn(staffUser);
+        final UserDto staffUser = new UserDto();
+        staffUser.setName( "Stephanie" );
+        staffUser.setUsername( "staff" );
+        staffUser.setEmail( "stephanie@wolfcafe.com" );
+        staffUser.setPassword( "xyz789" );
+        final Collection<Role> staffRoles = new ArrayList<Role>();
+        staffRoles.add( roleRepository.findByName( "ROLE_STAFF" ) );
+        staffUser.setRoles( staffRoles );
+
+        Mockito.when( authService.createUser( ArgumentMatchers.any() ) ).thenReturn( staffUser );
 
         mvc.perform( post( "/api/auth/users" ).contentType( MediaType.APPLICATION_JSON )
                 .content( TestUtils.asJsonString( baristaUser ) ) ).andExpect( status().isCreated() );
-        
+
         // Log in as the staff user
         loginDto = new LoginDto( staffUser.getUsername(), staffUser.getPassword() );
 
@@ -204,34 +206,36 @@ public class AuthControllerTest {
         mvc.perform( post( "/api/auth/login" ).contentType( MediaType.APPLICATION_JSON )
                 .content( TestUtils.asJsonString( loginDto ) ) ).andExpect( status().isOk() )
                 .andExpect( jsonPath( "$.tokenType" ).value( "Bearer" ) )
-                .andExpect( jsonPath( "$.role" ).value( "ROLE_STAFF" ) );        
+                .andExpect( jsonPath( "$.role" ).value( "ROLE_STAFF" ) );
     }
-    
+
     /**
-     * Tests attempting to access the createUser() API endpoint when logged in as a user who doesn't have the admin role
+     * Tests attempting to access the createUser() API endpoint when logged in
+     * as a user who doesn't have the admin role
+     *
      * @throws Exception
-     * 				if error
+     *             if error
      */
     @Test
     @Transactional
     @WithMockUser ( username = "admin", roles = "STAFF" )
-    public void testCreateUserAsNonAdminRole() throws Exception {
-		// Create a barista user
-		final UserDto baristaUser = new UserDto();
-		baristaUser.setName("Barry");
-		baristaUser.setUsername("barista");
-		baristaUser.setEmail("barry@wolfcafe.com");
-		baristaUser.setPassword("abc123");
-		Collection<Role> baristaRoles = new ArrayList<Role>();
-		baristaRoles.add(roleRepository.findByName("ROLE_BARISTA"));
-		baristaUser.setRoles(baristaRoles);
-		
-	    Mockito.when( authService.createUser(ArgumentMatchers.any() ) ).thenReturn(baristaUser);
-	
-	    mvc.perform( post( "/api/auth/users" ).contentType( MediaType.APPLICATION_JSON )
-	            .content( TestUtils.asJsonString( baristaUser ) ) ).andExpect( status().isForbidden() );
-	    
-	    assertTrue(userRepository.findByUsername(baristaUser.getUsername()).isEmpty());
+    public void testCreateUserAsNonAdminRole () throws Exception {
+        // Create a barista user
+        final UserDto baristaUser = new UserDto();
+        baristaUser.setName( "Barry" );
+        baristaUser.setUsername( "barista" );
+        baristaUser.setEmail( "barry@wolfcafe.com" );
+        baristaUser.setPassword( "abc123" );
+        final Collection<Role> baristaRoles = new ArrayList<Role>();
+        baristaRoles.add( roleRepository.findByName( "ROLE_BARISTA" ) );
+        baristaUser.setRoles( baristaRoles );
+
+        Mockito.when( authService.createUser( ArgumentMatchers.any() ) ).thenReturn( baristaUser );
+
+        mvc.perform( post( "/api/auth/users" ).contentType( MediaType.APPLICATION_JSON )
+                .content( TestUtils.asJsonString( baristaUser ) ) ).andExpect( status().isForbidden() );
+
+        assertTrue( userRepository.findByUsername( baristaUser.getUsername() ).isEmpty() );
     }
 
     /**
@@ -303,17 +307,18 @@ public class AuthControllerTest {
         mvc.perform( put( "/api/auth/roles/ROLE_STAFF/permissions" ).contentType( MediaType.APPLICATION_JSON )
                 .content( json ) ).andExpect( status().isForbidden() );
     }
-    
+
     /**
      * Tests setting the tax rate
-     * @throws Exception 
+     *
+     * @throws Exception
      */
     @Test
-    @WithMockUser(username = "admin", roles = "ADMIN")
-    public void testSetTaxRate() throws Exception {
-    		MvcResult result = mvc.perform( get( "/api/auth/tax" ) ).andExpect( status().isOk() ).andReturn();
-    		assertEquals(Double.toString(authService.getTaxRate()), result.getResponse().getContentAsString());
-    		
+    @WithMockUser ( username = "admin", roles = "ADMIN" )
+    public void testSetTaxRate () throws Exception {
+        final MvcResult result = mvc.perform( get( "/api/auth/tax" ) ).andExpect( status().isOk() ).andReturn();
+        assertEquals( Double.toString( authService.getTaxRate() ), result.getResponse().getContentAsString() );
+
         final TaxDto updatedTax = new TaxDto( 5 );
         mvc.perform( put( "/api/auth/tax" ).contentType( MediaType.APPLICATION_JSON )
                 .content( TestUtils.asJsonString( updatedTax ) ).accept( MediaType.APPLICATION_JSON ) )
@@ -334,6 +339,95 @@ public class AuthControllerTest {
         mvc.perform( get( "/api/auth/users" ) ).andExpect( status().isOk() )
                 .andExpect( jsonPath( "$[0].username" ).value( "admin" ) )
                 .andExpect( jsonPath( "$[1].username" ).value( "staff" ) );
+    }
+
+    /**
+     * Tests successfully deleting multiple users in UC10.
+     */
+    @Test
+    @Transactional
+    @WithMockUser ( username = "admin", roles = "ADMIN" )
+    public void testBulkDeleteUsersSuccess () throws Exception {
+
+        Mockito.doNothing().when( authService ).deleteUserById( 1L );
+        Mockito.doNothing().when( authService ).deleteUserById( 2L );
+
+        final List<Long> ids = List.of( 1L, 2L );
+
+        mvc.perform( post( "/api/auth/users/delete" ).contentType( MediaType.APPLICATION_JSON )
+                .content( TestUtils.asJsonString( ids ) ) ).andExpect( status().isOk() )
+                .andExpect( content().string( "Selected users deleted successfully." ) );
+    }
+
+    /**
+     * Tests that non-admin users cannot bulk delete users.
+     */
+    @Test
+    @Transactional
+    @WithMockUser ( username = "staff", roles = "STAFF" )
+    public void testBulkDeleteUsersForbidden () throws Exception {
+
+        final List<Long> ids = List.of( 1L, 2L );
+
+        mvc.perform( post( "/api/auth/users/delete" ).contentType( MediaType.APPLICATION_JSON )
+                .content( TestUtils.asJsonString( ids ) ) ).andExpect( status().isForbidden() );
+    }
+
+    /**
+     * Tests bulk delete where deleteUserById throws a self-delete error.
+     */
+    @Test
+    @Transactional
+    @WithMockUser ( username = "admin", roles = "ADMIN" )
+    public void testBulkDeleteCannotDeleteSelf () throws Exception {
+
+        final List<Long> ids = List.of( 99L ); // arbitrary id
+
+        Mockito.doThrow( new edu.ncsu.csc326.wolfcafe.exception.WolfCafeAPIException( HttpStatus.BAD_REQUEST,
+                "You cannot delete your own account." ) ).when( authService ).deleteUserById( 99L );
+
+        mvc.perform( post( "/api/auth/users/delete" ).contentType( MediaType.APPLICATION_JSON )
+                .content( TestUtils.asJsonString( ids ) ) ).andExpect( status().isBadRequest() )
+                .andExpect( content().string( Matchers.containsString( "cannot delete your own" ) ) );
+    }
+
+    /**
+     * Tests bulk delete where staff user has active orders and cannot be
+     * deleted.
+     */
+    @Test
+    @Transactional
+    @WithMockUser ( username = "admin", roles = "ADMIN" )
+    public void testBulkDeleteStaffInUse () throws Exception {
+
+        final List<Long> ids = List.of( 10L );
+
+        Mockito.doThrow( new edu.ncsu.csc326.wolfcafe.exception.WolfCafeAPIException( HttpStatus.BAD_REQUEST,
+                "Cannot delete staff while they have an active (IN_PROGRESS) order assigned." ) ).when( authService )
+                .deleteUserById( 10L );
+
+        mvc.perform( post( "/api/auth/users/delete" ).contentType( MediaType.APPLICATION_JSON )
+                .content( TestUtils.asJsonString( ids ) ) ).andExpect( status().isBadRequest() )
+                .andExpect( content().string( Matchers.containsString( "active" ) ) );
+    }
+
+    /**
+     * Tests bulk delete where one of the users no longer exists
+     *
+     */
+    @Test
+    @Transactional
+    @WithMockUser ( username = "admin", roles = "ADMIN" )
+    public void testBulkDeleteUserNotFound () throws Exception {
+
+        final List<Long> ids = List.of( 123L );
+
+        Mockito.doThrow( new ResourceNotFoundException( "User not found with id 123" ) ).when( authService )
+                .deleteUserById( 123L );
+
+        mvc.perform( post( "/api/auth/users/delete" ).contentType( MediaType.APPLICATION_JSON )
+                .content( TestUtils.asJsonString( ids ) ) ).andExpect( status().isNotFound() )
+                .andExpect( content().string( Matchers.containsString( "User not found" ) ) );
     }
 
 }

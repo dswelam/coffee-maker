@@ -16,19 +16,22 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import edu.ncsu.csc326.wolfcafe.dto.TaxDto;
 import edu.ncsu.csc326.wolfcafe.dto.JwtAuthResponse;
 import edu.ncsu.csc326.wolfcafe.dto.LoginDto;
 import edu.ncsu.csc326.wolfcafe.dto.RegisterDto;
-import edu.ncsu.csc326.wolfcafe.entity.Tax;
+import edu.ncsu.csc326.wolfcafe.dto.TaxDto;
 import edu.ncsu.csc326.wolfcafe.dto.UserDto;
+import edu.ncsu.csc326.wolfcafe.entity.Order;
+import edu.ncsu.csc326.wolfcafe.entity.Order.OrderStatus;
 import edu.ncsu.csc326.wolfcafe.entity.Permission;
 import edu.ncsu.csc326.wolfcafe.entity.Role;
+import edu.ncsu.csc326.wolfcafe.entity.Tax;
 import edu.ncsu.csc326.wolfcafe.entity.User;
 import edu.ncsu.csc326.wolfcafe.exception.ResourceNotFoundException;
 import edu.ncsu.csc326.wolfcafe.exception.WolfCafeAPIException;
-import edu.ncsu.csc326.wolfcafe.mapper.UserMapper;
 import edu.ncsu.csc326.wolfcafe.mapper.TaxMapper;
+import edu.ncsu.csc326.wolfcafe.mapper.UserMapper;
+import edu.ncsu.csc326.wolfcafe.repository.OrderRepository;
 import edu.ncsu.csc326.wolfcafe.repository.RoleRepository;
 import edu.ncsu.csc326.wolfcafe.repository.TaxRepository;
 import edu.ncsu.csc326.wolfcafe.repository.UserRepository;
@@ -38,12 +41,14 @@ import lombok.AllArgsConstructor;
 
 /**
  * Implemented AuthService
+ *
+ * @author Diya Patel
  */
 @Service
 @AllArgsConstructor
 public class AuthServiceImpl implements AuthService {
-	/** Tax repository  */
-	private final TaxRepository taxRepository;
+    /** Tax repository */
+    private final TaxRepository         taxRepository;
     /** User repository */
     private final UserRepository        userRepository;
     /** Role repository */
@@ -54,6 +59,8 @@ public class AuthServiceImpl implements AuthService {
     private final AuthenticationManager authenticationManager;
     /** JWT Token provider for working with user tokens */
     private final JwtTokenProvider      jwtTokenProvider;
+    /** Order repository */
+    private final OrderRepository       orderRepository;
 
     /**
      * Registers the given user
@@ -89,36 +96,39 @@ public class AuthServiceImpl implements AuthService {
 
         return "User registered successfully.";
     }
-    
+
     /**
      * Creates the given user (can be of any role), can be used by admin only
-     * @param userDto new user information
+     *
+     * @param userDto
+     *            new user information
      * @return response with created user
      */
-	@Override
-	public UserDto createUser(UserDto userDto) {
+    @Override
+    public UserDto createUser ( final UserDto userDto ) {
         // Validate the user
-		// The name of the user must be a non-empty string
-		if ( userDto.getName().length() == 0 ) {
-            throw new IllegalArgumentException("User's name must be a non-empty string");
+        // The name of the user must be a non-empty string
+        if ( userDto.getName().length() == 0 ) {
+            throw new IllegalArgumentException( "User's name must be a non-empty string" );
         }
-		// The email address of the user must contain the "@" symbol
-		if (!userDto.getEmail().contains("@")) {
-			throw new IllegalArgumentException("User's email address is not in a valid format");
-		}
-		// The password of the user must be a non-empty string
-		if (userDto.getPassword().length() == 0) {
-			throw new IllegalArgumentException("User's password must be a non-empty string");
-		}
-		// The email of the user cannot be a duplicate of an already existing user in the system
-		if (userRepository.existsByEmail(userDto.getEmail())) {
-			throw new IllegalArgumentException("User's email address is already used by an existing user");
-		}
-		
-		User user = UserMapper.mapToUser( userDto );
-        User savedUser = userRepository.save( user );
+        // The email address of the user must contain the "@" symbol
+        if ( !userDto.getEmail().contains( "@" ) ) {
+            throw new IllegalArgumentException( "User's email address is not in a valid format" );
+        }
+        // The password of the user must be a non-empty string
+        if ( userDto.getPassword().length() == 0 ) {
+            throw new IllegalArgumentException( "User's password must be a non-empty string" );
+        }
+        // The email of the user cannot be a duplicate of an already existing
+        // user in the system
+        if ( userRepository.existsByEmail( userDto.getEmail() ) ) {
+            throw new IllegalArgumentException( "User's email address is already used by an existing user" );
+        }
+
+        final User user = UserMapper.mapToUser( userDto );
+        final User savedUser = userRepository.save( user );
         return UserMapper.mapToUserDto( savedUser );
-	}
+    }
 
     /**
      * Logins in the given user
@@ -165,9 +175,52 @@ public class AuthServiceImpl implements AuthService {
      */
     @Override
     public void deleteUserById ( final Long id ) {
-        userRepository.findById( id )
+
+        // Check if user exists (Concurrent Delete Case)
+        final User user = userRepository.findById( id )
                 .orElseThrow( () -> new ResourceNotFoundException( "User not found with id " + id ) );
-        userRepository.deleteById( id );
+
+        // Prevent Admin from deleting themselves
+        final Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        Long loggedInUserId = null;
+
+        if ( auth != null && auth.getName() != null ) {
+            final String username = auth.getName();
+            loggedInUserId = userRepository.findByUsername( username ).map( User::getId ).orElse( null );
+        }
+
+        // Prevent self-delete ONLY when an authenticated user is present
+        if ( loggedInUserId != null && loggedInUserId.equals( id ) ) {
+            throw new WolfCafeAPIException( HttpStatus.BAD_REQUEST, "You cannot delete your own account." );
+        }
+
+        // Determine user role
+        final Role role = user.getRoles().stream().findFirst()
+                .orElseThrow( () -> new WolfCafeAPIException( HttpStatus.BAD_REQUEST, "User has no role assigned." ) );
+
+        final String roleName = role.getName();
+
+        // Staff cannot be deleted if they have active orders
+        if ( "ROLE_STAFF".equals( roleName ) ) {
+
+            final List<Order> inProgressOrders = orderRepository.findAllByStatus( OrderStatus.IN_PROGRESS ).stream()
+                    .filter( o -> o.getPreparedBy() != null && o.getPreparedBy().getId().equals( id ) )
+                    .collect( Collectors.toList() );
+
+            if ( !inProgressOrders.isEmpty() ) {
+                throw new WolfCafeAPIException( HttpStatus.BAD_REQUEST,
+                        "Cannot delete staff while they have an active (IN_PROGRESS) order assigned." );
+            }
+        }
+
+        // delete their entire order history of customer
+        if ( "ROLE_CUSTOMER".equals( roleName ) ) {
+            final List<Order> customerOrders = orderRepository.findAllByCustomerId( id );
+            orderRepository.deleteAll( customerOrders );
+        }
+
+        // Finally delete the user
+        userRepository.delete( user );
     }
 
     /**
@@ -210,7 +263,7 @@ public class AuthServiceImpl implements AuthService {
         role.setPermissions( new java.util.HashSet<>( permissions ) );
         return roleRepository.save( role );
     }
-    
+
     /**
      * Creates the tax rate.
      *
@@ -228,40 +281,43 @@ public class AuthServiceImpl implements AuthService {
 
     /**
      * Returns the current tax rate of the system
+     *
      * @return current tax rate as an integer (2.00 = 2.00%)
      */
-	@Override
-	@Transactional
-	public double getTaxRate() {
+    @Override
+    @Transactional
+    public double getTaxRate () {
         final List<Tax> tax = taxRepository.findAll();
         if ( tax.size() == 0 ) {
             final TaxDto newTaxDto = new TaxDto();
-            newTaxDto.setCurrentAmount(2);
+            newTaxDto.setCurrentAmount( 2 );
             final TaxDto savedTaxDto = createTax( newTaxDto );
             return savedTaxDto.getCurrentAmount();
         }
         return TaxMapper.mapToTaxDto( tax.get( 0 ) ).getCurrentAmount();
-	}
+    }
 
-	/**
+    /**
      * Sets the current tax rate of the system
-     * @param taxRate the tax rate to set
+     *
+     * @param taxRate
+     *            the tax rate to set
      */
-	@Override
-	@Transactional
-	public void setTaxRate(TaxDto taxRate) {		
-		// Validate that the tax rate is a positive integer
-		if (taxRate.getCurrentAmount() > 0) {
-	        final List<Tax> tax = taxRepository.findAll();
-	        if ( tax.size() != 0 ) {
-	        		taxRepository.delete(tax.get(0));
-	        }
-            
-	        final TaxDto newTaxDto = new TaxDto();
-            newTaxDto.setCurrentAmount(taxRate.getCurrentAmount());
+    @Override
+    @Transactional
+    public void setTaxRate ( final TaxDto taxRate ) {
+        // Validate that the tax rate is a positive integer
+        if ( taxRate.getCurrentAmount() > 0 ) {
+            final List<Tax> tax = taxRepository.findAll();
+            if ( tax.size() != 0 ) {
+                taxRepository.delete( tax.get( 0 ) );
+            }
+
+            final TaxDto newTaxDto = new TaxDto();
+            newTaxDto.setCurrentAmount( taxRate.getCurrentAmount() );
             createTax( newTaxDto );
-		}
-	}
+        }
+    }
 
     @Override
     public List<UserDto> listUsers () {
@@ -270,9 +326,8 @@ public class AuthServiceImpl implements AuthService {
 
         // Convert each User entity into a UserDto, and directly maps roles to
         // collection
-        return users.stream()
-                .map( user -> new UserDto( user.getId(), user.getName(), user.getUsername(), user.getEmail(), user.getRoles() ) )
-                .collect( Collectors.toList() );
+        return users.stream().map( user -> new UserDto( user.getId(), user.getName(), user.getUsername(),
+                user.getEmail(), user.getRoles() ) ).collect( Collectors.toList() );
     }
 
 }
