@@ -25,6 +25,7 @@ import edu.ncsu.csc326.wolfcafe.dto.UserDto;
 import edu.ncsu.csc326.wolfcafe.entity.Permission;
 import edu.ncsu.csc326.wolfcafe.entity.Role;
 import edu.ncsu.csc326.wolfcafe.exception.ResourceNotFoundException;
+import edu.ncsu.csc326.wolfcafe.exception.WolfCafeAPIException;
 import edu.ncsu.csc326.wolfcafe.service.AuthService;
 import lombok.AllArgsConstructor;
 
@@ -56,8 +57,8 @@ public class AuthController {
         return new ResponseEntity<>( response, HttpStatus.CREATED );
     }
 
-    /** Registers a new user of any role with the system.
-     *
+    /**
+     * Registers a new user of any role with the system.
      */
     @PreAuthorize ( "hasRole('ADMIN')" )
     @PostMapping ( "/users" )
@@ -131,6 +132,7 @@ public class AuthController {
 
     /**
      * Returns the current tax rate set in the system
+     *
      * @return current tax rate as an integer
      */
     @GetMapping ( "/tax" )
@@ -140,7 +142,9 @@ public class AuthController {
 
     /**
      * Sets the current tax rate in the system, requires the ADMIN role
-     * @param taxDto the tax rate containing the current amount to set
+     *
+     * @param taxDto
+     *            the tax rate containing the current amount to set
      */
     @PreAuthorize ( "hasRole('ADMIN')" )
     @PutMapping ( "/tax" )
@@ -158,6 +162,33 @@ public class AuthController {
     public ResponseEntity<List<UserDto>> getAllUsers () {
         final List<UserDto> users = authService.listUsers();
         return ResponseEntity.ok( users );
+    }
+
+    /**
+     * Deletes multiple users at once. Calls deleteUserById for each user.
+     *
+     * @param ids
+     *            list of user IDs to delete
+     * @return success message or error from underlying deleteUserById logic
+     */
+    @PreAuthorize ( "hasRole('ADMIN')" )
+    @PostMapping ( "/users/delete" )
+    public ResponseEntity< ? > deleteMultipleUsers ( @RequestBody final List<Long> ids ) {
+
+        try {
+            for ( Long id : ids ) {
+                authService.deleteUserById( id );
+            }
+            return ResponseEntity.ok( "Selected users deleted successfully." );
+        }
+        catch ( ResourceNotFoundException e ) {
+            // UC10: user already deleted by another admin
+            return ResponseEntity.status( HttpStatus.NOT_FOUND ).body( e.getMessage() );
+        }
+        catch ( WolfCafeAPIException e ) {
+            // UC10: cannot delete self or cannot delete staff w/ active orders
+            return ResponseEntity.status( HttpStatus.BAD_REQUEST ).body( e.getMessage() );
+        }
     }
 
 }

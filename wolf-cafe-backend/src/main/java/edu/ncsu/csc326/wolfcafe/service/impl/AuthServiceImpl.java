@@ -21,6 +21,8 @@ import edu.ncsu.csc326.wolfcafe.dto.LoginDto;
 import edu.ncsu.csc326.wolfcafe.dto.RegisterDto;
 import edu.ncsu.csc326.wolfcafe.dto.TaxDto;
 import edu.ncsu.csc326.wolfcafe.dto.UserDto;
+import edu.ncsu.csc326.wolfcafe.entity.Order;
+import edu.ncsu.csc326.wolfcafe.entity.Order.OrderStatus;
 import edu.ncsu.csc326.wolfcafe.entity.Permission;
 import edu.ncsu.csc326.wolfcafe.entity.Role;
 import edu.ncsu.csc326.wolfcafe.entity.Tax;
@@ -29,6 +31,7 @@ import edu.ncsu.csc326.wolfcafe.exception.ResourceNotFoundException;
 import edu.ncsu.csc326.wolfcafe.exception.WolfCafeAPIException;
 import edu.ncsu.csc326.wolfcafe.mapper.TaxMapper;
 import edu.ncsu.csc326.wolfcafe.mapper.UserMapper;
+import edu.ncsu.csc326.wolfcafe.repository.OrderRepository;
 import edu.ncsu.csc326.wolfcafe.repository.RoleRepository;
 import edu.ncsu.csc326.wolfcafe.repository.TaxRepository;
 import edu.ncsu.csc326.wolfcafe.repository.UserRepository;
@@ -40,11 +43,12 @@ import lombok.AllArgsConstructor;
  * Implemented AuthService
  *
  * @author Dania Swelam
+ * @author Diya Patel
  */
 @Service
 @AllArgsConstructor
 public class AuthServiceImpl implements AuthService {
-    /** Tax repository  */
+    /** Tax repository */
     private final TaxRepository         taxRepository;
     /** User repository */
     private final UserRepository        userRepository;
@@ -56,6 +60,8 @@ public class AuthServiceImpl implements AuthService {
     private final AuthenticationManager authenticationManager;
     /** JWT Token provider for working with user tokens */
     private final JwtTokenProvider      jwtTokenProvider;
+    /** Order repository */
+    private final OrderRepository       orderRepository;
 
     /**
      * Registers the given user
@@ -94,7 +100,9 @@ public class AuthServiceImpl implements AuthService {
 
     /**
      * Creates the given user (can be of any role), can be used by admin only
-     * @param userDto new user information
+     *
+     * @param userDto
+     *            new user information
      * @return response with created user
      */
     @Override
@@ -168,9 +176,52 @@ public class AuthServiceImpl implements AuthService {
      */
     @Override
     public void deleteUserById ( final Long id ) {
-        userRepository.findById( id )
+
+        // Check if user exists (Concurrent Delete Case)
+        final User user = userRepository.findById( id )
                 .orElseThrow( () -> new ResourceNotFoundException( "User not found with id " + id ) );
-        userRepository.deleteById( id );
+
+        // Prevent Admin from deleting themselves
+        final Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        Long loggedInUserId = null;
+
+        if ( auth != null && auth.getName() != null ) {
+            final String username = auth.getName();
+            loggedInUserId = userRepository.findByUsername( username ).map( User::getId ).orElse( null );
+        }
+
+        // Prevent self-delete ONLY when an authenticated user is present
+        if ( loggedInUserId != null && loggedInUserId.equals( id ) ) {
+            throw new WolfCafeAPIException( HttpStatus.BAD_REQUEST, "You cannot delete your own account." );
+        }
+
+        // Determine user role
+        final Role role = user.getRoles().stream().findFirst()
+                .orElseThrow( () -> new WolfCafeAPIException( HttpStatus.BAD_REQUEST, "User has no role assigned." ) );
+
+        final String roleName = role.getName();
+
+        // Staff cannot be deleted if they have active orders
+        if ( "ROLE_STAFF".equals( roleName ) ) {
+
+            final List<Order> inProgressOrders = orderRepository.findAllByStatus( OrderStatus.IN_PROGRESS ).stream()
+                    .filter( o -> o.getPreparedBy() != null && o.getPreparedBy().getId().equals( id ) )
+                    .collect( Collectors.toList() );
+
+            if ( !inProgressOrders.isEmpty() ) {
+                throw new WolfCafeAPIException( HttpStatus.BAD_REQUEST,
+                        "Cannot delete staff while they have an active (IN_PROGRESS) order assigned." );
+            }
+        }
+
+        // delete their entire order history of customer
+        if ( "ROLE_CUSTOMER".equals( roleName ) ) {
+            final List<Order> customerOrders = orderRepository.findAllByCustomerId( id );
+            orderRepository.deleteAll( customerOrders );
+        }
+
+        // Finally delete the user
+        userRepository.delete( user );
     }
 
     /**
@@ -231,6 +282,7 @@ public class AuthServiceImpl implements AuthService {
 
     /**
      * Returns the current tax rate of the system
+     *
      * @return current tax rate as an integer (2.00 = 2.00%)
      */
     @Override
@@ -248,7 +300,9 @@ public class AuthServiceImpl implements AuthService {
 
     /**
      * Sets the current tax rate of the system
-     * @param taxRate the tax rate to set
+     *
+     * @param taxRate
+     *            the tax rate to set
      */
     @Override
     @Transactional

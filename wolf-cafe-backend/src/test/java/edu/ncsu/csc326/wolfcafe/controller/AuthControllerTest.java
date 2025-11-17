@@ -23,6 +23,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
@@ -149,7 +150,7 @@ public class AuthControllerTest {
      * Tests creating a staff and barista user (as an admin user) and logging in as the created users.
      *
      * @throws Exception
-     * 				if error
+     *             if error
      */
     @Test
     @Transactional
@@ -209,9 +210,11 @@ public class AuthControllerTest {
     }
 
     /**
-     * Tests attempting to access the createUser() API endpoint when logged in as a user who doesn't have the admin role
+     * Tests attempting to access the createUser() API endpoint when logged in
+     * as a user who doesn't have the admin role
+     *
      * @throws Exception
-     * 				if error
+     *             if error
      */
     @Test
     @Transactional
@@ -307,6 +310,7 @@ public class AuthControllerTest {
 
     /**
      * Tests setting the tax rate
+     *
      * @throws Exception
      */
     @Test
