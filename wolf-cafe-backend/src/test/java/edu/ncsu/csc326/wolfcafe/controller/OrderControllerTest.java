@@ -424,3 +424,15 @@ public class OrderControllerTest {
         }
     }
 }
+
+/**
+ * GENERATIVE AI USED:
+ * Model: GPT-4.1
+ * This code snippet was completed with the assistance of Generative AI technology.
+ * The code was reviewed and edited by human engineers, but may contain errors.
+ *
+ * Prompts used:
+ * - "Complete the OrderControllerTest class to include tests for preparing an order,
+ *    marking an order as ready, fulfilling an order, cancelling an order, and listing
+ *    orders by customer. Use JUnit 5 and Spring Boot testing annotations."
+ */
