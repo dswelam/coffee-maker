@@ -340,6 +340,7 @@ public class AuthServiceTest {
         } );
         assertTrue( ex5.getMessage().contains( "Email already exists" ) );
     }
+    /**
      * UC10: Successfully delete a normal user.
      */
     @Test
