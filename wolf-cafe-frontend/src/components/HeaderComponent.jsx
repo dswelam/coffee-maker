@@ -28,39 +28,49 @@ const HeaderComponent = () => {
 					<ul className='navbar-nav'>
 
 						{/* Items */}
-						{isAuth && (
+						{
+							isAuth && (
 							<li className='nav-item'>
 								<NavLink to='/items' className='nav-link'>Items</NavLink>
 							</li>
+							
 						)}
 
 						{/* UC-11 Order link */}
-						{isAuth && (
+						{
+							isAuth && (
 							<li className='nav-item'>
 								<NavLink to='/order' className='nav-link'>Order</NavLink>
 							</li>
+							
 						)}
 
 					</ul>
 				</div>
 
 				<ul className='navbar-nav'>
-                    {!isAuth && (
+                    {
+						!isAuth && (
                         <li className='nav-item'>
                             <NavLink to='/register' className='nav-link'>Register</NavLink>
                         </li>
+						
                     )}
 
-                    {!isAuth && (
+                    {
+						!isAuth && (
                         <li className='nav-item'>
                             <NavLink to='/login' className='nav-link'>Login</NavLink>
                         </li>
+						
                     )}
 
-                    {isAuth && (
+                    {
+						isAuth && (
                         <li className='nav-item'>
                             <NavLink to='/login' className='nav-link' onClick={handleLogout}>Logout</NavLink>
                         </li>
+						
                     )}
                 </ul>
             </nav>
