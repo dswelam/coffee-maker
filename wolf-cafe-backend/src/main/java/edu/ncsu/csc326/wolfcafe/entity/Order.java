@@ -45,8 +45,9 @@ public class Order {
     private OrderStatus     status;
 
     /** Order staff */
-    @ManyToOne ( fetch = FetchType.LAZY, optional = false )
-    @JoinColumn ( name = "user_prepared" )
+    @ManyToOne ( fetch = FetchType.LAZY, optional = true )
+    // Nullable true to allow for orders that have not yet been prepared
+    @JoinColumn ( name = "user_prepared", nullable = true )
     private User            preparedBy;
 
     /**
