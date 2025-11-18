@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { registerAPICall } from '../services/AuthService'
 
 const RegisterComponent = () => {
@@ -9,40 +10,43 @@ const RegisterComponent = () => {
 	const [password, setPassword] = useState('')
 
 	const [errorMessage, setErrorMessage] = useState('')
+	const [successMessage, setSuccessMessage] = useState('')
 
-
-	useEffect(() => {
-		// prevent scrolling
-		document.body.style.overflow = 'hidden'
-
-		// cleanup when component unmounts
-		return () => {
-			document.body.style.overflow = 'auto'
-		}
-	}, [])
+	const navigate = useNavigate()
 
 	function handleRegistrationForm(e) {
-		e.preventDefault();
+	    e.preventDefault()
 
-		const register = { name, username, email, password }
+	    const register = {
+	        name,
+	        username,
+	        email,
+	        password
+	    }
 
-		console.log(register)
+	    registerAPICall(register)
+	        .then((response) => {
+	            console.log(response.data)
 
-		registerAPICall(register).then((response) => {
-			console.log(response.data)
-		}).catch(error => {
-			console.error(error)
-			setErrorMessage('Registration failed. Please check your inputs.')
-		})
+	            setSuccessMessage("Account created successfully!")
+
+	            // hide after 3 seconds and redirect
+	            setTimeout(() => {
+	                setSuccessMessage('')
+	                navigate('/login')
+	            }, 3000)
+	        })
+	        .catch((error) => {
+	            console.error(error)
+	            setErrorMessage('Registration failed. Please check your inputs.')
+	        })
 	}
 
 	return (
-		<div
-			className='d-flex justify-content-center align-items-center vh-100'
-		>
+		<div className='d-flex justify-content-center align-items-center vh-100' style={{ paddingTop: '20px' }}>
 			<div
 				className='card shadow-lg p-5'
-				style={{ width: '45rem', transform: 'scale(1)', backgroundColor: '#fff', borderRadius: '1rem' }}
+				style={{ width: '45rem', backgroundColor: '#fff', borderRadius: '1rem' }}
 			>
 				<div className='card-header text-center border-0 mb-3 bg-white'>
 					<h2 className='fw-bold mb-0 text-dark'>Create Account</h2>
@@ -103,17 +107,20 @@ const RegisterComponent = () => {
 								Register
 							</button>
 						</div>
+
 						{errorMessage && (
 							<div className='alert alert-danger mt-4 text-center fs-5 py-3'>
 								{errorMessage}
 							</div>
 						)}
+
+						{successMessage && (
+							<div className='alert alert-success mt-4 text-center fs-5 py-3'>
+								{successMessage}
+							</div>
+						)}
 					</form>
 				</div>
-			</div>
-
-			<div style={{ position: 'absolute', bottom: '1rem', width: '100%', textAlign: 'center' }}>
-				<span>WolfCafe © 2025</span>
 			</div>
 		</div>
 	)

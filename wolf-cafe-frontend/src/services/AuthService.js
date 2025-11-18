@@ -45,5 +45,6 @@ export const isStaffUser = () => {
 export const getAllUsers = () => axios.get(AUTH_REST_API_BASE_URL + '/' + 'users')
 export const deleteUser = (id) => axios.delete(AUTH_REST_API_BASE_URL + '/' + 'user' + '/' + id)
 
-
-
+export function addUser(user) {
+    return axios.post(AUTH_REST_API_BASE_URL + '/users', user);
+}

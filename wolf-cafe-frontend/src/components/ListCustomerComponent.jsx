@@ -1,17 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom'
 import { deleteUser, getAllUsers, isAdminUser } from '../services/AuthService';
 
 const ListStaffComponent = () => {
 	const [users, setUsers] = useState([])
-
-
 	const isAdmin = isAdminUser()
-
-	const navigate = useNavigate()
 	const [error, setError] = useState('');
 	const [successMsg, setSuccessMsg] = useState('');
-	const allowed = ['STAFF', 'ADMIN', 'BARISTA'];
 
 	useEffect(() => {
 		listUsers()
@@ -19,11 +13,11 @@ const ListStaffComponent = () => {
 
 	function listUsers() {
 		getAllUsers().then((response) => {
-			// filter users whose roles include STAFF
-			const filteredUsers = response.data.filter(user =>
-				user.roles.some(role => allowed.some(a => role.name.includes(a)))
+			// filter users whose roles include CUSTOMER
+			const customerUsers = response.data.filter(user =>
+				user.roles.some(role => role.name.includes('CUSTOMER'))
 			);
-			setUsers(filteredUsers);
+			setUsers(customerUsers);
 		}).catch(error => {
 			console.error(error)
 			setError('Failed to load users.');
@@ -74,19 +68,12 @@ const ListStaffComponent = () => {
 				}}
 			>
 				<div className="card-header text-center border-0 mb-4 bg-white">
-					<h2 className="fw-bold text-dark mb-0">Staff</h2>
-					<p className="text-secondary mt-2">List of registered staff members</p>
-					<p className="text-secondary mt-2">Click on Staff's' username to delete</p>
+					<h2 className="fw-bold text-dark mb-0">Customers</h2>
+					<p className="text-secondary mt-2">List of registered Customers</p>
+					<p className="text-secondary mt-2">Click on Customer's username to delete</p>
 
 				</div>
-				<div className="mt-3">
-					<button
-						className="btn btn-primary"
-						onClick={() => navigate('/add-user')}
-					>
-						Create New User
-					</button>
-				</div>
+
 				<div className="card-body">
 					<table className="table table-bordered align-middle text-center">
 						<thead className="table-light">

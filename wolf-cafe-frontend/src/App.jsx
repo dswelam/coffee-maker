@@ -9,6 +9,9 @@ import LoginComponent from './components/LoginComponent'
 import ListIngredientsComponent from './components/ListIngredientsComponent'
 import IngredientComponent from './components/IngredientComponent'
 import ListStaffComponent from './components/ListStaffComponent'
+import ListCustomerComponent from './components/ListCustomerComponent'
+import UserComponent from './components/UserComponent'
+
 
 import { isUserLoggedIn } from './services/AuthService'
 
@@ -37,6 +40,8 @@ function App() {
 		<Route path='/add-ingredient' element={<AuthenticatedRoute><IngredientComponent /></AuthenticatedRoute>}></Route>
 		<Route path='/update-ingredient/:ingredientName' element={<AuthenticatedRoute><IngredientComponent /></AuthenticatedRoute>}></Route>
 		<Route path='/staff' element={<AuthenticatedRoute><ListStaffComponent /></AuthenticatedRoute>}></Route>
+		<Route path='/customers' element={<AuthenticatedRoute><ListCustomerComponent /></AuthenticatedRoute>}></Route>
+		<Route path='/add-user' element={<AuthenticatedRoute><UserComponent /></AuthenticatedRoute>}></Route>
 
 
 
