@@ -366,4 +366,94 @@ public class AuthControllerTest {
                 .andExpect( jsonPath( "$.username" ).value( "updateduser" ) )
                 .andExpect( jsonPath( "$.email" ).value( "updated@email.com" ) );
     }
+
+    /**
+     * Tests successfully deleting multiple users in UC10.
+     */
+    @Test
+    @Transactional
+    @WithMockUser ( username = "admin", roles = "ADMIN" )
+    public void testBulkDeleteUsersSuccess () throws Exception {
+
+        Mockito.doNothing().when( authService ).deleteUserById( 1L );
+        Mockito.doNothing().when( authService ).deleteUserById( 2L );
+
+        final List<Long> ids = List.of( 1L, 2L );
+
+        mvc.perform( post( "/api/auth/users/delete" ).contentType( MediaType.APPLICATION_JSON )
+                .content( TestUtils.asJsonString( ids ) ) ).andExpect( status().isOk() )
+                .andExpect( content().string( "Selected users deleted successfully." ) );
+    }
+
+    /**
+     * Tests that non-admin users cannot bulk delete users.
+     */
+    @Test
+    @Transactional
+    @WithMockUser ( username = "staff", roles = "STAFF" )
+    public void testBulkDeleteUsersForbidden () throws Exception {
+
+        final List<Long> ids = List.of( 1L, 2L );
+
+        mvc.perform( post( "/api/auth/users/delete" ).contentType( MediaType.APPLICATION_JSON )
+                .content( TestUtils.asJsonString( ids ) ) ).andExpect( status().isForbidden() );
+    }
+
+    /**
+     * Tests bulk delete where deleteUserById throws a self-delete error.
+     */
+    @Test
+    @Transactional
+    @WithMockUser ( username = "admin", roles = "ADMIN" )
+    public void testBulkDeleteCannotDeleteSelf () throws Exception {
+
+        final List<Long> ids = List.of( 99L ); // arbitrary id
+
+        Mockito.doThrow( new edu.ncsu.csc326.wolfcafe.exception.WolfCafeAPIException( HttpStatus.BAD_REQUEST,
+                "You cannot delete your own account." ) ).when( authService ).deleteUserById( 99L );
+
+        mvc.perform( post( "/api/auth/users/delete" ).contentType( MediaType.APPLICATION_JSON )
+                .content( TestUtils.asJsonString( ids ) ) ).andExpect( status().isBadRequest() )
+                .andExpect( content().string( Matchers.containsString( "cannot delete your own" ) ) );
+    }
+
+    /**
+     * Tests bulk delete where staff user has active orders and cannot be
+     * deleted.
+     */
+    @Test
+    @Transactional
+    @WithMockUser ( username = "admin", roles = "ADMIN" )
+    public void testBulkDeleteStaffInUse () throws Exception {
+
+        final List<Long> ids = List.of( 10L );
+
+        Mockito.doThrow( new edu.ncsu.csc326.wolfcafe.exception.WolfCafeAPIException( HttpStatus.BAD_REQUEST,
+                "Cannot delete staff while they have an active (IN_PROGRESS) order assigned." ) ).when( authService )
+                .deleteUserById( 10L );
+
+        mvc.perform( post( "/api/auth/users/delete" ).contentType( MediaType.APPLICATION_JSON )
+                .content( TestUtils.asJsonString( ids ) ) ).andExpect( status().isBadRequest() )
+                .andExpect( content().string( Matchers.containsString( "active" ) ) );
+    }
+
+    /**
+     * Tests bulk delete where one of the users no longer exists
+     *
+     */
+    @Test
+    @Transactional
+    @WithMockUser ( username = "admin", roles = "ADMIN" )
+    public void testBulkDeleteUserNotFound () throws Exception {
+
+        final List<Long> ids = List.of( 123L );
+
+        Mockito.doThrow( new ResourceNotFoundException( "User not found with id 123" ) ).when( authService )
+                .deleteUserById( 123L );
+
+        mvc.perform( post( "/api/auth/users/delete" ).contentType( MediaType.APPLICATION_JSON )
+                .content( TestUtils.asJsonString( ids ) ) ).andExpect( status().isNotFound() )
+                .andExpect( content().string( Matchers.containsString( "User not found" ) ) );
+    }
+
 }
