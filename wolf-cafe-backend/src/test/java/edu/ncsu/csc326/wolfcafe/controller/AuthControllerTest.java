@@ -311,7 +311,7 @@ public class AuthControllerTest {
     /**
      * Tests setting the tax rate
      *
-     * @throws Exception
+     * @throws Exception if error
      */
     @Test
     @WithMockUser ( username = "admin", roles = "ADMIN" )

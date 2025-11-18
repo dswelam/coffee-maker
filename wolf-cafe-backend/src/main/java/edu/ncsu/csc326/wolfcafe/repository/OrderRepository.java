@@ -41,7 +41,6 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
     /**
      * Deletes an order by its ID
      * @param id the ID of the order to delete
-     * @return void
      */
     @Override
     void deleteById ( Long id );
