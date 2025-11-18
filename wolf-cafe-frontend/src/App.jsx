@@ -6,7 +6,10 @@ import ListItemsComponent from './components/ListItemsComponent'
 import ItemComponent from './components/ItemComponent'
 import RegisterComponent from './components/RegisterComponent'
 import LoginComponent from './components/LoginComponent'
+import EditUserComponent from "./components/EditUserComponent";
 import { isUserLoggedIn } from './services/AuthService'
+import OrderComponent from "./components/OrderComponent";
+
 
 function App() {
 
@@ -28,7 +31,8 @@ function App() {
 		<Route path='/login' element={<LoginComponent />}></Route>
 		<Route path='/items' element={<AuthenticatedRoute><ListItemsComponent /></AuthenticatedRoute>}></Route>
 		<Route path='/add-item' element={<AuthenticatedRoute><ItemComponent /></AuthenticatedRoute>}></Route>
-		<Route path='/update-item/:id' element={<AuthenticatedRoute><ItemComponent /></AuthenticatedRoute>}></Route>
+		<Route path="/edit-user/:id/:type" element={<AuthenticatedRoute><EditUserComponent /></AuthenticatedRoute>}></Route>
+		<Route path="/order" element={<AuthenticatedRoute><OrderComponent /></AuthenticatedRoute>} />
 	  </Routes>
 	  <FooterComponent />
 	  </BrowserRouter>
