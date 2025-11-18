@@ -48,3 +48,8 @@ export const deleteUser = (id) => axios.delete(AUTH_REST_API_BASE_URL + '/' + 'u
 export function addUser(user) {
     return axios.post(AUTH_REST_API_BASE_URL + '/users', user);
 }
+export const getTax = () => axios.get(AUTH_REST_API_BASE_URL + '/' + 'tax')
+export const editTax = (rate) =>
+  axios.put(AUTH_REST_API_BASE_URL + '/tax', {
+    currentAmount: rate
+  });

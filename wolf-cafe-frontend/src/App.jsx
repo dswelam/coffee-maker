@@ -11,7 +11,7 @@ import IngredientComponent from './components/IngredientComponent'
 import ListStaffComponent from './components/ListStaffComponent'
 import ListCustomerComponent from './components/ListCustomerComponent'
 import UserComponent from './components/UserComponent'
-
+import TaxRateComponent from './components/TaxRateComponent'
 
 import { isUserLoggedIn } from './services/AuthService'
 
@@ -40,9 +40,13 @@ function App() {
 		<Route path='/add-ingredient' element={<AuthenticatedRoute><IngredientComponent /></AuthenticatedRoute>}></Route>
 		<Route path='/update-ingredient/:ingredientName' element={<AuthenticatedRoute><IngredientComponent /></AuthenticatedRoute>}></Route>
 		<Route path='/staff' element={<AuthenticatedRoute><ListStaffComponent /></AuthenticatedRoute>}></Route>
+<<<<<<< HEAD
 		<Route path='/customers' element={<AuthenticatedRoute><ListCustomerComponent /></AuthenticatedRoute>}></Route>
 		<Route path='/add-user' element={<AuthenticatedRoute><UserComponent /></AuthenticatedRoute>}></Route>
 
+=======
+		<Route path='/tax-rate' element={<AuthenticatedRoute><TaxRateComponent /></AuthenticatedRoute>}></Route>
+>>>>>>> b116f371db3e6195d8eb8851c6ab9496f905ba12
 
 
 	  </Routes>

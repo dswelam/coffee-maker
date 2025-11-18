@@ -12,7 +12,10 @@ const RegisterComponent = () => {
 	const [errorMessage, setErrorMessage] = useState('')
 	const [successMessage, setSuccessMessage] = useState('')
 
+<<<<<<< HEAD
 	const navigate = useNavigate()
+=======
+>>>>>>> b116f371db3e6195d8eb8851c6ab9496f905ba12
 
 	function handleRegistrationForm(e) {
 	    e.preventDefault()
@@ -46,7 +49,7 @@ const RegisterComponent = () => {
 		<div className='d-flex justify-content-center align-items-center vh-100' style={{ paddingTop: '20px' }}>
 			<div
 				className='card shadow-lg p-5'
-				style={{ width: '45rem', backgroundColor: '#fff', borderRadius: '1rem' }}
+				style={{ width: '45rem', transform: 'scale(0.9)', backgroundColor: '#fff', borderRadius: '1rem' }}
 			>
 				<div className='card-header text-center border-0 mb-3 bg-white'>
 					<h2 className='fw-bold mb-0 text-dark'>Create Account</h2>
@@ -98,6 +101,12 @@ const RegisterComponent = () => {
 							/>
 						</div>
 
+						{errorMessage && (
+							<div className='alert alert-danger mt-4 text-center fs-5 py-3'>
+								{errorMessage}
+							</div>
+						)}
+						
 						<div className='text-center'>
 							<button
 								className='btn btn-danger btn-lg w-100 fw-bold'
@@ -107,6 +116,7 @@ const RegisterComponent = () => {
 								Register
 							</button>
 						</div>
+<<<<<<< HEAD
 
 						{errorMessage && (
 							<div className='alert alert-danger mt-4 text-center fs-5 py-3'>
@@ -119,6 +129,8 @@ const RegisterComponent = () => {
 								{successMessage}
 							</div>
 						)}
+=======
+>>>>>>> b116f371db3e6195d8eb8851c6ab9496f905ba12
 					</form>
 				</div>
 			</div>

@@ -18,7 +18,7 @@ const HeaderComponent = () => {
 
 	return (
 		<div>
-			<header>
+			<header style={{ height: "80px" }}>
 				<nav className='navbar navbar-expand-md navbar-dark bg-dark w-100 fixed-top'>
 					<div>
 						<a href='http://localhost:3000' className='navbar-brand'
@@ -69,6 +69,15 @@ const HeaderComponent = () => {
 									<NavLink to='/ingredients' className='nav-link'
 										style={{ fontSize: '1.5rem', fontWeight: '600', marginLeft: '3rem' }}
 									>Inventory</NavLink>
+								</li>
+							}
+							{/* ADMIN */}
+							{
+								isAuth && isAdmin &&
+								<li className='nav-item'>
+									<NavLink to='/tax-rate' className='nav-link'
+										style={{ fontSize: '1.5rem', fontWeight: '600', marginLeft: '3rem' }}
+									>Tax Rate</NavLink>
 								</li>
 							}
 						</ul>
