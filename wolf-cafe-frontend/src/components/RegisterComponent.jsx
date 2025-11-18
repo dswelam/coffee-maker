@@ -11,38 +11,34 @@ const RegisterComponent = () => {
 
 	const [errorMessage, setErrorMessage] = useState('')
 	const [successMessage, setSuccessMessage] = useState('')
-
-<<<<<<< HEAD
 	const navigate = useNavigate()
-=======
->>>>>>> b116f371db3e6195d8eb8851c6ab9496f905ba12
 
 	function handleRegistrationForm(e) {
-	    e.preventDefault()
+		e.preventDefault()
 
-	    const register = {
-	        name,
-	        username,
-	        email,
-	        password
-	    }
+		const register = {
+			name,
+			username,
+			email,
+			password
+		}
 
-	    registerAPICall(register)
-	        .then((response) => {
-	            console.log(response.data)
+		registerAPICall(register)
+			.then((response) => {
+				console.log(response.data)
 
-	            setSuccessMessage("Account created successfully!")
+				setSuccessMessage("Account created successfully!")
 
-	            // hide after 3 seconds and redirect
-	            setTimeout(() => {
-	                setSuccessMessage('')
-	                navigate('/login')
-	            }, 3000)
-	        })
-	        .catch((error) => {
-	            console.error(error)
-	            setErrorMessage('Registration failed. Please check your inputs.')
-	        })
+				// hide after 3 seconds and redirect
+				setTimeout(() => {
+					setSuccessMessage('')
+					navigate('/login')
+				}, 3000)
+			})
+			.catch((error) => {
+				console.error(error)
+				setErrorMessage('Registration failed. Please check your inputs.')
+			})
 	}
 
 	return (
@@ -106,7 +102,7 @@ const RegisterComponent = () => {
 								{errorMessage}
 							</div>
 						)}
-						
+
 						<div className='text-center'>
 							<button
 								className='btn btn-danger btn-lg w-100 fw-bold'
@@ -116,8 +112,6 @@ const RegisterComponent = () => {
 								Register
 							</button>
 						</div>
-<<<<<<< HEAD
-
 						{errorMessage && (
 							<div className='alert alert-danger mt-4 text-center fs-5 py-3'>
 								{errorMessage}
@@ -129,8 +123,6 @@ const RegisterComponent = () => {
 								{successMessage}
 							</div>
 						)}
-=======
->>>>>>> b116f371db3e6195d8eb8851c6ab9496f905ba12
 					</form>
 				</div>
 			</div>
