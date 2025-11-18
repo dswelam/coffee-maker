@@ -128,10 +128,10 @@ const ListIngredientsComponent = () => {
 	};
 
 	return (
-		<div className="d-flex justify-content-center align-items-center vh-20" style={{ paddingTop: '40px' }}>
+		<div className="page-container d-flex justify-content-center align-items-start">
 			<div
 				className="card shadow-lg p-5"
-				style={{ width: '75rem', transform: 'scale(0.9)', backgroundColor: '#fff', borderRadius: '1rem', maxHeight: '200vh', overflowY: 'auto' }}
+				style={{ width: '75rem', transform: 'scale(1)', backgroundColor: '#fff', borderRadius: '1rem', maxHeight: '200vh', overflowY: 'auto' }}
 			>
 				<div className="card-header text-center border-0 mb-4 bg-white">
 					<h2 className="fw-bold text-dark mb-0">Inventory</h2>

@@ -89,8 +89,8 @@ const IngredientComponent = () => {
 
 	return (
 			<div
-				className='d-flex justify-content-center align-items-center vh-100'
-				style={{ paddingTop: '5px' }}
+				className='d-flex justify-content-center align-items-center vh-50'
+				style={{ paddingTop: '40px' }}
 			>
 				<div
 					className='card shadow-lg p-5'
