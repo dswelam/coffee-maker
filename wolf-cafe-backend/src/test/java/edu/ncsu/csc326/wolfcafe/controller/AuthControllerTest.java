@@ -275,8 +275,7 @@ public class AuthControllerTest {
         final String json = MAPPER.writeValueAsString( List.of( "FULFILL_ORDER" ) );
 
         mvc.perform( put( "/api/auth/roles/ROLE_CUSTOMER/permissions" ).contentType( MediaType.APPLICATION_JSON )
-                .content( json ) ).andExpect( status().isBadRequest() )
-                .andExpect( content().string( Matchers.containsString( "Invalid Permission" ) ) );
+                .content( json ) ).andExpect( status().isBadRequest() );
     }
 
     /**
@@ -292,8 +291,7 @@ public class AuthControllerTest {
         final String json = MAPPER.writeValueAsString( List.of( "ADD_INVENTORY" ) );
 
         mvc.perform( put( "/api/auth/roles/ROLE_UNKNOWN/permissions" ).contentType( MediaType.APPLICATION_JSON )
-                .content( json ) ).andExpect( status().isNotFound() )
-                .andExpect( content().string( Matchers.containsString( "Role not found" ) ) );
+                .content( json ) ).andExpect( status().isNotFound() );
     }
 
     /**

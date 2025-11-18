@@ -104,11 +104,11 @@ public class ItemController {
         }
         catch ( final IllegalArgumentException e ) {
             // Invalid Price, Invalid Unit, No Ingredients
-            return ResponseEntity.badRequest().build();
+            return ResponseEntity.badRequest().body( null );
         }
         catch ( final ResourceNotFoundException e ) {
             // Cannot Edit (item deleted by concurrent user)
-            return ResponseEntity.status( HttpStatus.CONFLICT ).build();
+            return ResponseEntity.status( HttpStatus.CONFLICT ).body( null );
         }
     }
 

@@ -49,37 +49,6 @@ public class OrderLine {
     }
 
     /**
-     * Constructor that takes all properties for an OrderLine
-     *
-     * @param id
-     *            the order line id
-     * @param order
-     *            the order associated with this order line
-     * @param item
-     *            the item in the order line
-     * @param quantity
-     *            the quantity of the item in the order line
-     */
-    public OrderLine ( final Long id, final Order order, final Item item, final Integer quantity ) {
-        this.id = id;
-        this.order = order;
-        this.item = item;
-        this.quantity = quantity;
-    }
-
-    /**
-     * Constructor without id for the OrderLine
-     * @param order the order associated with this order line
-     * @param item the item in the order line
-     * @param quantity the quantity of the item in the order line
-     */
-    public OrderLine ( final Order order, final Item item, final Integer quantity ) {
-        this.order = order;
-        this.item = item;
-        this.quantity = quantity;
-    }
-
-    /**
      * Gets the id of the order line
      * @return the order line id
      */
