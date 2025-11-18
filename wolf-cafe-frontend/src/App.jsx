@@ -6,6 +6,10 @@ import ListItemsComponent from './components/ListItemsComponent'
 import ItemComponent from './components/ItemComponent'
 import RegisterComponent from './components/RegisterComponent'
 import LoginComponent from './components/LoginComponent'
+import ListIngredientsComponent from './components/ListIngredientsComponent'
+import IngredientComponent from './components/IngredientComponent'
+import ListStaffComponent from './components/ListStaffComponent'
+
 import { isUserLoggedIn } from './services/AuthService'
 import OrderComponent from "./components/OrderComponent";
 

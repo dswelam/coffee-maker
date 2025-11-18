@@ -14,23 +14,23 @@ import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabas
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase.Replace;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 
-import edu.ncsu.csc326.wolfcafe.entity.Recipe;
+import edu.ncsu.csc326.wolfcafe.entity.Item;
 
 /**
  * Tests Recipe repository
  */
 @DataJpaTest
 @AutoConfigureTestDatabase ( replace = Replace.NONE )
-class RecipeRepositoryTest {
+class ItemRepositoryTest {
 
     /** Reference to recipe repository */
     @Autowired
-    private RecipeRepository recipeRepository;
+    private ItemRepository itemRepository;
 
     /** Coffee recipe */
-    private Recipe           recipe1;
+    private Item           item1;
     /** Latte recipe */
-    private Recipe           recipe2;
+    private Item           item2;
 
     /**
      * Sets up the test case.
@@ -40,18 +40,18 @@ class RecipeRepositoryTest {
      */
     @BeforeEach
     public void setUp () throws Exception {
-        recipeRepository.deleteAll();
+        itemRepository.deleteAll();
 
         // Setup Coffee recipe
         final Map<String, Integer> coffeeIngredients = Map.of( "Coffee", 3 );
-        recipe1 = new Recipe( "Coffee", 50, coffeeIngredients );
+        item1 = new Item( null, "Coffee", "Hot coffee", 5.0, coffeeIngredients );
 
         // Setup Latte recipe
         final Map<String, Integer> latteIngredients = Map.of( "Coffee", 3, "Milk", 2, "Sugar", 1 );
-        recipe2 = new Recipe( "Latte", 100, latteIngredients );
+        item2 = new Item( null, "Latte", "Iced latte", 10.0, latteIngredients );
 
-        recipeRepository.save( recipe1 );
-        recipeRepository.save( recipe2 );
+        itemRepository.save( item1 );
+        itemRepository.save( item2 );
     }
 
     /**
@@ -59,12 +59,12 @@ class RecipeRepositoryTest {
      * values are retrieved for the price and number of each ingredient.
      */
     @Test
-    public void testGetCoffeeRecipeByName () {
-        final Optional<Recipe> recipe = recipeRepository.findByName( "Coffee" );
-        final Recipe actualRecipe = recipe.get();
-        assertAll( "Recipe contents", () -> assertEquals( "Coffee", actualRecipe.getName() ),
-                () -> assertEquals( 50, actualRecipe.getPrice() ),
-                () -> assertEquals( 3, actualRecipe.getIngredients().get( "Coffee" ) ) );
+    public void testGetCoffeeItemByName () {
+        final Optional<Item> item = itemRepository.findByName( "Coffee" );
+        final Item actualItem = item.get();
+        assertAll( "Item contents", () -> assertEquals( "Coffee", actualItem.getName() ),
+                () -> assertEquals( 5.0, actualItem.getPrice() ),
+                () -> assertEquals( 3, actualItem.getIngredients().get( "Coffee" ) ) );
     }
 
     /**
@@ -72,14 +72,14 @@ class RecipeRepositoryTest {
      * values are retrieved for the price and number of each ingredient.
      */
     @Test
-    public void testGetLatteRecipeByName () {
-        final Optional<Recipe> recipe = recipeRepository.findByName( "Latte" );
-        final Recipe actualRecipe = recipe.get();
-        assertAll( "Recipe contents", () -> assertEquals( "Latte", actualRecipe.getName() ),
-                () -> assertEquals( 100, actualRecipe.getPrice() ),
-                () -> assertEquals( 3, actualRecipe.getIngredients().get( "Coffee" ) ),
-                () -> assertEquals( 2, actualRecipe.getIngredients().get( "Milk" ) ),
-                () -> assertEquals( 1, actualRecipe.getIngredients().get( "Sugar" ) ) );
+    public void testGetLatteItemByName () {
+        final Optional<Item> item = itemRepository.findByName( "Latte" );
+        final Item actualItem = item.get();
+        assertAll( "Item contents", () -> assertEquals( "Latte", actualItem.getName() ),
+                () -> assertEquals( 10.0, actualItem.getPrice() ),
+                () -> assertEquals( 3, actualItem.getIngredients().get( "Coffee" ) ),
+                () -> assertEquals( 2, actualItem.getIngredients().get( "Milk" ) ),
+                () -> assertEquals( 1, actualItem.getIngredients().get( "Sugar" ) ) );
     }
 
     /**
@@ -87,9 +87,9 @@ class RecipeRepositoryTest {
      * is returned.
      */
     @Test
-    public void testGetRecipeByNameInvalid () {
-        final Optional<Recipe> recipe = recipeRepository.findByName( "Unknown" );
-        assertTrue( recipe.isEmpty() );
+    public void testGetItemByNameInvalid () {
+        final Optional<Item> item = itemRepository.findByName( "Unknown" );
+        assertTrue( item.isEmpty() );
     }
 
 }

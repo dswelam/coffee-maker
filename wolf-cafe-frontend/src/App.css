@@ -40,3 +40,35 @@
 .read-the-docs {
   color: #888;
 }
+
+/** Added Wolf card design layout */
+.recipe-container {
+  max-width: 700px;
+  margin: 0 auto;
+  background-color: white;
+  padding: 2rem;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Optional table tweaks */
+.table th,
+.table td {
+  padding: 8px;
+  text-align: left;
+}
+
+.btn-danger {
+  background-color: #b40000;
+  border: none;
+}
+
+.btn-danger:hover {
+  background-color: #a00000;
+}
+.navbar-nav .nav-link.active {
+  background-color: #fff;
+  color: #000 !important;
+  border-radius: 0.5rem;
+  padding: 0.5rem 1rem;
+}

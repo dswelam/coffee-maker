@@ -1,115 +1,221 @@
 import React from 'react'
 import { useEffect, useState } from 'react'
-import { getItemById, saveItem, updateItem } from '../services/ItemService'
+import { getItemById, saveItem, updateItem, deleteItemById } from '../services/ItemService'
 import { useNavigate, useParams } from 'react-router-dom'
+import { getInventory } from '../services/InventoryService';
 
-const TodoComponent = () => {
 
-    const [name, setName] = useState('')
-    const [description, setDescription] = useState('')
+const ItemComponent = () => {
+
+	const [name, setName] = useState('')
+	const [description, setDescription] = useState('')
 	const [price, setPrice] = useState('')
-    const { id } = useParams()
+	const [allIngredients, setAllIngredients] = useState([]);
+	const [selectedIngredients, setSelectedIngredients] = useState([]);
+	const [deleteMessage, setDeleteMessage] = useState('');
+	const [errors, setErrors] = useState({})
 
-    const navigate = useNavigate()
+	const { id } = useParams()
+	const navigate = useNavigate()
 
-    useEffect(() => {
-        if(id) {
-            getItemById(id).then((response) => {
-                console.log(response.data)
-                setName(response.data.name)
-                setDescription(response.data.description)
+	useEffect(() => {
+		const fetchIngredients = async () => {
+
+			try {
+				const res = await getInventory();
+				let ingredientNames = [];
+
+				if (Array.isArray(res.data.ingredients)) {
+					// API returns an array of objects
+					ingredientNames = res.data.ingredients.map(i => i.name);
+				} else if (typeof res.data.ingredients === 'object' && res.data.ingredients !== null) {
+					// API returns an object { "Sugar": 5, "Coffee": 10 }
+					ingredientNames = Object.keys(res.data.ingredients);
+				}
+
+				setAllIngredients(ingredientNames);
+			} catch (err) {
+				console.error(err);
+			}
+		};
+
+		fetchIngredients();
+
+		if (id) {
+			getItemById(id).then((response) => {
+				console.log(response.data)
+				setName(response.data.name)
+				setDescription(response.data.description)
 				setPrice(response.data.price)
-            }).catch(error => {
-                console.error(error)
-            })
-        }
-    }, [id])
+				setSelectedIngredients(Object.keys(response.data.ingredients || {}));
+			}).catch(error => {
+				console.error(error)
+			})
+		}
+	}, [id])
 
-    function saveOrUpdateItem(e) {
-        e.preventDefault()
-        const item = {name, description, price}
-        console.log(item)
+	useEffect(() => {
+		// prevent scrolling
+		document.body.style.overflow = 'hidden'
 
-        if (id) {
-            updateItem(id, item).then((response) => {
-                console.log(response.data)
-                navigate('/items')
-            }).catch(error => {
-                console.error(error)
-            })
-        } else {
-            saveItem(item).then((response) => {
-                console.log(response.data)
-                navigate('/items')
-            }).catch(error => {
-                console.error(error)
-            })
-        }
-    }
+		// cleanup when component unmounts
+		return () => {
+			document.body.style.overflow = 'auto'
+		}
+	}, [])
 
-    function pageTitle() {
-        if (id) {
-            return <h2 className='text-center'>Update Item</h2>
-        } else {
-            return <h2 className='text-center'>Add Item</h2>
-        }
-    }
+	function saveOrUpdateItem(e) {
+		e.preventDefault()
+		const item = {
+			name,
+			description,
+			price,
+			ingredients: selectedIngredients.reduce((obj, name) => {
+				obj[name] = 1; // or just keep as array if your backend handles it
+				return obj;
+			}, {})
+		}
+		console.log(item)
 
-  return (
-    <div className='container'>
-        <br /> <br />
-        <div className='row'>
-            <div className='card col-md-6 offset-md-3 offset-md-3'>
-                { pageTitle() }
-                
-                <div className='card-body'>
-                    <form>
-                        <div className='form-group mb-2'>
-                            <label className='form-label'>Item Name:</label>
-                            <input 
-                                type='text'
-                                className='form-control'
-                                placeholder='Enter Item Name'
-                                name='name'
-                                value={name}
-                                onChange={(e) => setName(e.target.value)}
-                            >
-                            </input>
-                        </div>
+		const newErrors = {};
+		{/* JaredH error checking for inputs*/ }
+		if (!name.trim()) newErrors.name = "Name is required.";
+		if (!description.trim()) newErrors.description = "Description is required.";
+		if (!price || isNaN(price) || Number(price) <= 0)
+			newErrors.price = "Enter a valid positive number for price.";
+		// if error, stop 
+		setErrors(newErrors);
+		if (Object.keys(newErrors).length > 0) return;
 
-                        <div className='form-group mb-2'>
-                            <label className='form-label'>Item Description:</label>
-                            <input 
-                                type='text'
-                                className='form-control'
-                                placeholder='Enter Item Description'
-                                name='description'
-                                value={description}
-                                onChange={(e) => setDescription(e.target.value)}
-                            >
-                            </input>
-                        </div>
+		if (id) {
+			updateItem(id, item).then((response) => {
+				console.log(response.data)
+				navigate('/items')
+			}).catch(error => {
+				console.error(error)
+			})
+		} else {
+			saveItem(item).then((response) => {
+				console.log(response.data)
+				navigate('/items')
+			}).catch(error => {
+				console.error(error)
 
-                        <div className='form-group mb-2'>
-                            <label className='form-label'>Item Price:</label>
-							<input 
-                                type='text'
-                                className='form-control'
-                                placeholder='Enter Item Price'
-                                name='price'
-                                value={price}
-                                onChange={(e) => setPrice(e.target.value)}
-                            >
-                            </input>
-                        </div>
+				{/*JaredH Error printing for duplicate name*/ }
+				if (error.response?.status === 401) {
+					setErrors({ name: "An item with that name already exists." });
+				} else {
+					setErrors({ general: "Something went wrong saving the item." });
+				}
+			})
+		}
+	}
 
-                        <button type='submit' className='btn btn-success' onClick={(e) => saveOrUpdateItem(e)}>Submit</button>
-                    </form>
-                </div>
-            </div>
-        </div>
-    </div>
-  )
+	{/* Added - JaredH, delete button logic for item update page  */ }
+	function deleteItem() {
+		const confirmDelete = window.confirm('Are you sure you want to delete this item?');
+		if (!confirmDelete) return;
+
+		deleteItemById(id)
+			.then(() => {
+				setDeleteMessage('Item deleted successfully!');
+				setTimeout(() => navigate('/items'), 2500);
+			})
+			.catch((error) => {
+				console.error(error);
+				setDeleteMessage('This item may have already been deleted by another user.');
+				setTimeout(() => navigate('/items'), 2500);
+			});
+	}
+
+	{/* Edited - JaredH, added Back Button  */ }
+	const pageTitle = () => (
+		<div className="text-center mb-4" style={{ paddingTop: '40px' }}>
+			<button
+				type="button"
+				className="btn btn-dark"
+				onClick={() => navigate('/items')}
+				style={{ position: 'absolute', top: '10px', right: '10px', fontSize: '18px', color: '#FFFFFF' }}
+			>
+				← Back
+			</button>
+			<h2 className="fw-bold">{id ? 'Update Item' : 'Add Item'}</h2>
+		</div>
+	)
+
+	return (
+		<div className="d-flex justify-content-center align-items-center vh-100" style={{ paddingTop: '5px' }}>
+			<div className="card shadow-lg p-5" style={{ width: '45rem', transform: 'scale(0.9)', backgroundColor: '#fff', borderRadius: '1rem' }}>
+				{pageTitle()}
+
+				{errors.general && <div className="alert alert-danger text-center">{errors.general}</div>}
+				{deleteMessage && <div className="alert alert-info text-center">{deleteMessage}</div>}
+
+				<form>
+					<div className="mb-3">
+						<label className="form-label fw-semibold">Item Name</label>
+						<input type="text" className="form-control form-control-lg" placeholder="Enter item name" value={name} onChange={e => setName(e.target.value)} />
+						{errors.name && <div className="text-danger">{errors.name}</div>}
+					</div>
+
+					<div className="mb-3">
+						<label className="form-label fw-semibold">Item Description</label>
+						<input type="text" className="form-control form-control-lg" placeholder="Enter description" value={description} onChange={e => setDescription(e.target.value)} />
+						{errors.description && <div className="text-danger">{errors.description}</div>}
+					</div>
+
+					<div className="mb-3">
+						<label className="form-label fw-semibold">Item Price</label>
+						<input type="number" className="form-control form-control-lg" placeholder="Enter price" value={price} onChange={e => setPrice(e.target.value)} />
+						{errors.price && <div className="text-danger">{errors.price}</div>}
+					</div>
+
+					<div className="mb-3">
+						<label className="form-label fw-semibold">Ingredients</label>
+						<div style={{ maxHeight: '200px', overflowY: 'auto', border: '1px solid #ccc', padding: '8px' }}>
+							{allIngredients.map(ing => (
+								<div key={ing} className="form-check">
+									<input
+										className="form-check-input"
+										type="checkbox"
+										value={ing}
+										checked={selectedIngredients.includes(ing)}
+										onChange={e => {
+											if (e.target.checked) setSelectedIngredients([...selectedIngredients, ing])
+											else setSelectedIngredients(selectedIngredients.filter(i => i !== ing))
+										}}
+									/>
+									<label className="form-check-label">{ing}</label>
+								</div>
+							))}
+						</div>
+					</div>
+
+					<div className={`d-flex mt-4 ${id ? 'justify-content-between' : 'justify-content-center'}`}>
+						<button
+							type="submit"
+							className={`btn btn-lg ${id ? 'w-50 me-2' : 'w-50'} fw-bold`}
+							onClick={saveOrUpdateItem}
+							style={{ backgroundColor: '#28a745', color: 'white', border: 'none' }} // green
+						>
+							Submit
+						</button>
+
+						{id && (
+							<button
+								type="button"
+								className="btn btn-lg w-50 fw-bold"
+								onClick={deleteItem}
+								style={{ backgroundColor: '#CC0000', color: 'white', border: 'none' }} // black
+							>
+								Delete
+							</button>
+						)}
+					</div>
+				</form>
+			</div>
+		</div>
+	)
 }
 
-export default TodoComponent
+export default ItemComponent

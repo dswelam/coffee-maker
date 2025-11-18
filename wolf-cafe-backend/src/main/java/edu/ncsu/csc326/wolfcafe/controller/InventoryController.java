@@ -15,9 +15,11 @@ import edu.ncsu.csc326.wolfcafe.service.InventoryService;
 import lombok.AllArgsConstructor;
 
 /**
- * Controller for CoffeeMaker's inventory. The inventory is a singleton; there's
+ * Controller for WolfCafes's inventory. The inventory is a singleton; there's
  * only one row in the database that contains the current inventory for the
  * system.
+ *
+ * @author Dania Swelam
  */
 @CrossOrigin ( "*" )
 @RestController
@@ -30,7 +32,7 @@ public class InventoryController {
     private final InventoryService inventoryService;
 
     /**
-     * REST API endpoint to provide GET access to the CoffeeMaker's singleton
+     * REST API endpoint to provide GET access to the WolfCafe's singleton
      * Inventory.
      *
      * @return response to the request

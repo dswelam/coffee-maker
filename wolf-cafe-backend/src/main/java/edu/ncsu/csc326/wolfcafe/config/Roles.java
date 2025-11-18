@@ -13,8 +13,12 @@ public class Roles {
 	 */
 	public enum UserRoles {
 		
-		/** Staff for WolfCafe */
+		/** Staff for WolfCafe - manages the Inventory */
 		ROLE_STAFF,
+		/** Barista for WolfCafe - manages the Orders */
+		ROLE_BARISTA,
+		/** Anonymous Customer for WolfCafe */
+		ROLE_ANONYMOUS,
 		/** Customer for WolfCafe */
 		ROLE_CUSTOMER
 
