@@ -1,121 +1,116 @@
-// src/components/OrderComponent.jsx
-import React, { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { getAllItems } from "../services/ItemService";
-import { createOrder } from "../services/OrderService";
-import { getCurrentUser } from "../services/AuthService";
+import React, { useEffect, useState } from "react"
+import { useNavigate } from "react-router-dom"
+import { getAllItems } from "../services/ItemService"
+import { createOrder } from "../services/OrderService"
+import { getCurrentUser } from "../services/AuthService"
+import { getUserById } from "../services/UserService"
 
 const OrderComponent = () => {
-  const navigate = useNavigate();
+  const navigate = useNavigate()
 
-  const [items, setItems] = useState([]);
-  const [cart, setCart] = useState([]);
-  const [tipPercent, setTipPercent] = useState(0);
-  const [customTip, setCustomTip] = useState("");
-  const [moneyGiven, setMoneyGiven] = useState("");
-  const [errors, setErrors] = useState({});
-  const [success, setSuccess] = useState("");
+  const [items, setItems] = useState([])
+  const [cart, setCart] = useState([])
+  const [tipPercent, setTipPercent] = useState(0)
+  const [customTip, setCustomTip] = useState("")
+  const [moneyGiven, setMoneyGiven] = useState("")
+  const [errors, setErrors] = useState({})
+  const [success, setSuccess] = useState("")
 
-  const TAX_RATE = 0.0725;
-
-  const round = (n) => Number(n.toFixed(2));
+  const TAX_RATE = 0.0725
+  const round = (n) => Number(Number(n).toFixed(2))
 
   useEffect(() => {
     getAllItems()
       .then((res) => setItems(res.data))
-      .catch((err) => {
-        console.error(err);
-        setErrors((prev) => ({ ...prev, api: "Error loading menu items." }));
-      });
-  }, []);
+      .catch(() =>
+        setErrors((prev) => ({
+          ...prev,
+          api: "Could not load menu items."
+        }))
+      )
+  }, [])
 
   /** Add item to cart **/
   function addToCart(item, qty) {
-    const q = Number(qty);
+    const q = Number(qty)
     if (!q || q <= 0) {
-      setErrors({ quantity: "Quantity must be a positive number." });
-      return;
+      setErrors({ quantity: "Quantity must be a positive number." })
+      return
     }
 
-    setErrors((prev) => ({ ...prev, quantity: null }));
-    setCart([...cart, { item, qty: q }]);
+    setErrors((prev) => ({ ...prev, quantity: null }))
+    setCart([...cart, { item, qty: q }])
   }
 
   /** CART CALCULATIONS **/
   const calculateSubtotal = () =>
-    round(cart.reduce((sum, c) => sum + c.item.price * c.qty, 0));
+    round(cart.reduce((sum, c) => sum + c.item.price * c.qty, 0))
 
-  const calculateTax = () => round(calculateSubtotal() * TAX_RATE);
+  const calculateTax = () => round(calculateSubtotal() * TAX_RATE)
 
   const calculateTip = () => {
-    if (tipPercent > 0) return round(calculateSubtotal() * tipPercent);
-    if (customTip) return round(Number(customTip));
-    return 0;
-  };
+    if (tipPercent > 0) return round(calculateSubtotal() * tipPercent)
+    if (customTip) return round(customTip)
+    return 0
+  }
 
   const calculateTotal = () =>
-    round(calculateSubtotal() + calculateTax() + calculateTip());
+    round(calculateSubtotal() + calculateTax() + calculateTip())
 
-  // Clear payment error when user types enough money
+  /** Clear payment error when user types **/
   useEffect(() => {
     if (errors.payment && moneyGiven) {
-      if (round(Number(moneyGiven)) >= calculateTotal()) {
-        setErrors((prev) => ({ ...prev, payment: null }));
+      if (round(moneyGiven) >= calculateTotal()) {
+        setErrors((prev) => ({ ...prev, payment: null }))
       }
     }
-  }, [moneyGiven, cart, tipPercent, customTip]);
+  }, [moneyGiven, cart, tipPercent, customTip])
 
   /** Build DTO & POST **/
   async function placeOrder() {
-    const newErrors = {};
-    const total = calculateTotal();
+    const newErrors = {}
+    const total = calculateTotal()
 
+    // Payment validation
     if (!moneyGiven || isNaN(moneyGiven)) {
-      newErrors.payment = "Enter a valid payment amount.";
-      setErrors(newErrors);
-      return;
+      newErrors.payment = "Enter a valid payment amount."
+      setErrors(newErrors)
+      return
     }
 
-    if (round(Number(moneyGiven)) < total) {
-      newErrors.payment = "Insufficient payment.";
-      setErrors(newErrors);
-      return;
+    if (round(moneyGiven) < total) {
+      newErrors.payment = "Insufficient payment."
+      setErrors(newErrors)
+      return
     }
 
     if (cart.length === 0) {
-      newErrors.cart = "Cart is empty.";
-      setErrors(newErrors);
-      return;
+      newErrors.cart = "Cart is empty."
+      setErrors(newErrors)
+      return
     }
 
-    const user = getCurrentUser();
-    if (!user) {
-      setErrors({ auth: "Login required to place an order." });
-      return;
+    const current = getCurrentUser()
+    if (!current || !current.id) {
+      setErrors({ auth: "You must be logged in." })
+      return
     }
 
-    setErrors({});
+    let fullUser
+    try {
+      const res = await getUserById(current.id)
+      fullUser = res.data
+    } catch (err) {
+      setErrors({ api: "Could not load user profile." })
+      return
+    }
 
-    // Shape `customer` and `preparedBy` like User entities.
-    // Backend tests create full Users, but we at least send id & username.
-    const customerUser = {
-      id: user.id ?? null,
-      username: user.username,
-      name: null,
-      email: null,
-      password: null
-    };
-
-    // For now we'll also set preparedBy = same user.
-    // In a real app, this would be a staff/barista user.
-    const preparedByUser = { ...customerUser };
-
+    // Build order DTO exactly as backend expects
     const orderDto = {
-      customer: customerUser,
-      preparedBy: preparedByUser,
+      customer: fullUser,
+      preparedBy: fullUser, // temporary assumption
       orderItems: cart.map((c) => ({
         quantity: c.qty,
-        // Send full item object from /items so inventory check works
         item: {
           id: c.item.id,
           name: c.item.name,
@@ -124,20 +119,19 @@ const OrderComponent = () => {
           ingredients: c.item.ingredients
         }
       }))
-    };
+    }
 
     try {
-      await createOrder(orderDto);
+      await createOrder(orderDto)
 
-      setSuccess(
-        `Order placed! Change due: $${round(Number(moneyGiven) - total)}`
-      );
+      const change = round(moneyGiven - total)
 
-      // Small delay so user can see success message
-      setTimeout(() => navigate("/"), 2000);
+      setSuccess(`Order placed! Change due: $${change}`)
+
+      setTimeout(() => navigate("/"), 2000)
     } catch (err) {
-      console.error(err);
-      setErrors({ api: "Error placing order." });
+      console.error(err)
+      setErrors({ api: "Error placing order." })
     }
   }
 
@@ -145,13 +139,9 @@ const OrderComponent = () => {
     <div className="container mt-5">
       <h2 className="text-center fw-bold mb-4">Build Your Order</h2>
 
-      {/* ERRORS & SUCCESS */}
-      {errors.quantity && (
-        <div className="alert alert-danger">{errors.quantity}</div>
-      )}
-      {errors.payment && (
-        <div className="alert alert-danger">{errors.payment}</div>
-      )}
+      {/* ERRORS */}
+      {errors.quantity && <div className="alert alert-danger">{errors.quantity}</div>}
+      {errors.payment && <div className="alert alert-danger">{errors.payment}</div>}
       {errors.cart && <div className="alert alert-danger">{errors.cart}</div>}
       {errors.api && <div className="alert alert-danger">{errors.api}</div>}
       {errors.auth && <div className="alert alert-danger">{errors.auth}</div>}
@@ -161,10 +151,7 @@ const OrderComponent = () => {
       <h4>Menu</h4>
       <ul className="list-group mb-4">
         {items.map((item) => (
-          <li
-            className="list-group-item d-flex justify-content-between"
-            key={item.id}
-          >
+          <li className="list-group-item d-flex justify-content-between" key={item.id}>
             <span>
               {item.name} — ${item.price.toFixed(2)}
             </span>
@@ -180,10 +167,7 @@ const OrderComponent = () => {
               <button
                 className="btn btn-success ms-2"
                 onClick={() =>
-                  addToCart(
-                    item,
-                    document.getElementById(`qty-${item.id}`).value
-                  )
+                  addToCart(item, document.getElementById(`qty-${item.id}`).value)
                 }
               >
                 Add
@@ -213,8 +197,8 @@ const OrderComponent = () => {
         <button
           className="btn btn-outline-primary me-2"
           onClick={() => {
-            setTipPercent(0.15);
-            setCustomTip("");
+            setTipPercent(0.15)
+            setCustomTip("")
           }}
         >
           15%
@@ -222,8 +206,8 @@ const OrderComponent = () => {
         <button
           className="btn btn-outline-primary me-2"
           onClick={() => {
-            setTipPercent(0.2);
-            setCustomTip("");
+            setTipPercent(0.2)
+            setCustomTip("")
           }}
         >
           20%
@@ -231,8 +215,8 @@ const OrderComponent = () => {
         <button
           className="btn btn-outline-primary me-2"
           onClick={() => {
-            setTipPercent(0.25);
-            setCustomTip("");
+            setTipPercent(0.25)
+            setCustomTip("")
           }}
         >
           25%
@@ -244,8 +228,8 @@ const OrderComponent = () => {
         value={customTip}
         placeholder="Custom Tip ($)"
         onChange={(e) => {
-          setCustomTip(e.target.value);
-          setTipPercent(0);
+          setCustomTip(e.target.value)
+          setTipPercent(0)
         }}
       />
 
@@ -257,8 +241,8 @@ const OrderComponent = () => {
         value={moneyGiven}
         placeholder="Amount Given"
         onChange={(e) => {
-          setMoneyGiven(e.target.value);
-          setErrors((prev) => ({ ...prev, payment: null }));
+          setMoneyGiven(e.target.value)
+          setErrors((prev) => ({ ...prev, payment: null }))
         }}
       />
 
@@ -275,7 +259,7 @@ const OrderComponent = () => {
         Place Order
       </button>
     </div>
-  );
-};
+  )
+}
 
-export default OrderComponent;
+export default OrderComponent

@@ -31,6 +31,7 @@ function App() {
 		<Route path='/login' element={<LoginComponent />}></Route>
 		<Route path='/items' element={<AuthenticatedRoute><ListItemsComponent /></AuthenticatedRoute>}></Route>
 		<Route path='/add-item' element={<AuthenticatedRoute><ItemComponent /></AuthenticatedRoute>}></Route>
+		<Route path='/update-item/:id' element={<AuthenticatedRoute><ItemComponent /></AuthenticatedRoute>}></Route>
 		<Route path="/edit-user/:id/:type" element={<AuthenticatedRoute><EditUserComponent /></AuthenticatedRoute>}></Route>
 		<Route path="/order" element={<AuthenticatedRoute><OrderComponent /></AuthenticatedRoute>} />
 	  </Routes>
