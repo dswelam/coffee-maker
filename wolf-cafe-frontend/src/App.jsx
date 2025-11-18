@@ -42,6 +42,7 @@ function App() {
 		<Route path='/staff' element={<AuthenticatedRoute><ListStaffComponent /></AuthenticatedRoute>}></Route>
 		<Route path='/customers' element={<AuthenticatedRoute><ListCustomerComponent /></AuthenticatedRoute>}></Route>
 		<Route path='/add-user' element={<AuthenticatedRoute><UserComponent /></AuthenticatedRoute>}></Route>
+		<Route path='/tax-rate' element={<AuthenticatedRoute><TaxRateComponent /></AuthenticatedRoute>}></Route>
 	  </Routes>
 	  <FooterComponent />
 	  </BrowserRouter>
