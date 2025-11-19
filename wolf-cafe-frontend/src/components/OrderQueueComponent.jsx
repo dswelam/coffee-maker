@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react"
 import { useNavigate } from "react-router-dom"
-import { OrderQueue } from "../services/OrderService"
+import { OrderQueue, prepareOrder, markReady, fulfillOrder, cancelOrder } from "../services/OrderService"
 
 
 const OrderQueueComponent = () => {
@@ -38,6 +38,42 @@ const OrderQueueComponent = () => {
   }, [errorMsg]);
   
   
+  async function handleStatusSelect(orderId, newStatus) {
+    try {
+      if (newStatus === "IN_PROGRESS") {
+        await prepareOrder(orderId);
+      } else if (newStatus === "READY") {
+        await markReady(orderId);
+      } else if (newStatus === "FULFILLED") {
+        await fulfillOrder(orderId);
+      } else if (newStatus === "CANCELLED") {
+        await cancelOrder(orderId);
+      } else {
+        return; // "PLACED" can't be set manually
+      }
+
+      setSuccessMsg("Order status updated!");
+      listOrders();
+    } catch (err) {
+      console.error(err);
+      setErrorMsg("Unable to update order status.");
+    }
+  }
+  
+  function getValidTransitions(status) {
+    switch (status) {
+      case "PLACED":
+        return ["IN_PROGRESS", "CANCELLED"];
+      case "IN_PROGRESS":
+        return ["READY"];
+      case "READY":
+        return ["FULFILLED"];
+      default:
+        return []; // no transitions allowed
+    }
+  }
+
+
   return (
     <div className="container" style={{ paddingTop: '40px' }}>
       <h2 className="fw-bold text-center mb-4">Order Queue</h2>
@@ -73,21 +109,40 @@ const OrderQueueComponent = () => {
                   {order.customer?.name || "Unknown"}
                 </p>
 
-                <p className="mb-0">
-                  <span className="fw-semibold">Status:</span>{" "}
-                  <span
-                    className={`badge ${
-                      order.status === "PENDING"
-                        ? "bg-warning text-dark"
-                        : order.status === "COMPLETED"
-                        ? "bg-success"
-                        : "bg-secondary"
-                    }`}
-                    style={{ fontSize: "1rem" }}
-                  >
-                    {order.status}
-                  </span>
-                </p>
+				<p className="mb-0">
+				  <span className="fw-semibold">Status:</span>{" "}
+				  <span
+				    className={`badge ${
+				      order.status === "PENDING"
+				        ? "bg-warning text-dark"
+				        : order.status === "COMPLETED"
+				        ? "bg-success"
+				        : "bg-secondary"
+				    }`}
+				    style={{ fontSize: "1rem" }}
+				  >
+				    {order.status}
+				  </span>
+				</p>
+
+				{getValidTransitions(order.status).length > 0 && (
+				  <select
+				    className="form-select mt-3"
+				    style={{ maxWidth: "200px" }}
+				    defaultValue=""
+				    onChange={(e) => handleStatusSelect(order.id, e.target.value)}
+				  >
+				    <option value="" disabled>
+				      Update Status…
+				    </option>
+
+				    {getValidTransitions(order.status).map((next) => (
+				      <option key={next} value={next}>
+				        {next}
+				      </option>
+				    ))}
+				  </select>
+				)}
               </div>
             </div>
           ))}

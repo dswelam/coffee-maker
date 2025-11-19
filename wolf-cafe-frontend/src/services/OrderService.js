@@ -21,3 +21,23 @@ export const createOrder = (orderDto) => {
 
 // order queue listing 
 export const OrderQueue = () => axios.get(ORDER_API_BASE_URL + '/' + 'queue')
+
+export function updateOrderStatus(orderId, status) {
+  return axios.put(`/api/orders/${orderId}/status`, { status });
+}
+
+export function prepareOrder(id) {
+  return axios.put(`/api/orders/${id}/prepare`);
+}
+
+export function markReady(id) {
+  return axios.put(`/api/orders/${id}/ready`);
+}
+
+export function fulfillOrder(id) {
+  return axios.put(`/api/orders/${id}/fulfill`);
+}
+
+export function cancelOrder(id) {
+  return axios.put(`/api/orders/${id}/cancel`);
+}
