@@ -79,7 +79,7 @@ const ListStaffComponent = () => {
 					<p className="text-secondary mt-2">Click on Staff's' username to delete</p>
 
 				</div>
-				<div className="mt-3">
+				<div className="mt-2 d-flex justify-content-center">
 					<button
 						className="btn btn-primary"
 						onClick={() => navigate('/add-user')}
