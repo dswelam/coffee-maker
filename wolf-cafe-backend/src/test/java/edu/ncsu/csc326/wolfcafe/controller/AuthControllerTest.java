@@ -524,4 +524,58 @@ public class AuthControllerTest {
                 .andExpect( content().string( Matchers.containsString( "User not found" ) ) );
     }
 
+    /**
+     * Test for getting user by id
+     *
+     * @throws Exception
+     *             if there is an error
+     */
+    @Test
+    @WithMockUser ( username = "admin", roles = "ADMIN" )
+    public void testGetUserByIdSuccess () throws Exception {
+        final Long userId = 10L;
+
+        final UserDto mockUser = new UserDto();
+        mockUser.setId( userId );
+        mockUser.setName( "Test User" );
+        mockUser.setUsername( "testuser" );
+        mockUser.setEmail( "test@example.com" );
+        mockUser.setRoles( List.of() );
+
+        Mockito.when( authService.getUserById( userId ) ).thenReturn( mockUser );
+
+        mvc.perform( get( "/api/auth/users/{id}", userId ) ).andExpect( status().isOk() )
+                .andExpect( jsonPath( "$.id" ).value( 10 ) ).andExpect( jsonPath( "$.name" ).value( "Test User" ) )
+                .andExpect( jsonPath( "$.username" ).value( "testuser" ) )
+                .andExpect( jsonPath( "$.email" ).value( "test@example.com" ) );
+    }
+
+    /**
+     * Tests get user when current role is staff
+     *
+     * @throws Exception
+     *             because of staff role
+     */
+    @Test
+    @WithMockUser ( username = "staff", roles = "STAFF" )
+    public void testGetUserByIdForbidden () throws Exception {
+        mvc.perform( get( "/api/auth/users/{id}", 10L ) ).andExpect( status().isForbidden() );
+    }
+
+    /**
+     * Tests when user is not found
+     *
+     * @throws Exception
+     *             because user is not found
+     */
+    @Test
+    @WithMockUser ( username = "admin", roles = "ADMIN" )
+    public void testGetUserByIdNotFound () throws Exception {
+        Mockito.when( authService.getUserById( 99L ) )
+                .thenThrow( new ResourceNotFoundException( "User not found with id 99" ) );
+
+        mvc.perform( get( "/api/auth/users/{id}", 99L ) ).andExpect( status().isNotFound() )
+                .andExpect( content().string( Matchers.containsString( "User not found with id 99" ) ) );
+    }
+
 }

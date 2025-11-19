@@ -328,7 +328,7 @@ public class AuthServiceTest {
 
         // Invalid password (empty)
         updateDto.setEmail( "bobby@wolfcafe.com" );
-        updateDto.setPassword( "" );
+        updateDto.setPassword( " " );
         final WolfCafeAPIException ex4 = assertThrows( WolfCafeAPIException.class, () -> {
             authService.updateUser( createdUser.getId(), updateDto );
         } );
@@ -529,6 +529,47 @@ public class AuthServiceTest {
         authService.deleteUserById( staffId );
 
         assertTrue( userRepository.findById( staffId ).isEmpty() );
+    }
+
+    /**
+     * tests success case for getUserByID
+     */
+    @Test
+    @Transactional
+    void testGetUserByIdSuccess () {
+        // Create a user
+        final UserDto userDto = new UserDto();
+        userDto.setName( "Alice Wonderland" );
+        userDto.setUsername( "alicew" );
+        userDto.setEmail( "alice@test.com" );
+        userDto.setPassword( "password123" );
+        userDto.setRoles( List.of( roleRepository.findByName( "ROLE_CUSTOMER" ) ) );
+
+        final UserDto saved = authService.createUser( userDto );
+        final Long id = saved.getId();
+
+        // Call the method under test
+        final UserDto result = authService.getUserById( id );
+
+        // Assertions
+        assertNotNull( result );
+        assertEquals( id, result.getId() );
+        assertEquals( "Alice Wonderland", result.getName() );
+        assertEquals( "alicew", result.getUsername() );
+        assertEquals( "alice@test.com", result.getEmail() );
+        assertTrue( result.getRoles().stream().anyMatch( r -> r.getName().equals( "ROLE_CUSTOMER" ) ) );
+    }
+
+    /**
+     * Tests failures by throwing a not found exception
+     */
+    @Test
+    @Transactional
+    void testGetUserByIdNotFound () {
+        final ResourceNotFoundException ex = assertThrows( ResourceNotFoundException.class,
+                () -> authService.getUserById( 9999L ) );
+
+        assertTrue( ex.getMessage().contains( "User not found with id 9999" ) );
     }
 
 }

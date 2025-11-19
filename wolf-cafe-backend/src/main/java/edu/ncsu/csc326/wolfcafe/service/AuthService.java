@@ -15,6 +15,7 @@ import edu.ncsu.csc326.wolfcafe.entity.Role;
  * Authorization service
  *
  * @author Dania Swelam
+ * @author Diya Patel
  */
 public interface AuthService {
     /**
@@ -28,15 +29,20 @@ public interface AuthService {
 
     /**
      * Creates the given user (can be of any role), can be used by admin only
-     * @param userDto new user information
+     *
+     * @param userDto
+     *            new user information
      * @return response with created user
      */
     UserDto createUser ( UserDto userDto );
 
     /**
      * Updates the given user information
-     * @param id id of user to update
-     * @param userDto updated user information
+     *
+     * @param id
+     *            id of user to update
+     * @param userDto
+     *            updated user information
      * @return response with updated user
      */
     UserDto updateUser ( Long id, UserDto userDto );
@@ -60,13 +66,16 @@ public interface AuthService {
 
     /**
      * Returns the current tax rate of the system
+     *
      * @return current tax rate as an double (2.00 = 2.00%)
      */
     double getTaxRate ();
 
     /**
      * Sets the current tax rate of the system
-     * @param taxRate the tax rate to set
+     *
+     * @param taxRate
+     *            the tax rate to set
      */
     void setTaxRate ( TaxDto taxRate );
 
@@ -97,4 +106,14 @@ public interface AuthService {
      * @return the list of current users
      */
     List<UserDto> listUsers ();
+
+    /**
+     * Gets the user through the user ID
+     *
+     * @param id
+     *            the id of the user
+     * @return the user information
+     */
+    UserDto getUserById ( Long id );
+
 }
