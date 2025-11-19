@@ -13,6 +13,11 @@ import edu.ncsu.csc326.wolfcafe.entity.OrderLine;
  */
 public class OrderMapper {
 
+    /**
+     * Maps an Order entity to an OrderDto
+     * @param order the Order entity
+     * @return the mapped OrderDto
+     */
     public static OrderDto mapToOrderDto ( final Order order ) {
         final List<OrderLineDto> orderLineDtos = order.getOrderItems().stream().map( OrderMapper::mapToOrderLineDto )
                 .collect( Collectors.toList() );
@@ -20,6 +25,11 @@ public class OrderMapper {
                 order.getPreparedBy() );
     }
 
+    /**
+     * Maps an OrderDto to an Order entity
+     * @param orderDto the OrderDto
+     * @return the mapped Order entity
+     */
     public static Order mapToOrder ( final OrderDto orderDto ) {
         final List<OrderLine> orderLines = orderDto.getOrderItems().stream().map( OrderMapper::mapToOrderLine )
                 .collect( Collectors.toList() );
@@ -31,10 +41,20 @@ public class OrderMapper {
         return order;
     }
 
+    /**
+     * Maps an OrderLine entity to an OrderLineDto
+     * @param orderLine the OrderLine entity
+     * @return the mapped OrderLineDto
+     */
     private static OrderLineDto mapToOrderLineDto ( final OrderLine orderLine ) {
         return new OrderLineDto( orderLine.getId(), orderLine.getItem(), orderLine.getQuantity() );
     }
 
+    /**
+     * Maps an OrderLineDto to an OrderLine entity
+     * @param orderLineDto the OrderLineDto
+     * @return the mapped OrderLine entity
+     */
     private static OrderLine mapToOrderLine ( final OrderLineDto orderLineDto ) {
         final OrderLine orderLine = new OrderLine();
         orderLine.setId( orderLineDto.getId() );

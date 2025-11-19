@@ -19,7 +19,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import edu.ncsu.csc326.wolfcafe.dto.ItemDto;
 import edu.ncsu.csc326.wolfcafe.dto.OrderDto;
 import edu.ncsu.csc326.wolfcafe.entity.Order.OrderStatus;
 import edu.ncsu.csc326.wolfcafe.service.OrderService;
@@ -40,28 +39,6 @@ public class OrderController {
     /** Link to OrderService */
     @Autowired
     private final OrderService orderService;
-
-    /**
-     * TODO
-     * @param itemName
-     * @param amtPaid
-     * @return
-     */
-    public ResponseEntity<OrderDto> orderItem ( final String itemName, final Integer amtPaid ) {
-        // TODO
-        return null;
-    }
-
-    /**
-     * TODO
-     * @param toPurchase
-     * @param amtPaid
-     * @return
-     */
-    public int orderItem ( final ItemDto toPurchase, final int amtPaid ) {
-        // TODO
-        return 0;
-    }
 
     /**
      * REST API method to provide POST access to the Order model.
@@ -132,7 +109,6 @@ public class OrderController {
      * REST API method to prepare an order.
      * Changes the order status to IN_PROGRESS and assigns it to the barista member.
      * @param orderId ID of the order to prepare
-     * @param staffId ID of the staff preparing the order
      * @return The updated order
      */
     @PreAuthorize ( "hasAnyRole('STAFF', 'ADMIN', 'BARISTA')" )

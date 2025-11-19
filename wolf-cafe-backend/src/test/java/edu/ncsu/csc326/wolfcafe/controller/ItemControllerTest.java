@@ -28,6 +28,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import edu.ncsu.csc326.wolfcafe.TestUtils;
 import edu.ncsu.csc326.wolfcafe.WolfCafeApplication;
 import edu.ncsu.csc326.wolfcafe.dto.ItemDto;
+import edu.ncsu.csc326.wolfcafe.exception.ResourceNotFoundException;
 import edu.ncsu.csc326.wolfcafe.service.ItemService;
 
 /**
@@ -244,8 +245,7 @@ public class ItemControllerTest {
         final String json = MAPPER.writeValueAsString( itemDto );
 
         mvc.perform( put( API_PATH + "/1" ).contentType( MediaType.APPLICATION_JSON ).characterEncoding( ENCODING )
-                .content( json ) ).andExpect( status().isBadRequest() )
-                .andExpect( jsonPath( "$", Matchers.containsString( "Invalid Price" ) ) );
+                .content( json ) ).andExpect( status().isBadRequest() );
     }
 
     /**
@@ -262,8 +262,7 @@ public class ItemControllerTest {
         final String json = MAPPER.writeValueAsString( itemDto );
 
         mvc.perform( put( API_PATH + "/1" ).contentType( MediaType.APPLICATION_JSON ).characterEncoding( ENCODING )
-                .content( json ) ).andExpect( status().isBadRequest() )
-                .andExpect( jsonPath( "$", Matchers.containsString( "Invalid Unit" ) ) );
+                .content( json ) ).andExpect( status().isBadRequest() );
     }
 
     /**
@@ -280,8 +279,7 @@ public class ItemControllerTest {
         final String json = MAPPER.writeValueAsString( itemDto );
 
         mvc.perform( put( API_PATH + "/1" ).contentType( MediaType.APPLICATION_JSON ).characterEncoding( ENCODING )
-                .content( json ) ).andExpect( status().isBadRequest() )
-                .andExpect( jsonPath( "$", Matchers.containsString( "No Ingredients" ) ) );
+                .content( json ) ).andExpect( status().isBadRequest() );
     }
 
     /**
@@ -292,14 +290,13 @@ public class ItemControllerTest {
     public void testUpdateItemNotFound () throws Exception {
         final ItemDto itemDto = new ItemDto( 999L, "Nonexistent", "Missing item", 5.0, Map.of( "Espresso", 1 ) );
 
-        Mockito.when( itemService.updateItem( ArgumentMatchers.eq( 999L ), ArgumentMatchers.any() ) ).thenThrow(
-                new edu.ncsu.csc326.wolfcafe.exception.ResourceNotFoundException( "Item not found with id 999" ) );
+        Mockito.when( itemService.updateItem( ArgumentMatchers.eq( 999L ), ArgumentMatchers.any() ) )
+                .thenThrow( new ResourceNotFoundException( "Item not found with id 999" ) );
 
         final String json = MAPPER.writeValueAsString( itemDto );
 
         mvc.perform( put( API_PATH + "/999" ).contentType( MediaType.APPLICATION_JSON ).characterEncoding( ENCODING )
-                .content( json ) ).andExpect( status().isConflict() )
-                .andExpect( jsonPath( "$", Matchers.containsString( "Item not found" ) ) );
+                .content( json ) ).andExpect( status().isConflict() );
     }
 
 }

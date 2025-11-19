@@ -6,5 +6,16 @@ package edu.ncsu.csc326.wolfcafe.entity;
  * @author Diya Patel
  */
 public enum Permission {
-    ADD_INVENTORY, FULFILL_ORDER, PURCHASE_ITEM, PURCHASE_RECIPE, MANAGE_USERS
+
+    /** Permission to add inventory */
+    ADD_INVENTORY,
+
+    /** Permission to  fulfill orders */
+    FULFILL_ORDER,
+
+    /** Permission to purchase items */
+    PURCHASE_ITEM,
+
+    /** Permission to manage users */
+    MANAGE_USERS
 }
