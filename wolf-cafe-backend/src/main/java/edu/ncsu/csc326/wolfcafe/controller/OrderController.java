@@ -1,6 +1,7 @@
 package edu.ncsu.csc326.wolfcafe.controller;
 
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -10,6 +11,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -17,6 +19,7 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 import edu.ncsu.csc326.wolfcafe.dto.OrderDto;
@@ -45,8 +48,8 @@ public class OrderController {
      *
      * @param orderDto
      *            The valid Order to be saved.
-     * @return ResponseEntity indicating success if the Order could be
-     *         saved to the inventory, or an error if it could not be
+     * @return ResponseEntity indicating success if the Order could be saved to
+     *         the inventory, or an error if it could not be
      */
     @PreAuthorize ( "hasAnyRole('STAFF', 'ADMIN', 'CUSTOMER', 'ANONYMOUS')" )
     @PostMapping
@@ -62,8 +65,8 @@ public class OrderController {
      *            the id of the order to update
      * @param orderDto
      *            The valid Order to be updated.
-     * @return ResponseEntity indicating success if the Order could be
-     *         updated, or an error if it could not be.
+     * @return ResponseEntity indicating success if the Order could be updated,
+     *         or an error if it could not be.
      */
     @PreAuthorize ( "hasAnyRole('STAFF', 'ADMIN', 'CUSTOMER', 'ANONYMOUS')" )
     @PutMapping ( "{id}" )
@@ -83,8 +86,8 @@ public class OrderController {
      *
      * @param orderId
      *            The id of the Order to delete
-     * @return Success if the order could be deleted; an error if the
-     *         order does not exist
+     * @return Success if the order could be deleted; an error if the order does
+     *         not exist
      */
     @PreAuthorize ( "hasAnyRole('STAFF', 'ADMIN')" )
     @DeleteMapping ( "{id}" )
@@ -95,7 +98,9 @@ public class OrderController {
 
     /**
      * REST API method to list orders by status.
-     * @param status Status of orders to list
+     *
+     * @param status
+     *            Status of orders to list
      * @return List of orders with the given status
      */
     @PreAuthorize ( "hasAnyRole('STAFF', 'ADMIN', 'BARISTA')" )
@@ -106,9 +111,11 @@ public class OrderController {
     }
 
     /**
-     * REST API method to prepare an order.
-     * Changes the order status to IN_PROGRESS and assigns it to the barista member.
-     * @param orderId ID of the order to prepare
+     * REST API method to prepare an order. Changes the order status to
+     * IN_PROGRESS and assigns it to the barista member.
+     *
+     * @param orderId
+     *            ID of the order to prepare
      * @return The updated order
      */
     @PreAuthorize ( "hasAnyRole('STAFF', 'ADMIN', 'BARISTA')" )
@@ -121,9 +128,11 @@ public class OrderController {
     }
 
     /**
-     * REST API method to mark an order as ready.
-     * Changes the order status to READY when the order is prepared.
-     * @param orderId ID of the order to mark as ready
+     * REST API method to mark an order as ready. Changes the order status to
+     * READY when the order is prepared.
+     *
+     * @param orderId
+     *            ID of the order to mark as ready
      * @return The updated order
      */
     @PreAuthorize ( "hasAnyRole('BARISTA')" )
@@ -136,9 +145,11 @@ public class OrderController {
     }
 
     /**
-     * REST API method to mark an order as fullfilled.
-     * Changes the order status to FULLFILLED when the customer picks up the order.
-     * @param orderId ID of the order to mark as fulfilled
+     * REST API method to mark an order as fullfilled. Changes the order status
+     * to FULLFILLED when the customer picks up the order.
+     *
+     * @param orderId
+     *            ID of the order to mark as fulfilled
      * @return The updated order
      */
     @PreAuthorize ( "hasAnyRole('STAFF', 'ADMIN', 'CUSTOMER', 'BARISTA')" )
@@ -150,7 +161,9 @@ public class OrderController {
 
     /**
      * REST API method to cancel an order.
-     * @param orderId ID of the order to cancel
+     *
+     * @param orderId
+     *            ID of the order to cancel
      * @return The updated order
      */
     @PreAuthorize ( "hasAnyRole('CUSTOMER')" )
@@ -162,6 +175,7 @@ public class OrderController {
 
     /**
      * REST API method to list orders for the authenticated customer.
+     *
      * @return List of orders for the authenticated customer
      */
     @PreAuthorize ( "hasAnyRole('CUSTOMER')" )
@@ -172,4 +186,18 @@ public class OrderController {
         final List<OrderDto> orders = orderService.getCustomersOrders( username );
         return ResponseEntity.ok( orders );
     }
+
+    /**
+     * handler for exception
+     *
+     * @param ex
+     *            the exception to handle
+     * @return the error message
+     */
+    @ExceptionHandler ( IllegalStateException.class )
+    @ResponseStatus ( HttpStatus.BAD_REQUEST )
+    public Map<String, String> handleIllegalState ( final IllegalStateException ex ) {
+        return Map.of( "error", ex.getMessage() );
+    }
+
 }
