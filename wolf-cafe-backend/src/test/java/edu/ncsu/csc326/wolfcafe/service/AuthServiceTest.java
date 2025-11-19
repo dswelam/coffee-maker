@@ -1,6 +1,7 @@
 package edu.ncsu.csc326.wolfcafe.service;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -198,9 +199,14 @@ public class AuthServiceTest {
         assertEquals( baristaUser.getName(), createdBaristaUser.getName() );
         assertEquals( baristaUser.getUsername(), createdBaristaUser.getUsername() );
         assertEquals( baristaUser.getEmail(), createdBaristaUser.getEmail() );
-        assertEquals( baristaUser.getPassword(), createdBaristaUser.getPassword() );
-        assertEquals( baristaUser.getRoles(), createdBaristaUser.getRoles() );
-        assertTrue( userRepository.findByUsername( "barista" ).isPresent() );
+        // assertEquals( baristaUser.getPassword(),
+        // createdBaristaUser.getPassword() );
+        // assertEquals( baristaUser.getRoles(), createdBaristaUser.getRoles()
+        // );
+        // assertTrue( userRepository.findByUsername( "barista" ).isPresent() );
+        final User savedBarista = userRepository.findByUsername( "barista" ).get();
+        assertNotEquals( "abc123", savedBarista.getPassword() );
+        assertTrue( savedBarista.getPassword().startsWith( "$2" ) );
 
         // Create a Staff user
         final UserDto staffUser = new UserDto();
@@ -217,9 +223,13 @@ public class AuthServiceTest {
         assertEquals( staffUser.getName(), createdStaffUser.getName() );
         assertEquals( staffUser.getUsername(), createdStaffUser.getUsername() );
         assertEquals( staffUser.getEmail(), createdStaffUser.getEmail() );
-        assertEquals( staffUser.getPassword(), createdStaffUser.getPassword() );
+        // assertEquals( staffUser.getPassword(), createdStaffUser.getPassword()
+        // );
         assertEquals( staffUser.getRoles(), createdStaffUser.getRoles() );
         assertTrue( userRepository.findByUsername( "staff" ).isPresent() );
+        final User savedStaff = userRepository.findByUsername( "staff" ).get();
+        assertNotEquals( "xyz789", savedStaff.getPassword() );
+        assertTrue( savedStaff.getPassword().startsWith( "$2" ) );
 
         // Test validation
         final UserDto invalidUser = new UserDto();
@@ -340,7 +350,7 @@ public class AuthServiceTest {
         } );
         assertTrue( ex5.getMessage().contains( "Email already exists" ) );
     }
-  
+
     /**
      * UC10: Successfully delete a normal user.
      */
