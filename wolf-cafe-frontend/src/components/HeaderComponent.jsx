@@ -57,7 +57,7 @@ const HeaderComponent = () => {
 
 							{/* ORDER (customers only) */}
 							{
-							    isCustomer &&
+							    isAuth && isCustomer &&
 							    <li className='nav-item'>
 							        <NavLink to='/order' className='nav-link'
 							            style={{ fontSize: '1.5rem', fontWeight: '600', marginLeft: '3rem' }}
