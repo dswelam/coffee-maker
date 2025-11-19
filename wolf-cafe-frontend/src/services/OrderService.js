@@ -18,3 +18,6 @@ export const createOrder = (orderDto) => {
     }
   });
 };
+
+// order queue listing 
+export const OrderQueue = () => axios.get(ORDER_API_BASE_URL + '/' + 'queue')

@@ -38,7 +38,15 @@ const HeaderComponent = () => {
 						<ul className='navbar-nav'>
 							{/*STAFF*/}
 							{
-								isAuth &&
+								isAuth && isStaff &&
+								<li className='nav-item'>
+									<NavLink to='/order-queue' className='nav-link'
+										style={{ fontSize: '1.5rem', fontWeight: '600', marginLeft: '3rem' }}
+									>Order Queue</NavLink>
+								</li>
+							}
+							{
+								isAuth && (isAdmin || isStaff) &&
 								<li className='nav-item'>
 									<NavLink to='/items' className='nav-link'
 										style={{ fontSize: '1.5rem', fontWeight: '600', marginLeft: '3rem' }}
@@ -75,7 +83,7 @@ const HeaderComponent = () => {
 								</li>
 							}
 							{
-								isAuth && isAdmin &&
+								isAuth && (isAdmin || isStaff) &&
 								<li className='nav-item'>
 									<NavLink to='/ingredients' className='nav-link'
 										style={{ fontSize: '1.5rem', fontWeight: '600', marginLeft: '3rem' }}
