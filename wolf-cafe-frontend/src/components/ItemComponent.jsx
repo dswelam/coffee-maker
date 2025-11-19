@@ -54,16 +54,6 @@ const ItemComponent = () => {
 		}
 	}, [id])
 
-	useEffect(() => {
-		// prevent scrolling
-		document.body.style.overflow = 'hidden'
-
-		// cleanup when component unmounts
-		return () => {
-			document.body.style.overflow = 'auto'
-		}
-	}, [])
-
 	function saveOrUpdateItem(e) {
 		e.preventDefault()
 		const item = {
@@ -144,8 +134,8 @@ const ItemComponent = () => {
 	)
 
 	return (
-		<div className="d-flex justify-content-center align-items-center vh-100" style={{ paddingTop: '5px' }}>
-			<div className="card shadow-lg p-5" style={{ width: '45rem', transform: 'scale(0.9)', backgroundColor: '#fff', borderRadius: '1rem' }}>
+		<div className="d-flex justify-content-center align-items-start" style={{ paddingTop: '40px' }}>
+		  <div className="card shadow-lg p-5" style={{ width: '45rem', backgroundColor: '#fff', borderRadius: '1rem', transform: 'scale(0.9)' }}>
 				{pageTitle()}
 
 				{errors.general && <div className="alert alert-danger text-center">{errors.general}</div>}

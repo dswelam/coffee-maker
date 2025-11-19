@@ -40,6 +40,13 @@ import edu.ncsu.csc326.wolfcafe.service.AuthService;
 import lombok.AllArgsConstructor;
 
 /**
+ * GENERATIVE AI WAS USED IN THE CREATION OF THIS FILE:
+ *
+ * Model: GitHub Copilot GPT-4.1
+ * Prompts:
+ * - "Generate an implementation of updating a user in Java using Spring Boot."
+ * - "Enhance the user update method to include validation checks for name, email, and password."
+ *
  * Implemented AuthService
  *
  * @author Dania Swelam
@@ -256,7 +263,7 @@ public class AuthServiceImpl implements AuthService {
 
         // Validate permissions allowed for staff
         for ( final Permission p : permissions ) {
-            if ( p == Permission.PURCHASE_ITEM || p == Permission.PURCHASE_RECIPE ) {
+            if ( p == Permission.PURCHASE_ITEM ) {
                 throw new IllegalArgumentException( "Invalid Permission: Staff cannot purchase items or recipes." );
             }
         }
@@ -384,12 +391,3 @@ public class AuthServiceImpl implements AuthService {
         return UserMapper.mapToUserDto( updatedUser );
     }
 }
-
-/**
- * GENERATIVE AI WAS USED IN THE CREATION OF THIS FILE:
- *
- * Model: GitHub Copilot GPT-4.1
- * Prompts:
- * - "Generate an implementation of updating a user in Java using Spring Boot."
- * - "Enhance the user update method to include validation checks for name, email, and password."
- */

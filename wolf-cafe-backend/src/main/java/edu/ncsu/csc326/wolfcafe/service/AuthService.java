@@ -35,6 +35,7 @@ public interface AuthService {
 
     /**
      * Updates the given user information
+     * @param id id of user to update
      * @param userDto updated user information
      * @return response with updated user
      */
