@@ -217,7 +217,6 @@ public class OrderServiceImpl implements OrderService {
     /**
      * Cancel an order
      * @param orderId The order to cancel by ID
-     * @param username The customer cancelling the order by username
      * @return The updated order DTO
      */
     @Override

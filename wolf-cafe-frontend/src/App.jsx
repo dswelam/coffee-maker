@@ -14,6 +14,8 @@ import UserComponent from './components/UserComponent'
 import TaxRateComponent from './components/TaxRateComponent'
 
 import { isUserLoggedIn } from './services/AuthService'
+import OrderComponent from "./components/OrderComponent";
+
 
 function App() {
 
@@ -36,6 +38,7 @@ function App() {
 		<Route path='/items' element={<AuthenticatedRoute><ListItemsComponent /></AuthenticatedRoute>}></Route>
 		<Route path='/add-item' element={<AuthenticatedRoute><ItemComponent /></AuthenticatedRoute>}></Route>
 		<Route path='/update-item/:id' element={<AuthenticatedRoute><ItemComponent /></AuthenticatedRoute>}></Route>
+		<Route path='/order' element={<AuthenticatedRoute><OrderComponent /></AuthenticatedRoute>}/>
 		<Route path='/ingredients' element={<AuthenticatedRoute><ListIngredientsComponent /></AuthenticatedRoute>}></Route>
 		<Route path='/add-ingredient' element={<AuthenticatedRoute><IngredientComponent /></AuthenticatedRoute>}></Route>
 		<Route path='/update-ingredient/:ingredientName' element={<AuthenticatedRoute><IngredientComponent /></AuthenticatedRoute>}></Route>

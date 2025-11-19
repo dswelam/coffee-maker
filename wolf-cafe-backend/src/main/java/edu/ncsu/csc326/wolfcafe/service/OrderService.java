@@ -36,8 +36,8 @@ public interface OrderService {
 
     /**
      * Checks that the payment is sufficient and calculates the change
-     * @param itemId the id of the item // TODO: Can't there be multiple items on an order?
-     * @param tip // TODO: Why is this needed?
+     * @param itemId the id of the item
+     * @param tip the tip amount
      * @param payment the amount paid by the customer
      * @return change to return to the user
      */
@@ -68,8 +68,9 @@ public interface OrderService {
     public OrderDto updateOrder ( Long orderId, OrderDto orderDto );
 
     /**
-     * TODO
-     * @param orderId
+     * Delete an order by its ID
+     * @param orderId id of the order to delete
+     * @throws ResourceNotFoundException if the order doesn't exist
      */
     public void deleteOrder ( Long orderId );
 
@@ -83,7 +84,7 @@ public interface OrderService {
     /**
      * Action to prepare an order
      * @param orderId The order to prepare by ID
-     * @param staffId The staff member preparing the order by ID
+     * @param staffUsername The staff member preparing the order by username
      * @return The updated order DTO
      */
     public OrderDto prepareOrder ( Long orderId, String staffUsername );
@@ -106,14 +107,13 @@ public interface OrderService {
     /**
      * Action to cancel an order
      * @param orderId The order to cancel by ID
-     * @param username The user cancelling the order by username
      * @return The updated order DTO
      */
     public OrderDto cancelOrder ( Long orderId );
 
     /**
      * List all orders for a given customer
-     * @param customerId
+     * @param username the customer's username
      * @return list of orders for a customer
      */
     public List<OrderDto> getCustomersOrders ( String username );

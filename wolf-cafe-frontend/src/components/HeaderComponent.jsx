@@ -1,13 +1,14 @@
 import React from 'react'
 import { NavLink } from 'react-router-dom'
 import { useNavigate } from 'react-router-dom'
-import { isAdminUser, isStaffUser, isUserLoggedIn, logout } from '../services/AuthService'
+import { isAdminUser, isStaffUser, isCustomerUser, isUserLoggedIn, logout } from '../services/AuthService'
 
 const HeaderComponent = () => {
 
 	const isAuth = isUserLoggedIn()
-	const isAdmin = isAdminUser();
-	const isStaff = isStaffUser();
+	const isAdmin = isAdminUser()
+	const isStaff = isStaffUser()
+	const isCustomer = isCustomerUser()
 
 	function handleLogout() {
 		logout()
@@ -46,6 +47,16 @@ const HeaderComponent = () => {
 							}
 
 
+							{/* ORDER (customers only) */}
+							{
+							    isCustomer &&
+							    <li className='nav-item'>
+							        <NavLink to='/order' className='nav-link'
+							            style={{ fontSize: '1.5rem', fontWeight: '600', marginLeft: '3rem' }}
+							        >Order</NavLink>
+							    </li>
+							}
+										  
 							{/*STAFF OR ADMIN*/}
 							{
 								isAuth && isAdmin &&

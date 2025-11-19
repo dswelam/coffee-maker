@@ -59,6 +59,9 @@ public class AuthController {
 
     /**
      * Registers a new user of any role with the system.
+     *
+     * @param userDto          object with user info
+     * @return response indicating success or failure
      */
     @PreAuthorize ( "hasRole('ADMIN')" )
     @PostMapping ( "/users" )
@@ -69,6 +72,10 @@ public class AuthController {
 
     /**
      * Updates an existing user of any role with the system.
+     *
+     * @param id       id of user to update
+     * @param userDto object with updated user info
+     * @return response indicating success or failure
      */
     @PreAuthorize ( "hasRole('ADMIN')" )
     @PutMapping ( "/users/{id}" )
@@ -116,17 +123,17 @@ public class AuthController {
      */
     @PreAuthorize ( "hasRole('ADMIN')" )
     @PutMapping ( "/roles/{roleName}/permissions" )
-    public ResponseEntity< ? > assignPermissions ( @PathVariable ( "roleName" ) final String roleName,
+    public ResponseEntity<Role> assignPermissions ( @PathVariable ( "roleName" ) final String roleName,
             @RequestBody final Collection<Permission> permissions ) {
         try {
             final Role updated = authService.assignPermissions( roleName, permissions );
             return ResponseEntity.ok( updated );
         }
         catch ( final IllegalArgumentException e ) {
-            return ResponseEntity.badRequest().body( e.getMessage() );
+            return ResponseEntity.badRequest().build();
         }
         catch ( final ResourceNotFoundException e ) {
-            return ResponseEntity.status( HttpStatus.NOT_FOUND ).body( e.getMessage() );
+            return ResponseEntity.status( HttpStatus.NOT_FOUND ).build();
         }
     }
 
@@ -173,19 +180,19 @@ public class AuthController {
      */
     @PreAuthorize ( "hasRole('ADMIN')" )
     @PostMapping ( "/users/delete" )
-    public ResponseEntity< ? > deleteMultipleUsers ( @RequestBody final List<Long> ids ) {
+    public ResponseEntity<String> deleteMultipleUsers ( @RequestBody final List<Long> ids ) {
 
         try {
-            for ( Long id : ids ) {
+            for ( final Long id : ids ) {
                 authService.deleteUserById( id );
             }
             return ResponseEntity.ok( "Selected users deleted successfully." );
         }
-        catch ( ResourceNotFoundException e ) {
+        catch ( final ResourceNotFoundException e ) {
             // UC10: user already deleted by another admin
             return ResponseEntity.status( HttpStatus.NOT_FOUND ).body( e.getMessage() );
         }
-        catch ( WolfCafeAPIException e ) {
+        catch ( final WolfCafeAPIException e ) {
             // UC10: cannot delete self or cannot delete staff w/ active orders
             return ResponseEntity.status( HttpStatus.BAD_REQUEST ).body( e.getMessage() );
         }
