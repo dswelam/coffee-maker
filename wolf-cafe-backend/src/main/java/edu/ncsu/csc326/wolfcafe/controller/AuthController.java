@@ -227,4 +227,18 @@ public class AuthController {
         return ResponseEntity.status( ex.getStatus() ).body( ex.getMessage() );
     }
 
+    /**
+     * gets the user information through ID
+     *
+     * @param id
+     *            the id of the user
+     * @return the information of the user
+     */
+    @PreAuthorize ( "hasRole('ADMIN')" )
+    @GetMapping ( "/users/{id}" )
+    public ResponseEntity<UserDto> getUserById ( @PathVariable ( name = "id" ) final Long id ) {
+        final UserDto user = authService.getUserById( id );
+        return ResponseEntity.ok( user );
+    }
+
 }

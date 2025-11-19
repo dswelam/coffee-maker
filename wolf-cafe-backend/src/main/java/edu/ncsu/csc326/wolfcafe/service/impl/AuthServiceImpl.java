@@ -376,8 +376,13 @@ public class AuthServiceImpl implements AuthService {
         }
 
         // [Invalid Password] Check: if password is provided, must be non-empty
-        if ( userDto.getPassword() != null && userDto.getPassword().trim().isEmpty() ) {
-            throw new WolfCafeAPIException( HttpStatus.BAD_REQUEST, "Invalid password: must be a non-empty string." );
+        // Only validate password if it is being changed
+        if ( userDto.getPassword() != null && !userDto.getPassword().isEmpty() ) {
+            // Password cannot be only spaces
+            if ( userDto.getPassword().trim().isEmpty() ) {
+                throw new WolfCafeAPIException( HttpStatus.BAD_REQUEST,
+                        "Invalid password: must be a non-empty string." );
+            }
         }
 
         // Update fields
@@ -393,4 +398,19 @@ public class AuthServiceImpl implements AuthService {
         final User updatedUser = userRepository.save( existingUser );
         return UserMapper.mapToUserDto( updatedUser );
     }
+
+    /**
+     * gets the user through the ID.
+     *
+     * @param id
+     *            the id of the user
+     * @return the user
+     */
+    @Override
+    public UserDto getUserById ( final Long id ) {
+        final User user = userRepository.findById( id )
+                .orElseThrow( () -> new ResourceNotFoundException( "User not found with id " + id ) );
+        return UserMapper.mapToUserDto( user );
+    }
+
 }
