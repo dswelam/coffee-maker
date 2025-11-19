@@ -1,6 +1,7 @@
 package edu.ncsu.csc326.wolfcafe.service;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -18,6 +19,7 @@ import edu.ncsu.csc326.wolfcafe.dto.ItemDto;
 import edu.ncsu.csc326.wolfcafe.dto.OrderDto;
 import edu.ncsu.csc326.wolfcafe.dto.OrderLineDto;
 import edu.ncsu.csc326.wolfcafe.dto.RegisterDto;
+import edu.ncsu.csc326.wolfcafe.entity.Order;
 import edu.ncsu.csc326.wolfcafe.entity.Order.OrderStatus;
 import edu.ncsu.csc326.wolfcafe.entity.User;
 import edu.ncsu.csc326.wolfcafe.mapper.ItemMapper;
@@ -29,6 +31,7 @@ import jakarta.persistence.EntityManager;
  * Test class for the OrderService and its implementation
  *
  * @author Brooke Wu
+ * @author Diya Patel (dapatel8)
  */
 @SpringBootTest
 public class OrderServiceTest {
@@ -162,6 +165,10 @@ public class OrderServiceTest {
         final OrderDto createdOrder = orderService.createOrder( order );
         assertEquals( createdOrder.getOrderItems().getFirst().getItem().getName(),
                 order.getOrderItems().getFirst().getItem().getName() );
+        inventory = inventoryService.getInventory();
+        assertEquals(7, inventory.getIngredients().get("Chocolate"));
+        assertEquals(8, inventory.getIngredients().get("Sugar"));
+        assertEquals(9, inventory.getIngredients().get("Milk"));
     }
 
     /**
@@ -218,10 +225,10 @@ public class OrderServiceTest {
         final OrderDto createdOrder = orderService.createOrder( order );
 
         // Update order status
-        createdOrder.setStatus( OrderStatus.READY );
+        createdOrder.setStatus( OrderStatus.PLACED );
         final OrderDto updatedOrder = orderService.updateOrder( createdOrder.getId(), createdOrder );
 
-        assertEquals( OrderStatus.READY, updatedOrder.getStatus() );
+        assertEquals( OrderStatus.PLACED, updatedOrder.getStatus() );
         assertEquals( "Tea", updatedOrder.getOrderItems().getFirst().getItem().getName() );
     }
 
@@ -413,9 +420,12 @@ public class OrderServiceTest {
         final List<OrderLineDto> orderItems = new ArrayList<>();
         orderItems.add( orderLine );
         order.setOrderItems( orderItems );
-        order.setStatus( OrderStatus.READY );
         order.setPreparedBy( barista );
         final OrderDto createdOrder = orderService.createOrder( order );
+
+        final Order existing = orderRepository.findById( createdOrder.getId() ).get();
+        existing.setStatus( OrderStatus.READY );
+        orderRepository.save( existing );
 
         // Mark order as fulfilled
         final OrderDto fulfilledOrder = orderService.orderFulfilled( createdOrder.getId() );
@@ -512,4 +522,131 @@ public class OrderServiceTest {
         assertEquals( 2, customerOrders.size() );
         assertEquals( "george", customerOrders.getFirst().getCustomer().getUsername() );
     }
+
+    /**
+     * Tests that exception is thrown when order is not placed and is trying to
+     * get updated
+     */
+    @Test
+    @Transactional
+    void testUpdateOrderFailsWhenNotPlaced () {
+        // Create customer
+        final RegisterDto reg = new RegisterDto();
+        reg.setName( "Test" );
+        reg.setUsername( "testUser1" );
+        reg.setEmail( "test1@mail.com" );
+        reg.setPassword( "pwd" );
+        authService.register( reg );
+        final User customer = userRepository.findByUsername( "testUser1" ).get();
+
+        // Create item
+        ItemDto item = new ItemDto();
+        item.setName( "FailTea" );
+        item.setPrice( 3.0 );
+        item.setIngredients( Map.of( "Tea", 1 ) );
+        item = itemService.addItem( item );
+
+        // Create order
+        final OrderLineDto line = new OrderLineDto();
+        line.setItem( ItemMapper.mapToItem( itemService.getItemByName( "FailTea" ) ) );
+        line.setQuantity( 1 );
+
+        final OrderDto order = new OrderDto();
+        order.setCustomer( customer );
+        order.setOrderItems( new ArrayList<>( List.of( line ) ) );
+        final OrderDto created = orderService.createOrder( order );
+
+        // Manually change to non-PLACED status
+        final Order existing = orderRepository.findById( created.getId() ).get();
+        existing.setStatus( OrderStatus.READY );
+        orderRepository.save( existing );
+
+        // Expect exception
+        assertThrows( IllegalStateException.class, () -> {
+            created.setStatus( OrderStatus.READY );
+            orderService.updateOrder( created.getId(), created );
+        } );
+    }
+
+    /**
+     * Tests that order is failed when trying to fufill when it is not ready
+     */
+    @Test
+    @Transactional
+    void testOrderFulfilledFailsWhenNotReady () {
+        // Create customer
+        final RegisterDto reg = new RegisterDto();
+        reg.setName( "Test2" );
+        reg.setUsername( "testUser2" );
+        reg.setEmail( "test2@mail.com" );
+        reg.setPassword( "pwd" );
+        authService.register( reg );
+        final User customer = userRepository.findByUsername( "testUser2" ).get();
+
+        // Create item
+        ItemDto item = new ItemDto();
+        item.setName( "FailCoffee" );
+        item.setPrice( 4.0 );
+        item.setIngredients( Map.of( "Coffee", 1 ) );
+        item = itemService.addItem( item );
+
+        // Create order
+        final OrderLineDto line = new OrderLineDto();
+        line.setItem( ItemMapper.mapToItem( itemService.getItemByName( "FailCoffee" ) ) );
+        line.setQuantity( 1 );
+
+        final OrderDto order = new OrderDto();
+        order.setCustomer( customer );
+        order.setOrderItems( new ArrayList<>( List.of( line ) ) );
+        final OrderDto created = orderService.createOrder( order );
+
+        // Order is PLACED, not READY → SHOULD FAIL
+        assertThrows( IllegalStateException.class, () -> {
+            orderService.orderFulfilled( created.getId() );
+        } );
+    }
+
+    /**
+     * If order is not placed then it cannot be cancelled.
+     */
+    @Test
+    @Transactional
+    void testCancelOrderFailsWhenNotPlaced () {
+        // Create customer
+        final RegisterDto reg = new RegisterDto();
+        reg.setName( "Test3" );
+        reg.setUsername( "testUser3" );
+        reg.setEmail( "test3@mail.com" );
+        reg.setPassword( "pwd" );
+        authService.register( reg );
+        final User customer = userRepository.findByUsername( "testUser3" ).get();
+
+        // Create item
+        ItemDto item = new ItemDto();
+        item.setName( "FailLatte" );
+        item.setPrice( 5.0 );
+        item.setIngredients( Map.of( "Milk", 1, "Coffee", 1 ) );
+        item = itemService.addItem( item );
+
+        // Create order
+        final OrderLineDto line = new OrderLineDto();
+        line.setItem( ItemMapper.mapToItem( itemService.getItemByName( "FailLatte" ) ) );
+        line.setQuantity( 1 );
+
+        final OrderDto order = new OrderDto();
+        order.setCustomer( customer );
+        order.setOrderItems( new ArrayList<>( List.of( line ) ) );
+        final OrderDto created = orderService.createOrder( order );
+
+        // Force order into non-PLACED state
+        final Order existing = orderRepository.findById( created.getId() ).get();
+        existing.setStatus( OrderStatus.IN_PROGRESS );
+        orderRepository.save( existing );
+
+        // Expect failure
+        assertThrows( IllegalStateException.class, () -> {
+            orderService.cancelOrder( created.getId() );
+        } );
+    }
+
 }

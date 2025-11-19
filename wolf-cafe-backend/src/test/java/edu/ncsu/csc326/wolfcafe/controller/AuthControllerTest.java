@@ -147,7 +147,8 @@ public class AuthControllerTest {
     }
 
     /**
-     * Tests creating a staff and barista user (as an admin user) and logging in as the created users.
+     * Tests creating a staff and barista user (as an admin user) and logging in
+     * as the created users.
      *
      * @throws Exception
      *             if error
@@ -309,7 +310,8 @@ public class AuthControllerTest {
     /**
      * Tests setting the tax rate
      *
-     * @throws Exception if error
+     * @throws Exception
+     *             if error
      */
     @Test
     @WithMockUser ( username = "admin", roles = "ADMIN" )
@@ -452,6 +454,128 @@ public class AuthControllerTest {
         mvc.perform( post( "/api/auth/users/delete" ).contentType( MediaType.APPLICATION_JSON )
                 .content( TestUtils.asJsonString( ids ) ) ).andExpect( status().isNotFound() )
                 .andExpect( content().string( Matchers.containsString( "User not found" ) ) );
+    }
+
+    /**
+     * deletion of user being success test.
+     */
+    @Test
+    @Transactional
+    @WithMockUser ( username = "admin", roles = "ADMIN" )
+    public void testDeleteUserSuccess () throws Exception {
+
+        // Mock no exception thrown
+        Mockito.doNothing().when( authService ).deleteUserById( 5L );
+
+        mvc.perform( org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete( "/api/auth/user/{id}",
+                5L ) ).andExpect( status().isOk() ).andExpect( content().string( "User deleted successfully." ) );
+    }
+
+    /**
+     * Test for deletion when it isn't an admin role, which causes an error.
+     *
+     * @throws Exception
+     *             because user is not admin
+     */
+    @Test
+    @Transactional
+    @WithMockUser ( username = "staff", roles = "STAFF" )
+    public void testDeleteUserForbidden () throws Exception {
+
+        mvc.perform( org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete( "/api/auth/user/{id}",
+                5L ) ).andExpect( status().isForbidden() );
+    }
+
+    /**
+     * Admin users cannot delete themselves
+     *
+     * @throws Exception
+     *             if admin tries to delete themselves
+     */
+    @Test
+    @Transactional
+    @WithMockUser ( username = "admin", roles = "ADMIN" )
+    public void testDeleteUserCannotDeleteSelfSingle () throws Exception {
+
+        Mockito.doThrow( new edu.ncsu.csc326.wolfcafe.exception.WolfCafeAPIException( HttpStatus.BAD_REQUEST,
+                "You cannot delete your own account." ) ).when( authService ).deleteUserById( 99L );
+
+        mvc.perform( org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete( "/api/auth/user/{id}",
+                99L ) ).andExpect( status().isBadRequest() )
+                .andExpect( content().string( Matchers.containsString( "cannot delete your own" ) ) );
+    }
+
+    /**
+     * Test to see if user is not found
+     *
+     * @throws Exception
+     *             if user is not found during deletion
+     */
+    @Test
+    @Transactional
+    @WithMockUser ( username = "admin", roles = "ADMIN" )
+    public void testDeleteUserNotFound () throws Exception {
+
+        Mockito.doThrow( new ResourceNotFoundException( "User not found with id 55" ) ).when( authService )
+                .deleteUserById( 55L );
+
+        mvc.perform( org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete( "/api/auth/user/{id}",
+                55L ) ).andExpect( status().isNotFound() )
+                .andExpect( content().string( Matchers.containsString( "User not found" ) ) );
+    }
+
+    /**
+     * Test for getting user by id
+     *
+     * @throws Exception
+     *             if there is an error
+     */
+    @Test
+    @WithMockUser ( username = "admin", roles = "ADMIN" )
+    public void testGetUserByIdSuccess () throws Exception {
+        final Long userId = 10L;
+
+        final UserDto mockUser = new UserDto();
+        mockUser.setId( userId );
+        mockUser.setName( "Test User" );
+        mockUser.setUsername( "testuser" );
+        mockUser.setEmail( "test@example.com" );
+        mockUser.setRoles( List.of() );
+
+        Mockito.when( authService.getUserById( userId ) ).thenReturn( mockUser );
+
+        mvc.perform( get( "/api/auth/users/{id}", userId ) ).andExpect( status().isOk() )
+                .andExpect( jsonPath( "$.id" ).value( 10 ) ).andExpect( jsonPath( "$.name" ).value( "Test User" ) )
+                .andExpect( jsonPath( "$.username" ).value( "testuser" ) )
+                .andExpect( jsonPath( "$.email" ).value( "test@example.com" ) );
+    }
+
+    /**
+     * Tests get user when current role is staff
+     *
+     * @throws Exception
+     *             because of staff role
+     */
+    @Test
+    @WithMockUser ( username = "staff", roles = "STAFF" )
+    public void testGetUserByIdForbidden () throws Exception {
+        mvc.perform( get( "/api/auth/users/{id}", 10L ) ).andExpect( status().isForbidden() );
+    }
+
+    /**
+     * Tests when user is not found
+     *
+     * @throws Exception
+     *             because user is not found
+     */
+    @Test
+    @WithMockUser ( username = "admin", roles = "ADMIN" )
+    public void testGetUserByIdNotFound () throws Exception {
+        Mockito.when( authService.getUserById( 99L ) )
+                .thenThrow( new ResourceNotFoundException( "User not found with id 99" ) );
+
+        mvc.perform( get( "/api/auth/users/{id}", 99L ) ).andExpect( status().isNotFound() )
+                .andExpect( content().string( Matchers.containsString( "User not found with id 99" ) ) );
     }
 
 }

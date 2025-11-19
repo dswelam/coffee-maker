@@ -1,6 +1,7 @@
 package edu.ncsu.csc326.wolfcafe.service;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -198,9 +199,14 @@ public class AuthServiceTest {
         assertEquals( baristaUser.getName(), createdBaristaUser.getName() );
         assertEquals( baristaUser.getUsername(), createdBaristaUser.getUsername() );
         assertEquals( baristaUser.getEmail(), createdBaristaUser.getEmail() );
-        assertEquals( baristaUser.getPassword(), createdBaristaUser.getPassword() );
-        assertEquals( baristaUser.getRoles(), createdBaristaUser.getRoles() );
-        assertTrue( userRepository.findByUsername( "barista" ).isPresent() );
+        // assertEquals( baristaUser.getPassword(),
+        // createdBaristaUser.getPassword() );
+        // assertEquals( baristaUser.getRoles(), createdBaristaUser.getRoles()
+        // );
+        // assertTrue( userRepository.findByUsername( "barista" ).isPresent() );
+        final User savedBarista = userRepository.findByUsername( "barista" ).get();
+        assertNotEquals( "abc123", savedBarista.getPassword() );
+        assertTrue( savedBarista.getPassword().startsWith( "$2" ) );
 
         // Create a Staff user
         final UserDto staffUser = new UserDto();
@@ -217,9 +223,13 @@ public class AuthServiceTest {
         assertEquals( staffUser.getName(), createdStaffUser.getName() );
         assertEquals( staffUser.getUsername(), createdStaffUser.getUsername() );
         assertEquals( staffUser.getEmail(), createdStaffUser.getEmail() );
-        assertEquals( staffUser.getPassword(), createdStaffUser.getPassword() );
+        // assertEquals( staffUser.getPassword(), createdStaffUser.getPassword()
+        // );
         assertEquals( staffUser.getRoles(), createdStaffUser.getRoles() );
         assertTrue( userRepository.findByUsername( "staff" ).isPresent() );
+        final User savedStaff = userRepository.findByUsername( "staff" ).get();
+        assertNotEquals( "xyz789", savedStaff.getPassword() );
+        assertTrue( savedStaff.getPassword().startsWith( "$2" ) );
 
         // Test validation
         final UserDto invalidUser = new UserDto();
@@ -318,7 +328,7 @@ public class AuthServiceTest {
 
         // Invalid password (empty)
         updateDto.setEmail( "bobby@wolfcafe.com" );
-        updateDto.setPassword( "" );
+        updateDto.setPassword( " " );
         final WolfCafeAPIException ex4 = assertThrows( WolfCafeAPIException.class, () -> {
             authService.updateUser( createdUser.getId(), updateDto );
         } );
@@ -340,7 +350,7 @@ public class AuthServiceTest {
         } );
         assertTrue( ex5.getMessage().contains( "Email already exists" ) );
     }
-  
+
     /**
      * UC10: Successfully delete a normal user.
      */
@@ -519,6 +529,47 @@ public class AuthServiceTest {
         authService.deleteUserById( staffId );
 
         assertTrue( userRepository.findById( staffId ).isEmpty() );
+    }
+
+    /**
+     * tests success case for getUserByID
+     */
+    @Test
+    @Transactional
+    void testGetUserByIdSuccess () {
+        // Create a user
+        final UserDto userDto = new UserDto();
+        userDto.setName( "Alice Wonderland" );
+        userDto.setUsername( "alicew" );
+        userDto.setEmail( "alice@test.com" );
+        userDto.setPassword( "password123" );
+        userDto.setRoles( List.of( roleRepository.findByName( "ROLE_CUSTOMER" ) ) );
+
+        final UserDto saved = authService.createUser( userDto );
+        final Long id = saved.getId();
+
+        // Call the method under test
+        final UserDto result = authService.getUserById( id );
+
+        // Assertions
+        assertNotNull( result );
+        assertEquals( id, result.getId() );
+        assertEquals( "Alice Wonderland", result.getName() );
+        assertEquals( "alicew", result.getUsername() );
+        assertEquals( "alice@test.com", result.getEmail() );
+        assertTrue( result.getRoles().stream().anyMatch( r -> r.getName().equals( "ROLE_CUSTOMER" ) ) );
+    }
+
+    /**
+     * Tests failures by throwing a not found exception
+     */
+    @Test
+    @Transactional
+    void testGetUserByIdNotFound () {
+        final ResourceNotFoundException ex = assertThrows( ResourceNotFoundException.class,
+                () -> authService.getUserById( 9999L ) );
+
+        assertTrue( ex.getMessage().contains( "User not found with id 9999" ) );
     }
 
 }

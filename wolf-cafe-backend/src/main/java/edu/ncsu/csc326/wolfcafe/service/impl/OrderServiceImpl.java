@@ -109,7 +109,7 @@ public class OrderServiceImpl implements OrderService {
         }
 
         // Save the updated inventory
-        updatedInventory = inventoryService.updateInventory( updatedInventory );
+        updatedInventory = inventoryService.updateInventoryForOrder( updatedInventory );
 
         return true;
     }
@@ -129,13 +129,26 @@ public class OrderServiceImpl implements OrderService {
 
     @Override
     public OrderDto updateOrder ( final Long orderId, final OrderDto orderDto ) {
-        Order order = orderRepository.findById( orderId )
+        // Find existing order or throw if not found
+        final Order existing = orderRepository.findById( orderId )
                 .orElseThrow( () -> new ResourceNotFoundException( "Order does not exist with id " + orderId ) );
 
-        order = OrderMapper.mapToOrder( orderDto );
+        // UC13: Edit Order alternative flow
+        // Order can only be edited when it is in PLACED status
+        if ( existing.getStatus() != OrderStatus.PLACED ) {
+            throw new IllegalStateException( "Order can only be edited when it is in PLACED status" );
+        }
 
-        final Order savedOrder = orderRepository.save( order );
+        // Map the incoming DTO to an Order entity
+        final Order updated = OrderMapper.mapToOrder( orderDto );
 
+        // Make sure we're updating the correct existing order
+        updated.setId( existing.getId() );
+        updated.setCustomer( existing.getCustomer() );
+        // Keep status as PLACED (editing should not secretly change it)
+        updated.setStatus( OrderStatus.PLACED );
+
+        final Order savedOrder = orderRepository.save( updated );
         return OrderMapper.mapToOrderDto( savedOrder );
     }
 
@@ -147,7 +160,9 @@ public class OrderServiceImpl implements OrderService {
 
     /**
      * Lists all orders with the given status.
-     * @param status the status to filter by
+     *
+     * @param status
+     *            the status to filter by
      * @return list of orders with the given status
      */
     @Override
@@ -158,8 +173,11 @@ public class OrderServiceImpl implements OrderService {
 
     /**
      * Action to prepare an order
-     * @param orderId The order to prepare by ID
-     * @param staffUsername The staff member preparing the order by username
+     *
+     * @param orderId
+     *            The order to prepare by ID
+     * @param staffUsername
+     *            The staff member preparing the order by username
      * @return The updated order DTO
      */
     @Override
@@ -179,8 +197,11 @@ public class OrderServiceImpl implements OrderService {
 
     /**
      * Order is marked as ready for pickup
-     * @param orderId The order to mark as ready by ID
-     * @param staffUsername The staff member marking the order as ready by username
+     *
+     * @param orderId
+     *            The order to mark as ready by ID
+     * @param staffUsername
+     *            The staff member marking the order as ready by username
      * @return The updated order DTO
      */
     @Override
@@ -200,13 +221,20 @@ public class OrderServiceImpl implements OrderService {
 
     /**
      * Action to mark an order as fulfilled
-     * @param orderId The order to mark as fulfilled by ID
+     *
+     * @param orderId
+     *            The order to mark as fulfilled by ID
      * @return The updated order DTO
      */
     @Override
     public OrderDto orderFulfilled ( final Long orderId ) {
         final Order order = orderRepository.findById( orderId )
                 .orElseThrow( () -> new ResourceNotFoundException( "Order does not exist with id " + orderId ) );
+
+        // UC13 main flow: customer can only pick up when the order is READY
+        if ( order.getStatus() != OrderStatus.READY ) {
+            throw new IllegalStateException( "Order can only be picked up when it is in READY status" );
+        }
 
         order.setStatus( OrderStatus.FULFILLED );
 
@@ -216,13 +244,21 @@ public class OrderServiceImpl implements OrderService {
 
     /**
      * Cancel an order
-     * @param orderId The order to cancel by ID
+     *
+     * @param orderId
+     *            The order to cancel by ID
      * @return The updated order DTO
      */
     @Override
     public OrderDto cancelOrder ( final Long orderId ) {
         final Order order = orderRepository.findById( orderId )
                 .orElseThrow( () -> new ResourceNotFoundException( "Order does not exist with id " + orderId ) );
+
+        // UC13: Cancel Order alternative flow
+        // Order can only be cancelled when it is in PLACED status
+        if ( order.getStatus() != OrderStatus.PLACED ) {
+            throw new IllegalStateException( "Order can only be cancelled when it is in PLACED status" );
+        }
 
         order.setStatus( OrderStatus.CANCELLED );
 
@@ -232,7 +268,9 @@ public class OrderServiceImpl implements OrderService {
 
     /**
      * List all orders for a given customer
-     * @param username the customer's username
+     *
+     * @param username
+     *            the customer's username
      * @return list of orders for a customer
      */
     @Override
