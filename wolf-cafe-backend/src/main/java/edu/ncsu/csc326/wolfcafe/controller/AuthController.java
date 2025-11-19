@@ -236,7 +236,7 @@ public class AuthController {
      */
     @PreAuthorize ( "hasRole('ADMIN')" )
     @GetMapping ( "/users/{id}" )
-    public ResponseEntity<UserDto> getUserById ( @PathVariable final Long id ) {
+    public ResponseEntity<UserDto> getUserById ( @PathVariable ( name = "id" ) final Long id ) {
         final UserDto user = authService.getUserById( id );
         return ResponseEntity.ok( user );
     }
