@@ -165,6 +165,10 @@ public class OrderServiceTest {
         final OrderDto createdOrder = orderService.createOrder( order );
         assertEquals( createdOrder.getOrderItems().getFirst().getItem().getName(),
                 order.getOrderItems().getFirst().getItem().getName() );
+        inventory = inventoryService.getInventory();
+        assertEquals(7, inventory.getIngredients().get("Chocolate"));
+        assertEquals(8, inventory.getIngredients().get("Sugar"));
+        assertEquals(9, inventory.getIngredients().get("Milk"));
     }
 
     /**
