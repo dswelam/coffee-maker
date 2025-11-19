@@ -42,10 +42,9 @@ import lombok.AllArgsConstructor;
 /**
  * GENERATIVE AI WAS USED IN THE CREATION OF THIS FILE:
  *
- * Model: GitHub Copilot GPT-4.1
- * Prompts:
- * - "Generate an implementation of updating a user in Java using Spring Boot."
- * - "Enhance the user update method to include validation checks for name, email, and password."
+ * Model: GitHub Copilot GPT-4.1 Prompts: - "Generate an implementation of
+ * updating a user in Java using Spring Boot." - "Enhance the user update method
+ * to include validation checks for name, email, and password."
  *
  * Implemented AuthService
  *
@@ -134,6 +133,10 @@ public class AuthServiceImpl implements AuthService {
         }
 
         final User user = UserMapper.mapToUser( userDto );
+
+        // hashes the password before saving
+        user.setPassword( passwordEncoder.encode( userDto.getPassword() ) );
+
         final User savedUser = userRepository.save( user );
         return UserMapper.mapToUserDto( savedUser );
     }
