@@ -33,6 +33,7 @@ import lombok.AllArgsConstructor;
  * Controller for authentication functionality.
  *
  * @author Dania Swelam
+ * @author Diya Patel
  */
 @CrossOrigin ( "*" )
 @RestController
@@ -60,7 +61,8 @@ public class AuthController {
     /**
      * Registers a new user of any role with the system.
      *
-     * @param userDto          object with user info
+     * @param userDto
+     *            object with user info
      * @return response indicating success or failure
      */
     @PreAuthorize ( "hasRole('ADMIN')" )
@@ -73,8 +75,10 @@ public class AuthController {
     /**
      * Updates an existing user of any role with the system.
      *
-     * @param id       id of user to update
-     * @param userDto object with updated user info
+     * @param id
+     *            id of user to update
+     * @param userDto
+     *            object with updated user info
      * @return response indicating success or failure
      */
     @PreAuthorize ( "hasRole('ADMIN')" )
@@ -196,6 +200,31 @@ public class AuthController {
             // UC10: cannot delete self or cannot delete staff w/ active orders
             return ResponseEntity.status( HttpStatus.BAD_REQUEST ).body( e.getMessage() );
         }
+    }
+
+    /**
+     * Handles ResourceNotFoundException globally.
+     *
+     * @param ex
+     *            the exception
+     *
+     * @return the correct error response
+     */
+    @org.springframework.web.bind.annotation.ExceptionHandler ( ResourceNotFoundException.class )
+    public ResponseEntity<String> handleNotFound ( final ResourceNotFoundException ex ) {
+        return ResponseEntity.status( HttpStatus.NOT_FOUND ).body( ex.getMessage() );
+    }
+
+    /**
+     * Handles WolfCafeAPIException globally.
+     *
+     * @param ex
+     *            the exception
+     * @return the correct error response
+     */
+    @org.springframework.web.bind.annotation.ExceptionHandler ( WolfCafeAPIException.class )
+    public ResponseEntity<String> handleWolfCafeException ( final WolfCafeAPIException ex ) {
+        return ResponseEntity.status( ex.getStatus() ).body( ex.getMessage() );
     }
 
 }
