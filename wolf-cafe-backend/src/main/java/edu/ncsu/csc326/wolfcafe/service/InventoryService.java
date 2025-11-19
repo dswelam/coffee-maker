@@ -27,7 +27,7 @@ public interface InventoryService {
     InventoryDto getInventory ();
 
     /**
-     * Updates the contents of the inventory.
+     * Updates the contents of the inventory by adding quantities of ingredients.
      *
      * @param inventoryDto
      *            values to update
@@ -51,5 +51,14 @@ public interface InventoryService {
      *            item to use ingredients from
      */
     void useIngredients ( Item item );
+
+	/**
+	 * Updates the contents of the inventory by deducting quantities of ingredients.
+	 *
+	 * @param inventoryDto
+	 *            values to update
+	 * @return updated inventory
+	 */
+	InventoryDto updateInventoryForOrder(InventoryDto inventoryDto);
 
 }

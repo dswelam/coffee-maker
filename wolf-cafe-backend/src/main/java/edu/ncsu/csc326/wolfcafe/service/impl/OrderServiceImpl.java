@@ -109,7 +109,7 @@ public class OrderServiceImpl implements OrderService {
         }
 
         // Save the updated inventory
-        updatedInventory = inventoryService.updateInventory( updatedInventory );
+        updatedInventory = inventoryService.updateInventoryForOrder( updatedInventory );
 
         return true;
     }
