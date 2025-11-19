@@ -162,7 +162,7 @@ public class OrderServiceTest {
         orderItems.add( orderLine );
         order.setOrderItems( orderItems );
 
-        final OrderDto createdOrder = orderService.createOrder( order );
+        final OrderDto createdOrder = orderService.createOrder( order, customerRegister.getUsername() );
         assertEquals( createdOrder.getOrderItems().getFirst().getItem().getName(),
                 order.getOrderItems().getFirst().getItem().getName() );
     }
@@ -218,7 +218,7 @@ public class OrderServiceTest {
         orderItems.add( orderLine );
         order.setOrderItems( orderItems );
 
-        final OrderDto createdOrder = orderService.createOrder( order );
+        final OrderDto createdOrder = orderService.createOrder( order, customer.getUsername() );
 
         // Update order status
         createdOrder.setStatus( OrderStatus.PLACED );
@@ -267,7 +267,7 @@ public class OrderServiceTest {
         orderLine1.setQuantity( 1 );
         orderItems1.add( orderLine1 );
         order1.setOrderItems( orderItems1 );
-        final OrderDto createdOrder = orderService.createOrder( order1 );
+        final OrderDto createdOrder = orderService.createOrder( order1, customer.getUsername() );
         orderService.prepareOrder( createdOrder.getId(), barista.getUsername() );
 
         // Create order2 with READY status
@@ -280,7 +280,7 @@ public class OrderServiceTest {
         orderLine2.setQuantity( 1 );
         orderItems2.add( orderLine2 );
         order2.setOrderItems( orderItems2 );
-        final OrderDto createdOrder2 = orderService.createOrder( order2 );
+        final OrderDto createdOrder2 = orderService.createOrder( order2, customer.getUsername() );
         orderService.prepareOrder( createdOrder2.getId(), barista.getUsername() );
         orderService.markReady( createdOrder2.getId(), barista.getUsername() );
 
@@ -328,7 +328,7 @@ public class OrderServiceTest {
         orderItems.add( orderLine );
         order.setOrderItems( orderItems );
         order.setStatus( OrderStatus.PLACED );
-        final OrderDto createdOrder = orderService.createOrder( order );
+        final OrderDto createdOrder = orderService.createOrder( order, customer.getUsername() );
 
         // Prepare order
         final OrderDto preparedOrder = orderService.prepareOrder( createdOrder.getId(), barista.getUsername() );
@@ -373,7 +373,7 @@ public class OrderServiceTest {
         order.setOrderItems( orderItems );
         order.setStatus( OrderStatus.IN_PROGRESS );
         order.setPreparedBy( barista );
-        final OrderDto createdOrder = orderService.createOrder( order );
+        final OrderDto createdOrder = orderService.createOrder( order, customer.getUsername() );
 
         // Mark order as ready
         final OrderDto readyOrder = orderService.markReady( createdOrder.getId(), barista.getUsername() );
@@ -417,7 +417,7 @@ public class OrderServiceTest {
         orderItems.add( orderLine );
         order.setOrderItems( orderItems );
         order.setPreparedBy( barista );
-        final OrderDto createdOrder = orderService.createOrder( order );
+        final OrderDto createdOrder = orderService.createOrder( order, customer.getUsername() );
 
         final Order existing = orderRepository.findById( createdOrder.getId() ).get();
         existing.setStatus( OrderStatus.READY );
@@ -457,7 +457,7 @@ public class OrderServiceTest {
         orderItems.add( orderLine );
         order.setOrderItems( orderItems );
         order.setStatus( OrderStatus.PLACED );
-        final OrderDto createdOrder = orderService.createOrder( order );
+        final OrderDto createdOrder = orderService.createOrder( order, customer.getUsername() );
 
         // Cancel order
         final OrderDto canceledOrder = orderService.cancelOrder( createdOrder.getId() );
@@ -503,7 +503,7 @@ public class OrderServiceTest {
         orderItems.add( orderLine1 );
         order1.setOrderItems( orderItems );
         order1.setStatus( OrderStatus.PLACED );
-        orderService.createOrder( order1 );
+        orderService.createOrder( order1, customer.getUsername() );
 
         final OrderDto order2 = new OrderDto();
         order2.setCustomer( customer );
@@ -511,7 +511,7 @@ public class OrderServiceTest {
         orderItems2.add( orderLine2 );
         order2.setOrderItems( orderItems );
         order2.setStatus( OrderStatus.PLACED );
-        orderService.createOrder( order2 );
+        orderService.createOrder( order2, customer.getUsername() );
 
         final List<OrderDto> customerOrders = orderService.getCustomersOrders( customer.getUsername() );
 
@@ -550,7 +550,7 @@ public class OrderServiceTest {
         final OrderDto order = new OrderDto();
         order.setCustomer( customer );
         order.setOrderItems( new ArrayList<>( List.of( line ) ) );
-        final OrderDto created = orderService.createOrder( order );
+        final OrderDto created = orderService.createOrder( order, customer.getUsername() );
 
         // Manually change to non-PLACED status
         final Order existing = orderRepository.findById( created.getId() ).get();
@@ -594,7 +594,7 @@ public class OrderServiceTest {
         final OrderDto order = new OrderDto();
         order.setCustomer( customer );
         order.setOrderItems( new ArrayList<>( List.of( line ) ) );
-        final OrderDto created = orderService.createOrder( order );
+        final OrderDto created = orderService.createOrder( order, customer.getUsername() );
 
         // Order is PLACED, not READY → SHOULD FAIL
         assertThrows( IllegalStateException.class, () -> {
@@ -632,7 +632,7 @@ public class OrderServiceTest {
         final OrderDto order = new OrderDto();
         order.setCustomer( customer );
         order.setOrderItems( new ArrayList<>( List.of( line ) ) );
-        final OrderDto created = orderService.createOrder( order );
+        final OrderDto created = orderService.createOrder( order, customer.getUsername() );
 
         // Force order into non-PLACED state
         final Order existing = orderRepository.findById( created.getId() ).get();

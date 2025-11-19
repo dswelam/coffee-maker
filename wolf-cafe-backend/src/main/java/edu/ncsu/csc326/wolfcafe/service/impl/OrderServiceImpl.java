@@ -44,7 +44,10 @@ public class OrderServiceImpl implements OrderService {
     private UserRepository   userRepository;
 
     @Override
-    public OrderDto createOrder ( final OrderDto orderDto ) {
+    public OrderDto createOrder ( final OrderDto orderDto, final String username ) {
+        // Set the customer username on the order
+        final User customer = userRepository.findByUsername( username )
+                .orElseThrow( () -> new ResourceNotFoundException( "User does not exist with username " + username ) );
         final InventoryDto inventory = inventoryService.getInventory();
 
         // Before creating the order, need to check if the inventory has
@@ -69,6 +72,8 @@ public class OrderServiceImpl implements OrderService {
 
         // Save the order to the database
         final Order order = OrderMapper.mapToOrder( orderDto );
+        order.setCustomer( customer );
+        order.setPreparedBy( null );
         final Order savedOrder = orderRepository.save( order );
         return OrderMapper.mapToOrderDto( savedOrder );
     }
