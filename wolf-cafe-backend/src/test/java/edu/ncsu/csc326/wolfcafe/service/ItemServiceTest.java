@@ -10,7 +10,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 
 import edu.ncsu.csc326.wolfcafe.dto.ItemDto;
@@ -21,7 +20,6 @@ import jakarta.persistence.EntityManager;
  * Tests ItemServiceImpl
  */
 @SpringBootTest
-@ActiveProfiles ( "test" )
 public class ItemServiceTest {
 
     /** Reference to ItemService */

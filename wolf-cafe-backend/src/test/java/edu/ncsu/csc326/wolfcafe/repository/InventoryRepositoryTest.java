@@ -12,7 +12,6 @@ import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabas
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase.Replace;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
-import org.springframework.test.context.ActiveProfiles;
 
 import edu.ncsu.csc326.wolfcafe.entity.Inventory;
 import jakarta.persistence.EntityManager;
@@ -21,7 +20,6 @@ import jakarta.persistence.EntityManager;
  * Tests InventoryRepository. Uses the real database - not an embedded one.
  */
 @DataJpaTest
-@ActiveProfiles ( "test" )
 @AutoConfigureTestDatabase ( replace = Replace.NONE )
 public class InventoryRepositoryTest {
 
@@ -47,13 +45,13 @@ public class InventoryRepositoryTest {
      */
     @BeforeEach
     public void setUp () throws Exception {
-        EntityManager entityManager = testEntityManager.getEntityManager();
+        final EntityManager entityManager = testEntityManager.getEntityManager();
         entityManager.createNativeQuery( "SET FOREIGN_KEY_CHECKS = 0" ).executeUpdate();
         entityManager.createNativeQuery( "TRUNCATE TABLE inventory" ).executeUpdate();
         entityManager.createNativeQuery( "SET FOREIGN_KEY_CHECKS = 1" ).executeUpdate();
 
         // Make sure that Inventory always has an id of 1L.
-        Map<String, Integer> ingredients = new HashMap<>();
+        final Map<String, Integer> ingredients = new HashMap<>();
         ingredients.put( "coffee", 20 );
         ingredients.put( "milk", 14 );
         ingredients.put( "sugar", 32 );
@@ -67,7 +65,7 @@ public class InventoryRepositoryTest {
      */
     @Test
     public void testSaveAndGetInventory () {
-        Inventory fetchedInventory = inventoryRepository.findById( inventory.getId() ).get();
+        final Inventory fetchedInventory = inventoryRepository.findById( inventory.getId() ).get();
         assertEquals( 20, fetchedInventory.getIngredients().get( "coffee" ) );
         assertEquals( 14, fetchedInventory.getIngredients().get( "milk" ) );
         assertEquals( 32, fetchedInventory.getIngredients().get( "sugar" ) );
@@ -79,12 +77,12 @@ public class InventoryRepositoryTest {
      */
     @Test
     public void testUpdateInventory () {
-        Inventory fetchedInventory = inventoryRepository.findById( inventory.getId() ).get();
+        final Inventory fetchedInventory = inventoryRepository.findById( inventory.getId() ).get();
         fetchedInventory.getIngredients().put( "coffee", 13 );
         fetchedInventory.getIngredients().put( "milk", 14 );
         fetchedInventory.getIngredients().put( "sugar", 27 );
 
-        Inventory updatedInventory = inventoryRepository.save( fetchedInventory );
+        final Inventory updatedInventory = inventoryRepository.save( fetchedInventory );
         assertEquals( 13, updatedInventory.getIngredients().get( "coffee" ) );
         assertEquals( 14, updatedInventory.getIngredients().get( "milk" ) );
         assertEquals( 27, updatedInventory.getIngredients().get( "sugar" ) );

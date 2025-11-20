@@ -9,7 +9,6 @@ import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabas
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase.Replace;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
-import org.springframework.test.context.ActiveProfiles;
 
 import edu.ncsu.csc326.wolfcafe.entity.Tax;
 import jakarta.persistence.EntityManager;
@@ -18,7 +17,6 @@ import jakarta.persistence.EntityManager;
  * Tests TaxRepository. Uses the real database - not an embedded one.
  */
 @DataJpaTest
-@ActiveProfiles ( "test" )
 @AutoConfigureTestDatabase ( replace = Replace.NONE )
 public class TaxRepositoryTest {
 
@@ -44,7 +42,7 @@ public class TaxRepositoryTest {
      */
     @BeforeEach
     public void setUp () throws Exception {
-        EntityManager entityManager = testEntityManager.getEntityManager();
+        final EntityManager entityManager = testEntityManager.getEntityManager();
         entityManager.createNativeQuery( "SET FOREIGN_KEY_CHECKS = 0" ).executeUpdate();
         entityManager.createNativeQuery( "TRUNCATE TABLE tax" ).executeUpdate();
         entityManager.createNativeQuery( "SET FOREIGN_KEY_CHECKS = 1" ).executeUpdate();
@@ -59,8 +57,8 @@ public class TaxRepositoryTest {
      */
     @Test
     public void testSaveAndGetTax () {
-        Tax fetchedTax = taxRepository.findById( tax.getId() ).get();
-        Tax expectedTax = new Tax( 1L, 2.00 );
+        final Tax fetchedTax = taxRepository.findById( tax.getId() ).get();
+        final Tax expectedTax = new Tax( 1L, 2.00 );
         assertEquals( expectedTax.getId(), fetchedTax.getId() );
         assertEquals( expectedTax.getCurrentAmount(), fetchedTax.getCurrentAmount() );
     }
@@ -70,11 +68,11 @@ public class TaxRepositoryTest {
      */
     @Test
     public void testUpdateTax () {
-        Tax fetchedTax = taxRepository.findById( tax.getId() ).get();
+        final Tax fetchedTax = taxRepository.findById( tax.getId() ).get();
         fetchedTax.setId( 2L );
         fetchedTax.setCurrentAmount( 5.25 );
 
-        Tax updatedTax = taxRepository.save( fetchedTax );
+        final Tax updatedTax = taxRepository.save( fetchedTax );
         assertEquals( 2L, updatedTax.getId() );
         assertEquals( 5.25, updatedTax.getCurrentAmount() );
     }
