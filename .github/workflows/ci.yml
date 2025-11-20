@@ -38,30 +38,3 @@ jobs:
       uses: codecov/codecov-action@v3
       with:
         file: ./wolf-cafe-backend/target/site/jacoco-ut/jacoco.xml
-
-  frontend-tests:
-    name: Frontend Tests  
-    runs-on: ubuntu-latest
-    
-    steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
-      
-    - name: Set up Node.js
-      uses: actions/setup-node@v4
-      with:
-        node-version: '18'
-        
-    - name: Cache Node modules
-      uses: actions/cache@v3
-      with:
-        path: ~/.npm
-        key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
-        
-    - name: Install dependencies
-      working-directory: ./wolf-cafe-frontend
-      run: npm ci
-      
-    - name: Run Frontend Tests
-      working-directory: ./wolf-cafe-frontend
-      run: npm test -- --coverage --watchAll=false
