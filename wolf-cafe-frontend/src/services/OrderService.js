@@ -29,7 +29,7 @@ export const updateOrder = (id, orderDto) => {
 };
 
 export const listMyOrders = () => {
-  return axios.get(`${ORDER_API_BASE_URL}/my-orders`, {
+  return axios.get(`${ORDER_API_BASE_URL}/myorders`, {
     headers: {
       ...authHeader(),
     },
