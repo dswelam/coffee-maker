@@ -13,9 +13,9 @@ import ListCustomerComponent from './components/ListCustomerComponent'
 import UserComponent from './components/UserComponent'
 import TaxRateComponent from './components/TaxRateComponent'
 import { isUserLoggedIn } from './services/AuthService'
-import OrderQueueComponent from "./components/OrderQueueComponent";
-import EditUserComponent from "./components/EditUserComponent";
-
+import OrderQueueComponent from "./components/OrderQueueComponent"
+import EditUserComponent from "./components/EditUserComponent"
+import OrderComponent from "./components/OrderComponent"
 
 
 function App() {
