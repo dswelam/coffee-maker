@@ -6,6 +6,7 @@ import ListItemsComponent from './components/ListItemsComponent'
 import ItemComponent from './components/ItemComponent'
 import RegisterComponent from './components/RegisterComponent'
 import LoginComponent from './components/LoginComponent'
+import ViewOrdersComponent from "./components/ViewOrdersComponent";
 import { isUserLoggedIn } from './services/AuthService'
 
 function App() {
@@ -29,6 +30,7 @@ function App() {
 		<Route path='/items' element={<AuthenticatedRoute><ListItemsComponent /></AuthenticatedRoute>}></Route>
 		<Route path='/add-item' element={<AuthenticatedRoute><ItemComponent /></AuthenticatedRoute>}></Route>
 		<Route path='/update-item/:id' element={<AuthenticatedRoute><ItemComponent /></AuthenticatedRoute>}></Route>
+		<Route path='/my-orders' element={<AuthenticatedRoute><ViewOrdersComponent /></AuthenticatedRoute>} />
 	  </Routes>
 	  <FooterComponent />
 	  </BrowserRouter>
