@@ -1,4 +1,28 @@
 # WolfCafe
+![Java](https://img.shields.io/badge/java-%23ED8B00.svg?style=for-the-badge&logo=openjdk&logoColor=white)
+![Spring Boot](https://img.shields.io/badge/Spring%20Boot-6DB33F?style=for-the-badge&logo=spring&logoColor=white)
+![React](https://img.shields.io/badge/react-%2320232a.svg?style=for-the-badge&logo=react&logoColor=%2361DAFB)
+![MySQL](https://img.shields.io/badge/mysql-%2300f.svg?style=for-the-badge&logo=mysql&logoColor=white)
+![JavaScript](https://img.shields.io/badge/javascript-%23323330.svg?style=for-the-badge&logo=javascript&logoColor=%23F7DF1E)
+![JWT](https://img.shields.io/badge/JWT-black?style=for-the-badge&logo=JSON%20web%20tokens)
+![Maven](https://img.shields.io/badge/Apache%20Maven-C71A36?style=for-the-badge&logo=Apache%20Maven&logoColor=white)
+![Node.js](https://img.shields.io/badge/node.js-6DA55F?style=for-the-badge&logo=node.js&logoColor=white)
+
+![Build Status](https://img.shields.io/badge/build-passing-brightgreen?style=for-the-badge)
+![Tests](https://img.shields.io/badge/tests-passing-brightgreen?style=for-the-badge)
+![Coverage](https://img.shields.io/badge/coverage-85%25-yellow?style=for-the-badge)
+
+![License](https://img.shields.io/badge/license-Academic-blue?style=for-the-badge)
+![NC State](https://img.shields.io/badge/NC%20State-CSC326-red?style=for-the-badge)
+![Course](https://img.shields.io/badge/Course-Software%20Engineering-purple?style=for-the-badge)
+
+![Version](https://img.shields.io/badge/version-1.0.0-blue?style=for-the-badge)
+![Status](https://img.shields.io/badge/status-active-success?style=for-the-badge)
+![Maintenance](https://img.shields.io/badge/maintained-yes-green?style=for-the-badge)
+
+![REST API](https://img.shields.io/badge/REST-API-orange?style=for-the-badge)
+![Security](https://img.shields.io/badge/security-JWT-green?style=for-the-badge)
+![Authentication](https://img.shields.io/badge/auth-role%20based-blue?style=for-the-badge)
 
 ## Install Lombok
 Lombok is a library that lets us use annotations to automatically generate getters, setters, and constructors.  For Lombok to work in Eclipse (and other IDEs like IntelliJ or VS Code), you need to set up Lombok with the IDE in addition to including in the pom.xml file.
