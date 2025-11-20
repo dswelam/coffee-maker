@@ -11,7 +11,7 @@ const ItemComponent = () => {
 	const [description, setDescription] = useState('')
 	const [price, setPrice] = useState('')
 	const [allIngredients, setAllIngredients] = useState([]);
-	const [selectedIngredients, setSelectedIngredients] = useState([]);
+	const [ingredientAmounts, setIngredientAmounts] = useState({});
 	const [deleteMessage, setDeleteMessage] = useState('');
 	const [errors, setErrors] = useState({})
 
@@ -47,7 +47,7 @@ const ItemComponent = () => {
 				setName(response.data.name)
 				setDescription(response.data.description)
 				setPrice(response.data.price)
-				setSelectedIngredients(Object.keys(response.data.ingredients || {}));
+				setIngredientAmounts(response.data.ingredients || {});
 			}).catch(error => {
 				console.error(error)
 			})
@@ -60,10 +60,7 @@ const ItemComponent = () => {
 			name,
 			description,
 			price,
-			ingredients: selectedIngredients.reduce((obj, name) => {
-				obj[name] = 1; // or just keep as array if your backend handles it
-				return obj;
-			}, {})
+			ingredients: ingredientAmounts
 		}
 		console.log(item)
 
@@ -163,22 +160,28 @@ const ItemComponent = () => {
 					<div className="mb-3">
 						<label className="form-label fw-semibold">Ingredients</label>
 						<div style={{ maxHeight: '200px', overflowY: 'auto', border: '1px solid #ccc', padding: '8px' }}>
-							{allIngredients.map(ing => (
-								<div key={ing} className="form-check">
-									<input
-										className="form-check-input"
-										type="checkbox"
-										value={ing}
-										checked={selectedIngredients.includes(ing)}
-										onChange={e => {
-											if (e.target.checked) setSelectedIngredients([...selectedIngredients, ing])
-											else setSelectedIngredients(selectedIngredients.filter(i => i !== ing))
-										}}
-									/>
-									<label className="form-check-label">{ing}</label>
-								</div>
-							))}
+						  {allIngredients.map(ing => (
+						    <div key={ing} className="d-flex align-items-center mb-2">
+						      <span style={{ width: "150px" }}>{ing}</span>
+
+						      <input
+						        type="number"
+						        min="0"
+						        className="form-control"
+						        style={{ width: "80px" }}
+						        value={ingredientAmounts[ing] || ""}
+						        onChange={e => {
+						          const val = e.target.value;
+						          setIngredientAmounts(prev => ({
+						            ...prev,
+						            [ing]: val === "" ? "" : Number(val)
+						          }));
+						        }}
+						      />
+						    </div>
+						  ))}
 						</div>
+
 					</div>
 
 					<div className={`d-flex mt-4 ${id ? 'justify-content-between' : 'justify-content-center'}`}>

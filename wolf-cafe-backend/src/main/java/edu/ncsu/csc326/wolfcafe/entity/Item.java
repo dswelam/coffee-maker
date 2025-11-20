@@ -3,6 +3,8 @@ package edu.ncsu.csc326.wolfcafe.entity;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
 import jakarta.persistence.CollectionTable;
 import jakarta.persistence.Column;
 import jakarta.persistence.ElementCollection;
@@ -29,6 +31,7 @@ import lombok.Setter;
 @AllArgsConstructor
 @Entity
 @Table ( name = "items" )
+@JsonIgnoreProperties ( { "hibernateLazyInitializer", "handler" } )
 public class Item {
 
     /** Item id */

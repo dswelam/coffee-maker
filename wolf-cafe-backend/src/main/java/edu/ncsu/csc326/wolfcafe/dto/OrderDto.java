@@ -2,12 +2,14 @@ package edu.ncsu.csc326.wolfcafe.dto;
 
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
 import edu.ncsu.csc326.wolfcafe.entity.Order.OrderStatus;
 import edu.ncsu.csc326.wolfcafe.entity.User;
 
 /**
- * Used to transfer Order data between the client and server. This class
- * will serve as the response in the REST API.
+ * Used to transfer Order data between the client and server. This class will
+ * serve as the response in the REST API.
  *
  * @author Brooke Wu (bwu25)
  */
@@ -17,6 +19,7 @@ public class OrderDto {
     private Long               id;
 
     /** Order customer */
+    @JsonIgnoreProperties ( { "hibernateLazyInitializer", "handler" } )
     private User               customer;
 
     /** Order items */
@@ -37,11 +40,17 @@ public class OrderDto {
 
     /**
      * Constructor that takes all properties for an OrderDto, including id
-     * @param id the order id
-     * @param customer the order customer
-     * @param orderItems the order items
-     * @param status the order status
-     * @param preparedBy the staff who prepared the order
+     *
+     * @param id
+     *            the order id
+     * @param customer
+     *            the order customer
+     * @param orderItems
+     *            the order items
+     * @param status
+     *            the order status
+     * @param preparedBy
+     *            the staff who prepared the order
      */
     public OrderDto ( final Long id, final User customer, final List<OrderLineDto> orderItems, final OrderStatus status,
             final User preparedBy ) {
@@ -55,10 +64,15 @@ public class OrderDto {
 
     /**
      * Constructor that takes all properties for an OrderDto EXCEPT for id
-     * @param customer the order customer
-     * @param orderItems the order items
-     * @param status the order status
-     * @param preparedBy the staff who prepared the order
+     *
+     * @param customer
+     *            the order customer
+     * @param orderItems
+     *            the order items
+     * @param status
+     *            the order status
+     * @param preparedBy
+     *            the staff who prepared the order
      */
     public OrderDto ( final User customer, final List<OrderLineDto> orderItems, final OrderStatus status,
             final User preparedBy ) {
@@ -71,6 +85,7 @@ public class OrderDto {
 
     /**
      * Gets the id of the order
+     *
      * @return the order id
      */
     public Long getId () {
@@ -79,7 +94,9 @@ public class OrderDto {
 
     /**
      * Sets the id of the order
-     * @param id the order id
+     *
+     * @param id
+     *            the order id
      */
     public void setId ( final Long id ) {
         this.id = id;
@@ -87,6 +104,7 @@ public class OrderDto {
 
     /**
      * Gets the customer who placed the order
+     *
      * @return the order customer
      */
     public User getCustomer () {
@@ -95,7 +113,9 @@ public class OrderDto {
 
     /**
      * Sets the customer who placed the order
-     * @param customer the order customer
+     *
+     * @param customer
+     *            the order customer
      */
     public void setCustomer ( final User customer ) {
         this.customer = customer;
@@ -103,6 +123,7 @@ public class OrderDto {
 
     /**
      * Gets the items in the order
+     *
      * @return the order items
      */
     public List<OrderLineDto> getOrderItems () {
@@ -111,7 +132,9 @@ public class OrderDto {
 
     /**
      * Sets the items in the order
-     * @param orderItems the order items
+     *
+     * @param orderItems
+     *            the order items
      */
     public void setOrderItems ( final List<OrderLineDto> orderItems ) {
         this.orderItems = orderItems;
@@ -119,6 +142,7 @@ public class OrderDto {
 
     /**
      * Gets the status of the order
+     *
      * @return the order status
      */
     public OrderStatus getStatus () {
@@ -127,7 +151,9 @@ public class OrderDto {
 
     /**
      * Sets the status of the order
-     * @param status the order status
+     *
+     * @param status
+     *            the order status
      */
     public void setStatus ( final OrderStatus status ) {
         this.status = status;
@@ -135,6 +161,7 @@ public class OrderDto {
 
     /**
      * Gets the staff who prepared the order
+     *
      * @return the staff who prepared the order
      */
     public User getPreparedBy () {
@@ -143,7 +170,9 @@ public class OrderDto {
 
     /**
      * Sets the staff who prepared the order
-     * @param preparedBy the staff who prepared the order
+     *
+     * @param preparedBy
+     *            the staff who prepared the order
      */
     public void setPreparedBy ( final User preparedBy ) {
         this.preparedBy = preparedBy;
