@@ -18,3 +18,38 @@ export const createOrder = (orderDto) => {
     }
   });
 };
+
+export const updateOrder = (id, orderDto) => {
+  return axios.put(`${ORDER_API_BASE_URL}/${id}`, orderDto, {
+    headers: {
+      "Content-Type": "application/json",
+      ...authHeader(),
+    },
+  });
+};
+
+export const listMyOrders = () => {
+  return axios.get(`${ORDER_API_BASE_URL}/myorders`, {
+    headers: {
+      ...authHeader(),
+    },
+  });
+};
+
+
+export const fulfillOrder = (orderId) => {
+  return axios.put(`${ORDER_API_BASE_URL}/${orderId}/fulfill`, null, {
+    headers: {
+      ...authHeader(),
+    },
+  });
+};
+
+
+export const cancelOrder = (orderId) => {
+  return axios.put(`${ORDER_API_BASE_URL}/${orderId}/cancel`, null, {
+    headers: {
+      ...authHeader(),
+    },
+  });
+};
