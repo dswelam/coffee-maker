@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from "react";
 import {
   getOrdersByStatus,
-  prepareOrder,
-  markReady,
-  fulfillOrder,
+  prepareOrderByStaff,
+  markReadyByStaff,
+  fulfillOrderByStaff,
   cancelOrder,
 } from "../services/OrderService";
 
@@ -71,9 +71,9 @@ const OrderQueueComponent = () => {
 
   async function updateStatus(id, next) {
     try {
-      if (next === "IN_PROGRESS") await prepareOrder(id);
-      else if (next === "READY") await markReady(id);
-      else if (next === "FULFILLED") await fulfillOrder(id);
+      if (next === "IN_PROGRESS") await prepareOrderByStaff(id);
+      else if (next === "READY") await markReadyByStaff(id);
+      else if (next === "FULFILLED") await fulfillOrderByStaff(id);
       else if (next === "CANCELLED") await cancelOrder(id);
 
       setSuccessMsg("Order updated successfully.");

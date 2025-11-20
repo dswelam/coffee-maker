@@ -168,7 +168,7 @@ public class OrderController {
      *            ID of the order to cancel
      * @return The updated order
      */
-    @PreAuthorize ( "hasAnyRole('CUSTOMER')" )
+    @PreAuthorize ( "hasAnyRole('CUSTOMER', 'BARISTA', 'STAFF' )" )
     @PutMapping ( "/{id}/cancel" )
     public ResponseEntity<OrderDto> orderCancelled ( @PathVariable ( "id" ) final Long orderId ) {
         final OrderDto order = orderService.cancelOrder( orderId );

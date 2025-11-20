@@ -6,6 +6,7 @@ import ListItemsComponent from './components/ListItemsComponent'
 import ItemComponent from './components/ItemComponent'
 import RegisterComponent from './components/RegisterComponent'
 import LoginComponent from './components/LoginComponent'
+import ViewOrdersComponent from "./components/ViewOrdersComponent";
 import ListIngredientsComponent from './components/ListIngredientsComponent'
 import IngredientComponent from './components/IngredientComponent'
 import ListStaffComponent from './components/ListStaffComponent'
@@ -39,6 +40,7 @@ function App() {
 		<Route path='/items' element={<AuthenticatedRoute><ListItemsComponent /></AuthenticatedRoute>}></Route>
 		<Route path='/add-item' element={<AuthenticatedRoute><ItemComponent /></AuthenticatedRoute>}></Route>
 		<Route path='/update-item/:id' element={<AuthenticatedRoute><ItemComponent /></AuthenticatedRoute>}></Route>
+		<Route path='/my-orders' element={<AuthenticatedRoute><ViewOrdersComponent /></AuthenticatedRoute>} />
 		<Route path='/order' element={<AuthenticatedRoute><OrderComponent /></AuthenticatedRoute>}/>
 		<Route path='/ingredients' element={<AuthenticatedRoute><ListIngredientsComponent /></AuthenticatedRoute>}></Route>
 		<Route path='/add-ingredient' element={<AuthenticatedRoute><IngredientComponent /></AuthenticatedRoute>}></Route>

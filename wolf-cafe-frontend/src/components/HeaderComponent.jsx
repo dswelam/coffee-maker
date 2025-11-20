@@ -99,6 +99,15 @@ const HeaderComponent = () => {
 									>Tax Rate</NavLink>
 								</li>
 							}
+							{/* CUSTOMER */}
+							{
+								isAuth && isCustomer &&
+								<li className='nav-item'>
+									<NavLink to='/my-orders' className='nav-link'
+										style={{ fontSize: '1.5rem', fontWeight: '600', marginLeft: '3rem' }}
+									>My Orders</NavLink>
+								</li>
+							}
 						</ul>
 					</div>
 					<ul className='navbar-nav'>
