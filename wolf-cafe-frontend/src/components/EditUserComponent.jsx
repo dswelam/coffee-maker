@@ -117,12 +117,24 @@ const EditUserComponent = () => {
 		deleteUser(id)
 			.then(() => {
 				setDeleteMsg("User deleted!");
-				setTimeout(() => navigate("/staff"), 1200);
+				setTimeout(() => {
+					if (isCustomer) {
+						navigate("/customers");
+					} else {
+						navigate("/staff");
+					}
+				}, 1200);
 			})
 			.catch((err) => {
 				console.error(err);
 				setDeleteMsg("User may already be deleted.");
-				setTimeout(() => navigate("/staff"), 1500);
+				setTimeout(() => {
+					if (isCustomer) {
+						navigate("/customers");
+					} else {
+						navigate("/staff");
+					}
+				}, 1500);
 			});
 	}
 

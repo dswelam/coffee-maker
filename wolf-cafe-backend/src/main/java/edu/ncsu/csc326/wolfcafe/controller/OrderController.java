@@ -45,14 +45,19 @@ public class OrderController {
      *
      * @param orderDto
      *            The valid Order to be saved.
+     * @param authentication
+     *            The authentication object of the requester.
      * @return ResponseEntity indicating success if the Order could be saved to
      *         the inventory, or an error if it could not be
      */
     @PreAuthorize ( "hasAnyRole('STAFF', 'ADMIN', 'CUSTOMER', 'ANONYMOUS')" )
     @PostMapping
-    public ResponseEntity<OrderDto> createOrder ( @RequestBody final OrderDto orderDto ) {
-        final OrderDto savedOrderDto = orderService.createOrder( orderDto );
-        return ResponseEntity.ok( savedOrderDto );
+    public ResponseEntity<OrderDto> createOrder ( @RequestBody final OrderDto orderDto,
+            final Authentication authentication ) {
+        // If the user is authenticated, set the customer username on the order
+        final String username = authentication.getName();
+        final OrderDto savedOrderDto = orderService.createOrder( orderDto, username );
+        return new ResponseEntity<>( savedOrderDto, HttpStatus.CREATED );
     }
 
     /**
@@ -132,7 +137,7 @@ public class OrderController {
      *            ID of the order to mark as ready
      * @return The updated order
      */
-    @PreAuthorize ( "hasAnyRole('BARISTA')" )
+    @PreAuthorize ( "hasAnyRole('BARISTA', 'STAFF')" )
     @PutMapping ( "/{id}/ready" )
     public ResponseEntity<OrderDto> markReady ( @PathVariable ( "id" ) final Long orderId ) {
         final Authentication auth = SecurityContextHolder.getContext().getAuthentication();
@@ -163,7 +168,7 @@ public class OrderController {
      *            ID of the order to cancel
      * @return The updated order
      */
-    @PreAuthorize ( "hasAnyRole('CUSTOMER')" )
+    @PreAuthorize ( "hasAnyRole('CUSTOMER', 'BARISTA', 'STAFF' )" )
     @PutMapping ( "/{id}/cancel" )
     public ResponseEntity<OrderDto> orderCancelled ( @PathVariable ( "id" ) final Long orderId ) {
         final OrderDto order = orderService.cancelOrder( orderId );

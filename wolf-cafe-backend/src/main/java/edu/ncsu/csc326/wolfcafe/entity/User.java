@@ -2,7 +2,8 @@ package edu.ncsu.csc326.wolfcafe.entity;
 
 import java.util.Collection;
 
-import jakarta.persistence.CascadeType;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -27,6 +28,7 @@ import lombok.Setter;
 @AllArgsConstructor
 @Entity
 @Table ( name = "users" )
+@JsonIgnoreProperties ( { "hibernateLazyInitializer", "handler" } )
 public class User {
 
     /** User's id */
@@ -50,11 +52,9 @@ public class User {
     private String           password;
 
     /** User's roles */
-    @ManyToMany(fetch = FetchType.EAGER)
-    @JoinTable(name = "users_roles",
-            joinColumns = @JoinColumn(name = "user_id", referencedColumnName = "id"),
-            inverseJoinColumns = @JoinColumn(name = "role_id", referencedColumnName = "id")
-    )
+    @ManyToMany ( fetch = FetchType.EAGER )
+    @JoinTable ( name = "users_roles", joinColumns = @JoinColumn ( name = "user_id", referencedColumnName = "id" ),
+            inverseJoinColumns = @JoinColumn ( name = "role_id", referencedColumnName = "id" ) )
     private Collection<Role> roles;
 
 }

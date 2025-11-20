@@ -90,36 +90,22 @@ const OrderComponent = () => {
       return
     }
 
-    const current = getCurrentUser()
-    if (!current || !current.id) {
-      setErrors({ auth: "You must be logged in." })
-      return
-    }
 
-    let fullUser
-    try {
-      const res = await getUserById(current.id)
-      fullUser = res.data
-    } catch (err) {
-      setErrors({ api: "Could not load user profile." })
-      return
-    }
+	const current = getCurrentUser()
+	if (!current || !current.username) {
+	  setErrors({ auth: "You must be logged in." })
+	  return
+	}
 
-    // Build order DTO exactly as backend expects
-    const orderDto = {
-      customer: fullUser,
-      preparedBy: fullUser, // temporary assumption
-      orderItems: cart.map((c) => ({
-        quantity: c.qty,
-        item: {
-          id: c.item.id,
-          name: c.item.name,
-          description: c.item.description,
-          price: c.item.price,
-          ingredients: c.item.ingredients
-        }
-      }))
-    }
+	// Only send the IDs of items, backend will fetch the real ones
+	const orderDto = {
+		username: current.username,
+	  orderItems: cart.map((c) => ({
+	    quantity: c.qty,
+	    item: { id: c.item.id } 
+	  }))
+	}
+
 
     try {
       await createOrder(orderDto)
@@ -138,14 +124,6 @@ const OrderComponent = () => {
   return (
     <div className="container mt-5">
       <h2 className="text-center fw-bold mb-4">Build Your Order</h2>
-
-      {/* ERRORS */}
-      {errors.quantity && <div className="alert alert-danger">{errors.quantity}</div>}
-      {errors.payment && <div className="alert alert-danger">{errors.payment}</div>}
-      {errors.cart && <div className="alert alert-danger">{errors.cart}</div>}
-      {errors.api && <div className="alert alert-danger">{errors.api}</div>}
-      {errors.auth && <div className="alert alert-danger">{errors.auth}</div>}
-      {success && <div className="alert alert-success">{success}</div>}
 
       {/* MENU */}
       <h4>Menu</h4>
@@ -255,9 +233,16 @@ const OrderComponent = () => {
         <strong>Total: ${calculateTotal()}</strong>
       </div>
 
-      <button className="btn btn-primary w-100" onClick={placeOrder}>
+      <button className="btn btn-primary w-100 mb-3" onClick={placeOrder}>
         Place Order
       </button>
+	  {/* ERRORS */}
+	  {errors.quantity && <div className="alert alert-danger">{errors.quantity}</div>}
+	  {errors.payment && <div className="alert alert-danger">{errors.payment}</div>}
+	  {errors.cart && <div className="alert alert-danger">{errors.cart}</div>}
+	  {errors.api && <div className="alert alert-danger">{errors.api}</div>}
+	  {errors.auth && <div className="alert alert-danger">{errors.auth}</div>}
+	  {success && <div className="alert alert-success">{success}</div>}
     </div>
   )
 }
