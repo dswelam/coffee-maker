@@ -8,9 +8,14 @@
 ![Maven](https://img.shields.io/badge/Apache%20Maven-C71A36?style=for-the-badge&logo=Apache%20Maven&logoColor=white)
 ![Node.js](https://img.shields.io/badge/node.js-6DA55F?style=for-the-badge&logo=node.js&logoColor=white)
 
+Static:
 ![Build Status](https://img.shields.io/badge/build-passing-brightgreen?style=for-the-badge)
 ![Tests](https://img.shields.io/badge/tests-passing-brightgreen?style=for-the-badge)
 ![Coverage](https://img.shields.io/badge/coverage-85%25-yellow?style=for-the-badge)
+
+Dynamic:
+![Build Status](https://github.com/ncstate-csc-coursework/csc326-2025-fall-tp-204-3/workflows/Wolf%20Cafe%20CI%2FCD/badge.svg)
+![Backend Tests](https://github.com/ncstate-csc-coursework/csc326-2025-fall-tp-204-3/workflows/Wolf%20Cafe%20CI%2FCD/badge.svg?event=push)
 
 ![License](https://img.shields.io/badge/license-Academic-blue?style=for-the-badge)
 ![NC State](https://img.shields.io/badge/NC%20State-CSC326-red?style=for-the-badge)
