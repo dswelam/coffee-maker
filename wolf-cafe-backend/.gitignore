@@ -1,0 +1,6 @@
+/target/
+**/application.properties
+/wolf-cafe-backend/target/**
+/wolf-cafe-backend/.settings/**
+**/application.properties
+**/.DS_Store
