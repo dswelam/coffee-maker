@@ -93,7 +93,7 @@ const ListStaffComponent = () => {
 											{isAdmin ? (
 												<span
 													style={{ cursor: 'pointer', color: 'black', textDecoration: 'none' }}
-													onClick={() => navigate(`/edit-user/${user.id}`)}   // <-- NOW IT NAVIGATES
+													onClick={() => navigate(`/edit-user/${user.id}`)}
 													onMouseEnter={(e) => (e.target.style.color = 'blue')}
 													onMouseLeave={(e) => (e.target.style.color = 'black')}
 												>

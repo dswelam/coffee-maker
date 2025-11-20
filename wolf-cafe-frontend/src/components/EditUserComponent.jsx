@@ -8,7 +8,6 @@ const EditUserComponent = () => {
 	const navigate = useNavigate();
 	const [isCustomer, setIsCustomer] = useState(false);
 
-
 	const roleMap = {
 		1: "ROLE_ADMIN",
 		2: "ROLE_STAFF",
@@ -56,7 +55,6 @@ const EditUserComponent = () => {
 					});
 					return;
 				}
-
 
 				setUser({
 					name: u.name,

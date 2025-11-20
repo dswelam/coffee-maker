@@ -48,7 +48,6 @@ function App() {
 		<Route path='/add-user' element={<AuthenticatedRoute><UserComponent /></AuthenticatedRoute>}></Route>
 		<Route path='/tax-rate' element={<AuthenticatedRoute><TaxRateComponent /></AuthenticatedRoute>}></Route>
 		<Route path="/edit-user/:id" element={<AuthenticatedRoute><EditUserComponent /></AuthenticatedRoute>}></Route>
-
 	  </Routes>
 	  <FooterComponent />
 	  </BrowserRouter>

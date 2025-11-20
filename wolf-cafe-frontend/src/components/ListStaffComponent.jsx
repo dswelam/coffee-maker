@@ -4,10 +4,7 @@ import { deleteUser, getAllUsers, isAdminUser } from '../services/AuthService';
 
 const ListStaffComponent = () => {
 	const [users, setUsers] = useState([])
-
-
 	const isAdmin = isAdminUser()
-
 	const navigate = useNavigate()
 	const [error, setError] = useState('');
 	const [successMsg, setSuccessMsg] = useState('');
@@ -103,12 +100,12 @@ const ListStaffComponent = () => {
 										<td>
 											{isAdmin ? (
 												<span
-												  style={{ cursor: 'pointer', color: 'black', textDecoration: 'none' }}
-												  onClick={() => navigate(`/edit-user/${user.id}`)}
-												  onMouseEnter={(e) => (e.target.style.color = 'blue')}
-												  onMouseLeave={(e) => (e.target.style.color = 'black')}
+													style={{ cursor: 'pointer', color: 'black', textDecoration: 'none' }}
+													onClick={() => navigate(`/edit-user/${user.id}`)}
+													onMouseEnter={(e) => (e.target.style.color = 'blue')}
+													onMouseLeave={(e) => (e.target.style.color = 'black')}
 												>
-												  {user.username}
+													{user.username}
 												</span>
 
 											) : (
