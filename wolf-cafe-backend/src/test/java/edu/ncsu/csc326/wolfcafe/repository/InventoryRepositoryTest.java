@@ -12,6 +12,7 @@ import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabas
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase.Replace;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
+import org.springframework.test.context.ActiveProfiles;
 
 import edu.ncsu.csc326.wolfcafe.entity.Inventory;
 import jakarta.persistence.EntityManager;
@@ -20,6 +21,7 @@ import jakarta.persistence.EntityManager;
  * Tests InventoryRepository. Uses the real database - not an embedded one.
  */
 @DataJpaTest
+@ActiveProfiles ( "test" )
 @AutoConfigureTestDatabase ( replace = Replace.NONE )
 public class InventoryRepositoryTest {
 
@@ -39,7 +41,7 @@ public class InventoryRepositoryTest {
      *
      * @throws java.lang.Exception
      *             if error
-     * 
+     *
      *             Source: https://www.geeksforgeeks.org/sql/
      *             truncate-tables-with-dependent-foreign-key-constraints-in-sql/
      */

@@ -12,6 +12,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 
 import edu.ncsu.csc326.wolfcafe.dto.InventoryDto;
@@ -34,6 +35,7 @@ import jakarta.persistence.EntityManager;
  * @author Diya Patel (dapatel8)
  */
 @SpringBootTest
+@ActiveProfiles ( "test" )
 public class OrderServiceTest {
 
     /** Reference to EntityManager for cleanup */
@@ -166,9 +168,9 @@ public class OrderServiceTest {
         assertEquals( createdOrder.getOrderItems().getFirst().getItem().getName(),
                 order.getOrderItems().getFirst().getItem().getName() );
         inventory = inventoryService.getInventory();
-        assertEquals(7, inventory.getIngredients().get("Chocolate"));
-        assertEquals(8, inventory.getIngredients().get("Sugar"));
-        assertEquals(9, inventory.getIngredients().get("Milk"));
+        assertEquals( 7, inventory.getIngredients().get( "Chocolate" ) );
+        assertEquals( 8, inventory.getIngredients().get( "Sugar" ) );
+        assertEquals( 9, inventory.getIngredients().get( "Milk" ) );
     }
 
     /**

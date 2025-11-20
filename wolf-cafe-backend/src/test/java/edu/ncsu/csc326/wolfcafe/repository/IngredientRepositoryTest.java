@@ -12,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase.Replace;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.test.context.ActiveProfiles;
 
 import edu.ncsu.csc326.wolfcafe.entity.Ingredient;
 import jakarta.transaction.Transactional;
@@ -22,6 +23,7 @@ import jakarta.transaction.Transactional;
  * @author Nora Cam (nncam)
  */
 @DataJpaTest
+@ActiveProfiles ( "test" )
 @AutoConfigureTestDatabase ( replace = Replace.NONE )
 class IngredientRepositoryTest {
 

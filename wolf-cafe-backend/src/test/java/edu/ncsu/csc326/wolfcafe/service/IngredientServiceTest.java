@@ -12,6 +12,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 
 import edu.ncsu.csc326.wolfcafe.dto.IngredientDto;
@@ -24,6 +25,7 @@ import edu.ncsu.csc326.wolfcafe.repository.IngredientRepository;
  * @author Nora Cam (nncam)
  */
 @SpringBootTest
+@ActiveProfiles ( "test" )
 public class IngredientServiceTest {
 
     /** The service being tested. */
