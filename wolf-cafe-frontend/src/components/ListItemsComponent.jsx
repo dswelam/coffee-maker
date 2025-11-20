@@ -93,7 +93,9 @@ const ListItemsComponent = () => {
 												}}
 											>
 												{Object.keys(item.ingredients).map((ing, idx) => (
-													<span key={idx}>• {ing}</span>
+													<span key={idx}>
+														• {ing} ({item.ingredients[ing]})
+													</span>
 												))}
 											</div>
 										) : (
