@@ -125,14 +125,6 @@ const OrderComponent = () => {
     <div className="container mt-5">
       <h2 className="text-center fw-bold mb-4">Build Your Order</h2>
 
-      {/* ERRORS */}
-      {errors.quantity && <div className="alert alert-danger">{errors.quantity}</div>}
-      {errors.payment && <div className="alert alert-danger">{errors.payment}</div>}
-      {errors.cart && <div className="alert alert-danger">{errors.cart}</div>}
-      {errors.api && <div className="alert alert-danger">{errors.api}</div>}
-      {errors.auth && <div className="alert alert-danger">{errors.auth}</div>}
-      {success && <div className="alert alert-success">{success}</div>}
-
       {/* MENU */}
       <h4>Menu</h4>
       <ul className="list-group mb-4">
@@ -241,9 +233,16 @@ const OrderComponent = () => {
         <strong>Total: ${calculateTotal()}</strong>
       </div>
 
-      <button className="btn btn-primary w-100" onClick={placeOrder}>
+      <button className="btn btn-primary w-100 mb-3" onClick={placeOrder}>
         Place Order
       </button>
+	  {/* ERRORS */}
+	  {errors.quantity && <div className="alert alert-danger">{errors.quantity}</div>}
+	  {errors.payment && <div className="alert alert-danger">{errors.payment}</div>}
+	  {errors.cart && <div className="alert alert-danger">{errors.cart}</div>}
+	  {errors.api && <div className="alert alert-danger">{errors.api}</div>}
+	  {errors.auth && <div className="alert alert-danger">{errors.auth}</div>}
+	  {success && <div className="alert alert-success">{success}</div>}
     </div>
   )
 }
