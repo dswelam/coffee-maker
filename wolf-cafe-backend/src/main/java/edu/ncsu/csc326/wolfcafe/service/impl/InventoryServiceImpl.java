@@ -58,7 +58,7 @@ public class InventoryServiceImpl implements InventoryService {
     }
 
     /**
-     * Updates the contents of the inventory.
+     * Updates the contents of the inventory by adding quantities of ingredients.
      *
      * @param inventoryDto
      *            values to update
@@ -80,6 +80,37 @@ public class InventoryServiceImpl implements InventoryService {
                         "Invalid amount for " + ingredient + ". Must be a positive integer" );
             }
             final int newAmount = currentIngredients.getOrDefault( ingredient, 0 ) + amountToAdd;
+            currentIngredients.put( ingredient, newAmount );
+        }
+
+        inventory.setIngredients( currentIngredients );
+        final Inventory savedInventory = inventoryRepository.save( inventory );
+        return InventoryMapper.mapToInventoryDto( savedInventory );
+    }
+    
+    /**
+     * Updates the contents of the inventory by deducting quantities of ingredients.
+     *
+     * @param inventoryDto
+     *            values to update
+     * @return updated inventory
+     */
+    @Override
+    public InventoryDto updateInventoryForOrder ( final InventoryDto inventoryDto ) {
+        final Inventory inventory = inventoryRepository.findById( 1L ).orElseThrow(
+                () -> new ResourceNotFoundException( "Inventory does not exist with id of " + inventoryDto.getId() ) );
+
+        final Map<String, Integer> currentIngredients = inventory.getIngredients();
+        final Map<String, Integer> additionalIngredients = inventoryDto.getIngredients();
+
+        for ( final Map.Entry<String, Integer> entry : additionalIngredients.entrySet() ) {
+            final String ingredient = entry.getKey();
+            final Integer amount = entry.getValue();
+            if ( amount == null || amount < 0 ) {
+                throw new InvalidIngredientAmountException(
+                        "Invalid amount for " + ingredient + ". Must be a positive integer" );
+            }
+            final int newAmount = amount;
             currentIngredients.put( ingredient, newAmount );
         }
 

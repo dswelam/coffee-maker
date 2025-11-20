@@ -96,18 +96,19 @@ public class ItemController {
      */
     @PreAuthorize ( "hasAnyRole('ADMIN', 'STAFF')" )
     @PutMapping ( "{id}" )
-    public ResponseEntity< ? > updateItem ( @PathVariable ( "id" ) final Long id, @RequestBody final ItemDto itemDto ) {
+    public ResponseEntity<ItemDto> updateItem ( @PathVariable ( "id" ) final Long id,
+            @RequestBody final ItemDto itemDto ) {
         try {
             final ItemDto updated = itemService.updateItem( id, itemDto );
             return ResponseEntity.ok( updated );
         }
         catch ( final IllegalArgumentException e ) {
             // Invalid Price, Invalid Unit, No Ingredients
-            return ResponseEntity.badRequest().body( e.getMessage() );
+            return ResponseEntity.badRequest().body( null );
         }
         catch ( final ResourceNotFoundException e ) {
             // Cannot Edit (item deleted by concurrent user)
-            return ResponseEntity.status( HttpStatus.CONFLICT ).body( e.getMessage() );
+            return ResponseEntity.status( HttpStatus.CONFLICT ).body( null );
         }
     }
 

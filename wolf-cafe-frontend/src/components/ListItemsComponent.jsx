@@ -7,9 +7,7 @@ import { getAllItems, deleteItemById } from '../services/ItemService'
 const ListItemsComponent = () => {
 
 	const [items, setItems] = useState([])
-
 	const navigate = useNavigate()
-
 	const isAdmin = isAdminUser()
 
 	useEffect(() => {
@@ -33,81 +31,84 @@ const ListItemsComponent = () => {
 		navigate(`/update-item/${id}`)
 	}
 
-	function deleteItem(id) {
-	    const confirmDelete = window.confirm('Are you sure you want to delete this item?');
-	    if (!confirmDelete) return;
-
-	    deleteItemById(id)
-	        .then((response) => {
-	            alert('Item deleted successfully!');
-	            listItems(); 
-	        })
-	        .catch((error) => {
-	            console.error(error);
-	            alert('This item may have already been deleted by another user.');
-	            listItems(); 
-	        });
-	}
-
-
 	return (
-		<div className='container'>
-			<br /> <br />
-			<h2 className='text-center'>Items</h2>
-			<h6 className='text-center'>Click on Item Name to Update Or Delete</h6>
-			{
-				isAdmin &&
-				<button className='btn btn-primary mb-2' onClick={addNewItem}>Add Item</button>
-			}
-			<div>
-				<table className='table table-bordered table-striped' style={{ textAlign: "left", tableLayout: 'fixed', width: '100%' }}>
-					<thead className='table-dark'>
-						<tr>
-							<th style={{ width: '100px' }}>Name</th>
-							<th style={{ width: '50px' }}>Price</th>
-							<th style={{ width: '100px' }}>Description</th>
-							<th style={{ width: '300px' }}>Ingredients</th>
-						</tr>
-					</thead>
-					<tbody>
-						{
-							items.map((item) =>
+		<div className="page-container d-flex justify-content-center align-items-start">
+			<div
+				className="card shadow-lg p-5"
+				style={{
+					width: '75rem',
+					transform: 'scale(1)',
+					backgroundColor: '#fff',
+					borderRadius: '1rem',
+					maxHeight: '200vh',
+					overflowY: 'auto',
+				}}
+			>
+				<div className="card-header text-center border-0 mb-4 bg-white">
+					<h2 className="fw-bold text-dark mb-0">Items</h2>
+					<p className="text-secondary mt-2">Click on Item Name to Update or Delete</p>
+					{isAdmin && (
+						<button className="btn btn-success mt-3 fw-bold" onClick={addNewItem}>
+							Add Item
+						</button>
+					)}
+				</div>
+
+				<div className="card-body">
+					<table className="table table-bordered align-middle text-center">
+						<thead className="table-light">
+							<tr>
+								<th className="fs-5">Name</th>
+								<th className="fs-5">Price</th>
+								<th className="fs-5">Description</th>
+								<th className="fs-5">Ingredients</th>
+							</tr>
+						</thead>
+						<tbody>
+							{items.map((item) => (
 								<tr key={item.id}>
-									<td>
-										{isAdmin && (
+									<td className="fw-semibold">
+										{isAdmin ? (
 											<span
-												style={{ color: 'black', textDecoration: 'none', cursor: 'pointer' }}
+												style={{ cursor: 'pointer', color: 'black', textDecoration: 'none' }}
 												onClick={() => updateItem(item.id)}
 												onMouseEnter={(e) => (e.target.style.color = 'blue')}
 												onMouseLeave={(e) => (e.target.style.color = 'black')}
 											>
-
-												{item.name} </span>)}{!isAdmin && item.name} </td>
+												{item.name}
+											</span>
+										) : (
+											item.name
+										)}
+									</td>
 									<td>{item.price}</td>
-									<td style={{ width: '200px', wordWrap: 'break-word', overflowWrap: 'break-word' }}>{item.description}</td>
+									<td style={{ wordWrap: 'break-word', overflowWrap: 'break-word' }}>{item.description}</td>
 									<td>
-									{item.ingredients ? (
-									  <div 
-									    style={{ 
-									      display: 'grid', 
-									      gridTemplateColumns: 'repeat(3, 1fr)', // 3 bullet points each row
-									      gap: '5px'
-									    }}
-									  >
-									    {Object.keys(item.ingredients).map((ing, idx) => (
-									      <span key={idx}>• {ing}</span>
-									    ))}
-									  </div>
-									) : 'No ingredients'}
+										{item.ingredients ? (
+											<div
+												style={{
+													display: 'grid',
+													gridTemplateColumns: 'repeat(3, 1fr)',
+													gap: '5px',
+												}}
+											>
+												{Object.keys(item.ingredients).map((ing, idx) => (
+													<span key={idx}>
+														• {ing} ({item.ingredients[ing]})
+													</span>
+												))}
+											</div>
+										) : (
+											'No ingredients'
+										)}
 									</td>
 								</tr>
-							)
-						}
-					</tbody>
-				</table>
+							))}
+						</tbody>
+					</table>
+				</div>
 			</div>
 		</div>
 	)
 }
-
 export default ListItemsComponent

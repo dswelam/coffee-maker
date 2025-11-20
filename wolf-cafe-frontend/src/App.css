@@ -1,8 +1,5 @@
 #root {
-  max-width: 1280px;
-  margin: 0 auto;
-  padding: 2rem;
-  text-align: center;
+  width: 100%;
 }
 
 .logo {
@@ -66,4 +63,25 @@
 .btn-danger:hover {
   background-color: #a00000;
 }
+.navbar-nav .nav-link.active {
+  background-color: #fff;
+  color: #000 !important;
+  border-radius: 0.5rem;
+  padding: 0.5rem 1rem;
+}
 
+/* Offsets content so it never sits under the fixed navbar */
+.page-container {
+  padding-top: 100px; /* adjust if your header is taller/shorter */
+  min-height: calc(100vh - 100px);
+}
+
+.login-wrapper {
+  min-height: 100vh;
+  padding-top: 80px; /* height of navbar */
+  background-color: #f8f9fa; /* optional clean bg */
+}
+
+.login-wrapper .card {
+  margin-top: -50px; /* visually centers card under navbar */
+}
