@@ -9,10 +9,13 @@ import LoginComponent from './components/LoginComponent'
 import ListIngredientsComponent from './components/ListIngredientsComponent'
 import IngredientComponent from './components/IngredientComponent'
 import ListStaffComponent from './components/ListStaffComponent'
+import ListCustomerComponent from './components/ListCustomerComponent'
+import UserComponent from './components/UserComponent'
 import TaxRateComponent from './components/TaxRateComponent'
 import { isUserLoggedIn } from './services/AuthService'
-import OrderComponent from "./components/OrderComponent";
 import OrderQueueComponent from "./components/OrderQueueComponent";
+import EditUserComponent from "./components/EditUserComponent";
+
 
 
 function App() {
@@ -41,9 +44,11 @@ function App() {
 		<Route path='/add-ingredient' element={<AuthenticatedRoute><IngredientComponent /></AuthenticatedRoute>}></Route>
 		<Route path='/update-ingredient/:ingredientName' element={<AuthenticatedRoute><IngredientComponent /></AuthenticatedRoute>}></Route>
 		<Route path='/staff' element={<AuthenticatedRoute><ListStaffComponent /></AuthenticatedRoute>}></Route>
+		<Route path='/customers' element={<AuthenticatedRoute><ListCustomerComponent /></AuthenticatedRoute>}></Route>
+		<Route path='/add-user' element={<AuthenticatedRoute><UserComponent /></AuthenticatedRoute>}></Route>
 		<Route path='/tax-rate' element={<AuthenticatedRoute><TaxRateComponent /></AuthenticatedRoute>}></Route>
 		<Route path='/order-queue' element={<AuthenticatedRoute><OrderQueueComponent /></AuthenticatedRoute>}></Route>
-
+		<Route path="/edit-user/:id" element={<AuthenticatedRoute><EditUserComponent /></AuthenticatedRoute>}></Route>
 	  </Routes>
 	  <FooterComponent />
 	  </BrowserRouter>
