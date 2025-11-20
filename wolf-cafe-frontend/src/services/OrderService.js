@@ -20,24 +20,18 @@ export const createOrder = (orderDto) => {
 };
 
 // order queue listing 
-export const OrderQueue = () => axios.get(ORDER_API_BASE_URL + '/' + 'queue')
+export const getOrdersByStatus = (stat) =>
+  axios.get(`${ORDER_API_BASE_URL}/queue?status=${stat}`, { headers: authHeader() });
 
-export function updateOrderStatus(orderId, status) {
-  return axios.put(`/api/orders/${orderId}/status`, { status });
-}
+export const prepareOrder = (id) =>
+  axios.put(`${ORDER_API_BASE_URL}/${id}/prepare`, {}, { headers: authHeader() });
 
-export function prepareOrder(id) {
-  return axios.put(`/api/orders/${id}/prepare`);
-}
+export const markReady = (id) =>
+  axios.put(`${ORDER_API_BASE_URL}/${id}/ready`, {}, { headers: authHeader() });
 
-export function markReady(id) {
-  return axios.put(`/api/orders/${id}/ready`);
-}
+export const fulfillOrder = (id) =>
+  axios.put(`${ORDER_API_BASE_URL}/${id}/fulfill`, {}, { headers: authHeader() });
 
-export function fulfillOrder(id) {
-  return axios.put(`/api/orders/${id}/fulfill`);
-}
+export const cancelOrder = (id) =>
+  axios.put(`${BASE}/${id}/cancel`, {}, { headers: authHeader() });
 
-export function cancelOrder(id) {
-  return axios.put(`/api/orders/${id}/cancel`);
-}

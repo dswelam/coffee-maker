@@ -90,36 +90,22 @@ const OrderComponent = () => {
       return
     }
 
-    const current = getCurrentUser()
-    if (!current || !current.id) {
-      setErrors({ auth: "You must be logged in." })
-      return
-    }
 
-    let fullUser
-    try {
-      const res = await getUserById(current.id)
-      fullUser = res.data
-    } catch (err) {
-      setErrors({ api: "Could not load user profile." })
-      return
-    }
+	const current = getCurrentUser()
+	if (!current || !current.username) {
+	  setErrors({ auth: "You must be logged in." })
+	  return
+	}
 
-    // Build order DTO exactly as backend expects
-    const orderDto = {
-      customer: fullUser,
-      preparedBy: fullUser, // temporary assumption
-      orderItems: cart.map((c) => ({
-        quantity: c.qty,
-        item: {
-          id: c.item.id,
-          name: c.item.name,
-          description: c.item.description,
-          price: c.item.price,
-          ingredients: c.item.ingredients
-        }
-      }))
-    }
+	// Only send the IDs of items, backend will fetch the real ones
+	const orderDto = {
+		username: current.username,
+	  orderItems: cart.map((c) => ({
+	    quantity: c.qty,
+	    item: { id: c.item.id } 
+	  }))
+	}
+
 
     try {
       await createOrder(orderDto)

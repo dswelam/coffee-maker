@@ -45,7 +45,8 @@ public class OrderController {
      *
      * @param orderDto
      *            The valid Order to be saved.
-     * @param authentication The authentication object of the requester.
+     * @param authentication
+     *            The authentication object of the requester.
      * @return ResponseEntity indicating success if the Order could be saved to
      *         the inventory, or an error if it could not be
      */
@@ -136,7 +137,7 @@ public class OrderController {
      *            ID of the order to mark as ready
      * @return The updated order
      */
-    @PreAuthorize ( "hasAnyRole('BARISTA')" )
+    @PreAuthorize ( "hasAnyRole('BARISTA', 'STAFF')" )
     @PutMapping ( "/{id}/ready" )
     public ResponseEntity<OrderDto> markReady ( @PathVariable ( "id" ) final Long orderId ) {
         final Authentication auth = SecurityContextHolder.getContext().getAuthentication();

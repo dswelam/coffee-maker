@@ -1,65 +1,44 @@
-import React, { useEffect, useState } from "react"
-import { useNavigate } from "react-router-dom"
-import { OrderQueue, prepareOrder, markReady, fulfillOrder, cancelOrder } from "../services/OrderService"
+import React, { useEffect, useState } from "react";
+import {
+  getOrdersByStatus,
+  prepareOrder,
+  markReady,
+  fulfillOrder,
+  cancelOrder,
+} from "../services/OrderService";
 
+const STATUS_ORDER = [
+  "PLACED",
+  "IN_PROGRESS",
+  "READY",
+  "FULFILLED",
+  "CANCELLED",
+];
 
 const OrderQueueComponent = () => {
-  const navigate = useNavigate()
+  const [ordersByGroup, setOrdersByGroup] = useState({});
   const [errorMsg, setErrorMsg] = useState("");
   const [successMsg, setSuccessMsg] = useState("");
-
-  const [orders, setOrders] = useState([])
-
-  useEffect(() => {
-  	listOrders()
-  }, [])
-
-  function listOrders() {
-  	OrderQueue().then((response) => {
-  		setOrders(response.data)
-  	}).catch(error => {
-  		console.error(error)
-  		setErrorMsg('Failed to load orders.');
-  	})
-  }
-  
-  useEffect(() => {
-  	if (successMsg) {
-  		const timer = setTimeout(() => setSuccessMsg(''), 3000); // clears after 3s
-  		return () => clearTimeout(timer);
-  	}
-  }, [successMsg]);
+  const [expandedOrders, setExpandedOrders] = useState({}); // track which orders are expanded
 
   useEffect(() => {
-  	if (errorMsg) {
-  		const timer = setTimeout(() => setError(''), 3000); // clears after 3s
-  		return () => clearTimeout(timer);
-  	}
-  }, [errorMsg]);
-  
-  
-  async function handleStatusSelect(orderId, newStatus) {
+    loadAllGroups();
+  }, []);
+
+  async function loadAllGroups() {
     try {
-      if (newStatus === "IN_PROGRESS") {
-        await prepareOrder(orderId);
-      } else if (newStatus === "READY") {
-        await markReady(orderId);
-      } else if (newStatus === "FULFILLED") {
-        await fulfillOrder(orderId);
-      } else if (newStatus === "CANCELLED") {
-        await cancelOrder(orderId);
-      } else {
-        return; // "PLACED" can't be set manually
+      const results = {};
+      for (let status of STATUS_ORDER) {
+        const res = await getOrdersByStatus(status);
+        results[status] = res.data;
       }
-
-      setSuccessMsg("Order status updated!");
-      listOrders();
+      setOrdersByGroup(results);
     } catch (err) {
       console.error(err);
-      setErrorMsg("Unable to update order status.");
+      setErrorMsg("Couldn't load queue.");
     }
   }
-  
+
   function getValidTransitions(status) {
     switch (status) {
       case "PLACED":
@@ -69,87 +48,132 @@ const OrderQueueComponent = () => {
       case "READY":
         return ["FULFILLED"];
       default:
-        return []; // no transitions allowed
+        return [];
     }
   }
 
+  function getStatusColor(status) {
+    switch (status) {
+      case "PLACED":
+        return "bg-secondary"; // grey
+      case "IN_PROGRESS":
+        return "bg-warning text-dark"; // yellow
+      case "READY":
+        return "bg-success"; // green
+      case "FULFILLED":
+        return "bg-primary"; // blue
+      case "CANCELLED":
+        return "bg-danger"; // red
+      default:
+        return "bg-dark";
+    }
+  }
+
+  async function updateStatus(id, next) {
+    try {
+      if (next === "IN_PROGRESS") await prepareOrder(id);
+      else if (next === "READY") await markReady(id);
+      else if (next === "FULFILLED") await fulfillOrder(id);
+      else if (next === "CANCELLED") await cancelOrder(id);
+
+      setSuccessMsg("Order updated successfully.");
+      loadAllGroups();
+    } catch (err) {
+      console.error(err);
+      setErrorMsg("Failed to update order.");
+    }
+  }
+
+  const toggleExpand = (orderId) => {
+    setExpandedOrders((prev) => ({
+      ...prev,
+      [orderId]: !prev[orderId],
+    }));
+  };
 
   return (
-    <div className="container" style={{ paddingTop: '40px' }}>
+    <div className="container" style={{ paddingTop: "40px" }}>
       <h2 className="fw-bold text-center mb-4">Order Queue</h2>
 
       {errorMsg && <div className="alert alert-danger text-center">{errorMsg}</div>}
       {successMsg && <div className="alert alert-success text-center">{successMsg}</div>}
 
-      {orders.length === 0 ? (
-        <p className="text-center">No orders found.</p>
-      ) : (
-        <div className="d-flex flex-wrap justify-content-center gap-4">
-          {orders.map((order) => (
-            <div
-              key={order.id}
-              className="card shadow-lg p-4"
-              style={{
-                width: "28rem",
-                borderRadius: "1rem",
-                backgroundColor: "#fff",
-                display: "flex",
-                flexDirection: "row",
-                alignItems: "center",
-                transform: "scale(0.98)"
-              }}
-            >
-              <div style={{ flexGrow: 1 }}>
-                <h4 className="fw-bold mb-3" style={{ color: "#333" }}>
-                  Order #{order.id}
-                </h4>
+      {STATUS_ORDER.map((status) => {
+        const list = ordersByGroup[status] || [];
+        if (list.length === 0) return null;
 
-                <p className="mb-2">
-                  <span className="fw-semibold">Customer:</span>{" "}
-                  {order.customer?.name || "Unknown"}
-                </p>
+        return (
+          <div key={status} className="mb-5">
+            <h3 className="fw-bold mb-3">{status.replace("_", " ")}</h3>
 
-				<p className="mb-0">
-				  <span className="fw-semibold">Status:</span>{" "}
-				  <span
-				    className={`badge ${
-				      order.status === "PENDING"
-				        ? "bg-warning text-dark"
-				        : order.status === "COMPLETED"
-				        ? "bg-success"
-				        : "bg-secondary"
-				    }`}
-				    style={{ fontSize: "1rem" }}
-				  >
-				    {order.status}
-				  </span>
-				</p>
+            <div className="d-flex flex-wrap gap-4">
+              {list.map((order) => (
+                <div
+                  key={order.id}
+                  className="card shadow p-4"
+                  style={{
+                    width: "26rem",
+                    borderRadius: "1rem",
+                    background: "#fff",
+                  }}
+                >
+                  <h5 className="fw-bold">Order #{order.id}</h5>
 
-				{getValidTransitions(order.status).length > 0 && (
-				  <select
-				    className="form-select mt-3"
-				    style={{ maxWidth: "200px" }}
-				    defaultValue=""
-				    onChange={(e) => handleStatusSelect(order.id, e.target.value)}
-				  >
-				    <option value="" disabled>
-				      Update Status…
-				    </option>
+                  <p className="mb-0">
+                    <span className="fw-semibold">Customer:</span>{" "}
+                    {order.customer?.name || "Unknown"}
+                  </p>
 
-				    {getValidTransitions(order.status).map((next) => (
-				      <option key={next} value={next}>
-				        {next}
-				      </option>
-				    ))}
-				  </select>
-				)}
-              </div>
+                  <p className="mt-2 mb-0">
+                    <span className="fw-semibold">Status:</span>{" "}
+                    <span className={`badge ${getStatusColor(order.status)}`}>
+                      {order.status}
+                    </span>
+                  </p>
+
+                  {getValidTransitions(order.status).length > 0 && (
+                    <select
+                      className="form-select mt-3"
+                      defaultValue=""
+                      style={{ maxWidth: "200px" }}
+                      onChange={(e) => updateStatus(order.id, e.target.value)}
+                    >
+                      <option value="" disabled>
+                        Update Status
+                      </option>
+                      {getValidTransitions(order.status).map((s) => (
+                        <option key={s} value={s}>
+                          {s}
+                        </option>
+                      ))}
+                    </select>
+                  )}
+
+                  {/* Collapsible items list */}
+                  <button
+                    className="btn btn-outline-secondary mt-3"
+                    onClick={() => toggleExpand(order.id)}
+                  >
+                    {expandedOrders[order.id] ? "Hide Items" : "Show Items"}
+                  </button>
+
+                  {expandedOrders[order.id] && (
+                    <ul className="list-group mt-2">
+                      {order.orderItems.map((oi) => (
+                        <li key={oi.id} className="list-group-item">
+                          {oi.item.name} × {oi.quantity}
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                </div>
+              ))}
             </div>
-          ))}
-        </div>
-      )}
+          </div>
+        );
+      })}
     </div>
   );
-}
+};
 
-export default OrderQueueComponent
+export default OrderQueueComponent;
