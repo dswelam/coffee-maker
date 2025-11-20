@@ -8,7 +8,7 @@ import org.springframework.stereotype.Service;
 
 import edu.ncsu.csc326.wolfcafe.dto.InventoryDto;
 import edu.ncsu.csc326.wolfcafe.entity.Inventory;
-import edu.ncsu.csc326.wolfcafe.entity.Recipe;
+import edu.ncsu.csc326.wolfcafe.entity.Item;
 import edu.ncsu.csc326.wolfcafe.exception.InvalidIngredientAmountException;
 import edu.ncsu.csc326.wolfcafe.exception.ResourceNotFoundException;
 import edu.ncsu.csc326.wolfcafe.mapper.InventoryMapper;
@@ -17,6 +17,8 @@ import edu.ncsu.csc326.wolfcafe.service.InventoryService;
 
 /**
  * Implementation of the InventoryService interface.
+ *
+ * @author Dania Swelam
  */
 @Service
 public class InventoryServiceImpl implements InventoryService {
@@ -56,7 +58,7 @@ public class InventoryServiceImpl implements InventoryService {
     }
 
     /**
-     * Updates the contents of the inventory.
+     * Updates the contents of the inventory by adding quantities of ingredients.
      *
      * @param inventoryDto
      *            values to update
@@ -85,15 +87,46 @@ public class InventoryServiceImpl implements InventoryService {
         final Inventory savedInventory = inventoryRepository.save( inventory );
         return InventoryMapper.mapToInventoryDto( savedInventory );
     }
+    
+    /**
+     * Updates the contents of the inventory by deducting quantities of ingredients.
+     *
+     * @param inventoryDto
+     *            values to update
+     * @return updated inventory
+     */
+    @Override
+    public InventoryDto updateInventoryForOrder ( final InventoryDto inventoryDto ) {
+        final Inventory inventory = inventoryRepository.findById( 1L ).orElseThrow(
+                () -> new ResourceNotFoundException( "Inventory does not exist with id of " + inventoryDto.getId() ) );
+
+        final Map<String, Integer> currentIngredients = inventory.getIngredients();
+        final Map<String, Integer> additionalIngredients = inventoryDto.getIngredients();
+
+        for ( final Map.Entry<String, Integer> entry : additionalIngredients.entrySet() ) {
+            final String ingredient = entry.getKey();
+            final Integer amount = entry.getValue();
+            if ( amount == null || amount < 0 ) {
+                throw new InvalidIngredientAmountException(
+                        "Invalid amount for " + ingredient + ". Must be a positive integer" );
+            }
+            final int newAmount = amount;
+            currentIngredients.put( ingredient, newAmount );
+        }
+
+        inventory.setIngredients( currentIngredients );
+        final Inventory savedInventory = inventoryRepository.save( inventory );
+        return InventoryMapper.mapToInventoryDto( savedInventory );
+    }
 
     /**
      * Checks if there are enough ingredients in inventory for the given recipe.
      */
     @Override
-    public boolean hasEnoughIngredients ( final Recipe recipe ) {
+    public boolean hasEnoughIngredients ( final Item item ) {
         final InventoryDto inventoryDto = getInventory();
         final Map<String, Integer> invMap = inventoryDto.getIngredients();
-        final Map<String, Integer> recMap = recipe.getIngredients();
+        final Map<String, Integer> recMap = item.getIngredients();
 
         for ( final Map.Entry<String, Integer> entry : recMap.entrySet() ) {
             final String name = entry.getKey();
@@ -110,12 +143,12 @@ public class InventoryServiceImpl implements InventoryService {
      * Deducts the ingredients for the given recipe from inventory.
      */
     @Override
-    public void useIngredients ( final Recipe recipe ) {
+    public void useIngredients ( final Item item ) {
         final Inventory inventory = inventoryRepository.findById( 1L )
                 .orElseThrow( () -> new ResourceNotFoundException( "Inventory does not exist" ) );
 
         final Map<String, Integer> invMap = inventory.getIngredients();
-        final Map<String, Integer> recMap = recipe.getIngredients();
+        final Map<String, Integer> recMap = item.getIngredients();
 
         for ( final Map.Entry<String, Integer> entry : recMap.entrySet() ) {
             final String name = entry.getKey();
@@ -126,5 +159,4 @@ public class InventoryServiceImpl implements InventoryService {
         inventory.setIngredients( invMap );
         inventoryRepository.save( inventory );
     }
-
 }

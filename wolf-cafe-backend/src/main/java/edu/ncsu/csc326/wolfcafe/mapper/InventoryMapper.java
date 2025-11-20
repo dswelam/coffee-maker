@@ -5,6 +5,8 @@ import edu.ncsu.csc326.wolfcafe.entity.Inventory;
 
 /**
  * Converts between InventoryDto and Inventory entity.
+ *
+ * @author Dania Swelam
  */
 public class InventoryMapper {
 

@@ -27,6 +27,15 @@ export const getLoggedInUser = () => {
     return username
 }
 
+export const getCurrentUser = () => {
+  const username = sessionStorage.getItem('authenticatedUser')
+  const role = sessionStorage.getItem('role')
+  const idStr = sessionStorage.getItem('userId')
+  if (!username) return null
+  const id = idStr ? Number(idStr) : null
+  return { id, username, role }
+}
+
 export const logout = () => {
     localStorage.clear()
     sessionStorage.clear()
@@ -36,3 +45,25 @@ export const isAdminUser = () => {
     let role = sessionStorage.getItem('role')
     return role != null && role == 'ROLE_ADMIN';
 }
+
+export const isStaffUser = () => {
+    let role = sessionStorage.getItem('role')
+    return role != null && role == 'ROLE_STAFF';
+}
+
+export const isCustomerUser = () => {
+    const role = sessionStorage.getItem('role')
+    return role === 'ROLE_CUSTOMER'
+}
+
+export const getAllUsers = () => axios.get(AUTH_REST_API_BASE_URL + '/' + 'users')
+export const deleteUser = (id) => axios.delete(AUTH_REST_API_BASE_URL + '/' + 'user' + '/' + id)
+
+export function addUser(user) {
+    return axios.post(AUTH_REST_API_BASE_URL + '/users', user);
+}
+export const getTax = () => axios.get(AUTH_REST_API_BASE_URL + '/' + 'tax')
+export const editTax = (rate) =>
+  axios.put(AUTH_REST_API_BASE_URL + '/tax', {
+    currentAmount: rate
+  });
