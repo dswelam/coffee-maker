@@ -28,6 +28,7 @@ import edu.ncsu.csc326.wolfcafe.dto.InventoryDto;
 import edu.ncsu.csc326.wolfcafe.dto.ItemDto;
 import edu.ncsu.csc326.wolfcafe.dto.OrderDto;
 import edu.ncsu.csc326.wolfcafe.dto.OrderLineDto;
+import edu.ncsu.csc326.wolfcafe.entity.Order;
 import edu.ncsu.csc326.wolfcafe.entity.Order.OrderStatus;
 import edu.ncsu.csc326.wolfcafe.entity.User;
 import edu.ncsu.csc326.wolfcafe.mapper.ItemMapper;
@@ -42,14 +43,14 @@ import jakarta.persistence.EntityManager;
 /**
  * GENERATIVE AI USED:
  *
- * Model: GPT-4.1
- * This code snippet was completed with the assistance of Generative AI technology.
- * The code was reviewed and edited by human engineers, but may contain errors.
+ * Model: GPT-4.1 This code snippet was completed with the assistance of
+ * Generative AI technology. The code was reviewed and edited by human
+ * engineers, but may contain errors.
  *
- * Prompts used:
- * - "Complete the OrderControllerTest class to include tests for preparing an order,
- *    marking an order as ready, fulfilling an order, cancelling an order, and listing
- *    orders by customer. Use JUnit 5 and Spring Boot testing annotations."
+ * Prompts used: - "Complete the OrderControllerTest class to include tests for
+ * preparing an order, marking an order as ready, fulfilling an order,
+ * cancelling an order, and listing orders by customer. Use JUnit 5 and Spring
+ * Boot testing annotations."
  *
  * Tests the Order controller.
  *
@@ -276,7 +277,8 @@ public class OrderControllerTest {
     /**
      * Tests updating an order.
      *
-     * @throws Exception if error
+     * @throws Exception
+     *             if error
      */
     @Test
     @Transactional
@@ -464,6 +466,10 @@ public class OrderControllerTest {
         order.setOrderItems( orderItems );
         order = orderService.createOrder( order );
 
+        final Order existing = orderRepository.findById( order.getId() ).get();
+        existing.setStatus( OrderStatus.READY );
+        orderRepository.save( existing );
+
         mvc.perform( put( "/api/orders/" + order.getId() + "/fulfill" ).accept( MediaType.APPLICATION_JSON ) )
                 .andExpect( status().isOk() ).andExpect( jsonPath( "$.status" ).value( "FULFILLED" ) );
     }
@@ -557,4 +563,147 @@ public class OrderControllerTest {
                 .andExpect( jsonPath( "$[0].customer.username" ).value( "customer" ) )
                 .andExpect( jsonPath( "$[1].customer.username" ).value( "customer" ) );
     }
+
+    /**
+     * Test when order fails if it is not placed
+     *
+     * @throws Exception
+     *             because order is not placed
+     */
+    @Test
+    @Transactional
+    @WithMockUser ( username = "customer", roles = { "CUSTOMER" } )
+    public void testUpdateOrderFailsWhenNotPlaced () throws Exception {
+
+        // Create users
+        final User customer = new User();
+        customer.setName( "Customer" );
+        customer.setUsername( "customer" );
+        customer.setEmail( "c@mail.com" );
+        customer.setPassword( "pwd" );
+        userRepository.save( customer );
+
+        final User barista = new User();
+        barista.setName( "Barry" );
+        barista.setUsername( "barista" );
+        barista.setEmail( "b@mail.com" );
+        barista.setPassword( "pwd" );
+        userRepository.save( barista );
+
+        // Create item
+        ItemDto item = new ItemDto();
+        item.setName( "Latte" );
+        item.setPrice( 4.0 );
+        item.setIngredients( Map.of( "Milk", 1 ) );
+        item = itemService.addItem( item );
+
+        // Create order (PLACED)
+        final OrderLineDto line = new OrderLineDto();
+        line.setItem( ItemMapper.mapToItem( itemService.getItemByName( "Latte" ) ) );
+        line.setQuantity( 1 );
+
+        OrderDto order = new OrderDto();
+        order.setCustomer( customer );
+        order.setPreparedBy( barista );
+        order.setOrderItems( new ArrayList<>( List.of( line ) ) );
+        order = orderService.createOrder( order );
+
+        // Change status to INVALID (READY)
+        final Order existing = orderRepository.findById( order.getId() ).get();
+        existing.setStatus( OrderStatus.READY );
+        orderRepository.save( existing );
+
+        // Expect 400 BAD REQUEST
+        mvc.perform( put( "/api/orders/" + order.getId() ).contentType( MediaType.APPLICATION_JSON )
+                .content( TestUtils.asJsonString( order ) ).accept( MediaType.APPLICATION_JSON ) )
+                .andExpect( status().isBadRequest() );
+    }
+
+    /**
+     * Tests that order is fufilled when it is not ready
+     *
+     * @throws Exception
+     *             because order is not ready
+     */
+    @Test
+    @Transactional
+    @WithMockUser ( username = "customer", roles = { "CUSTOMER" } )
+    public void testOrderFulfilledFailsWhenNotReady () throws Exception {
+
+        // Create customer
+        final User customer = new User();
+        customer.setName( "Customer" );
+        customer.setUsername( "customer" );
+        customer.setEmail( "c@mail.com" );
+        customer.setPassword( "pwd" );
+        userRepository.save( customer );
+
+        // Create item
+        ItemDto item = new ItemDto();
+        item.setName( "Mocha" );
+        item.setPrice( 5.0 );
+        item.setIngredients( Map.of( "Coffee", 1 ) );
+        item = itemService.addItem( item );
+
+        // Create order (PLACED, not READY)
+        final OrderLineDto line = new OrderLineDto();
+        line.setItem( ItemMapper.mapToItem( itemService.getItemByName( "Mocha" ) ) );
+        line.setQuantity( 1 );
+
+        OrderDto order = new OrderDto();
+        order.setCustomer( customer );
+        order.setOrderItems( new ArrayList<>( List.of( line ) ) );
+        order = orderService.createOrder( order );
+
+        // Should fail because status != READY
+        mvc.perform( put( "/api/orders/" + order.getId() + "/fulfill" ).accept( MediaType.APPLICATION_JSON ) )
+                .andExpect( status().isBadRequest() );
+    }
+
+    /**
+     * Tests that the cancel order fails if order is not placed
+     *
+     * @throws Exception
+     *             if order is not placed
+     */
+    @Test
+    @Transactional
+    @WithMockUser ( username = "customer", roles = { "CUSTOMER" } )
+    public void testCancelOrderFailsWhenNotPlaced () throws Exception {
+
+        // Create customer
+        final User customer = new User();
+        customer.setName( "Customer" );
+        customer.setUsername( "customer" );
+        customer.setEmail( "c@mail.com" );
+        customer.setPassword( "pwd" );
+        userRepository.save( customer );
+
+        // Create item
+        ItemDto item = new ItemDto();
+        item.setName( "Cappuccino" );
+        item.setPrice( 4.0 );
+        item.setIngredients( Map.of( "Coffee", 1 ) );
+        item = itemService.addItem( item );
+
+        // Create order (PLACED by default)
+        final OrderLineDto line = new OrderLineDto();
+        line.setItem( ItemMapper.mapToItem( itemService.getItemByName( "Cappuccino" ) ) );
+        line.setQuantity( 1 );
+
+        OrderDto order = new OrderDto();
+        order.setCustomer( customer );
+        order.setOrderItems( new ArrayList<>( List.of( line ) ) );
+        order = orderService.createOrder( order );
+
+        // Set to an invalid status
+        final Order existing = orderRepository.findById( order.getId() ).get();
+        existing.setStatus( OrderStatus.IN_PROGRESS );
+        orderRepository.save( existing );
+
+        // Should fail because status != PLACED
+        mvc.perform( put( "/api/orders/" + order.getId() + "/cancel" ).accept( MediaType.APPLICATION_JSON ) )
+                .andExpect( status().isBadRequest() );
+    }
+
 }
