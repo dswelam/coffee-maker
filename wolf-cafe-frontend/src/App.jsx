@@ -15,6 +15,7 @@ import TaxRateComponent from './components/TaxRateComponent'
 
 import { isUserLoggedIn } from './services/AuthService'
 import OrderComponent from "./components/OrderComponent";
+import EditUserComponent from "./components/EditUserComponent";
 
 
 function App() {
@@ -46,6 +47,8 @@ function App() {
 		<Route path='/customers' element={<AuthenticatedRoute><ListCustomerComponent /></AuthenticatedRoute>}></Route>
 		<Route path='/add-user' element={<AuthenticatedRoute><UserComponent /></AuthenticatedRoute>}></Route>
 		<Route path='/tax-rate' element={<AuthenticatedRoute><TaxRateComponent /></AuthenticatedRoute>}></Route>
+		<Route path="/edit-user/:id" element={<AuthenticatedRoute><EditUserComponent /></AuthenticatedRoute>}></Route>
+
 	  </Routes>
 	  <FooterComponent />
 	  </BrowserRouter>

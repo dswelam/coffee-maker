@@ -76,7 +76,7 @@ const ListStaffComponent = () => {
 				<div className="card-header text-center border-0 mb-4 bg-white">
 					<h2 className="fw-bold text-dark mb-0">Staff</h2>
 					<p className="text-secondary mt-2">List of registered staff members</p>
-					<p className="text-secondary mt-2">Click on Staff's' username to delete</p>
+					<p className="text-secondary mt-2">Click on Staff's' username to update or delete</p>
 
 				</div>
 				<div className="mt-2 d-flex justify-content-center">
@@ -103,13 +103,14 @@ const ListStaffComponent = () => {
 										<td>
 											{isAdmin ? (
 												<span
-													style={{ cursor: 'pointer', color: 'black', textDecoration: 'none' }}
-													onClick={() => deleteStaff(user.id)}
-													onMouseEnter={(e) => (e.target.style.color = 'blue')}
-													onMouseLeave={(e) => (e.target.style.color = 'black')}
+												  style={{ cursor: 'pointer', color: 'black', textDecoration: 'none' }}
+												  onClick={() => navigate(`/edit-user/${user.id}`)}
+												  onMouseEnter={(e) => (e.target.style.color = 'blue')}
+												  onMouseLeave={(e) => (e.target.style.color = 'black')}
 												>
-													{user.username}
+												  {user.username}
 												</span>
+
 											) : (
 												user.username
 											)}</td>

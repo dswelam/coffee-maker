@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { deleteUser, getAllUsers, isAdminUser } from '../services/AuthService';
+import { useNavigate } from 'react-router-dom';
 
 const ListStaffComponent = () => {
 	const [users, setUsers] = useState([])
 	const isAdmin = isAdminUser()
 	const [error, setError] = useState('');
 	const [successMsg, setSuccessMsg] = useState('');
+	const navigate = useNavigate();
 
 	useEffect(() => {
 		listUsers()
@@ -60,7 +62,7 @@ const ListStaffComponent = () => {
 				className="card shadow-lg p-5"
 				style={{
 					width: '75rem',
-					transform: 'scale(0.9)',
+					transform: 'scale(1)',
 					backgroundColor: '#fff',
 					borderRadius: '1rem',
 					maxHeight: '200vh',
@@ -91,7 +93,7 @@ const ListStaffComponent = () => {
 											{isAdmin ? (
 												<span
 													style={{ cursor: 'pointer', color: 'black', textDecoration: 'none' }}
-													onClick={() => deleteStaff(user.id)}
+													onClick={() => navigate(`/edit-user/${user.id}`)}   // <-- NOW IT NAVIGATES
 													onMouseEnter={(e) => (e.target.style.color = 'blue')}
 													onMouseLeave={(e) => (e.target.style.color = 'black')}
 												>
@@ -99,7 +101,9 @@ const ListStaffComponent = () => {
 												</span>
 											) : (
 												user.username
-											)}</td>
+											)}
+										</td>
+
 										<td>{user.email}</td>
 										<td>
 											{user.roles && user.roles.length > 0
