@@ -21,9 +21,10 @@ public interface OrderService {
      *
      * @param orderDto
      *            order to create
+     * @param username the username of the customer placing the order
      * @return the DTO for the order including an ID
      */
-    public OrderDto createOrder ( OrderDto orderDto );
+    public OrderDto createOrder ( OrderDto orderDto, String username );
 
     /**
      * Check if the inventory has sufficient quantity of ingredients to make the

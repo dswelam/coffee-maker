@@ -200,7 +200,7 @@ public class OrderControllerTest {
 
         mvc.perform( post( "/api/orders" ).contentType( MediaType.APPLICATION_JSON )
                 .content( TestUtils.asJsonString( order ) ).accept( MediaType.APPLICATION_JSON ) )
-                .andExpect( status().isOk() );
+                .andExpect( status().isCreated() );
 
     }
 
@@ -250,7 +250,7 @@ public class OrderControllerTest {
         order.setPreparedBy( barista );
         order.setStatus( OrderStatus.PLACED );
         order.setOrderItems( orderItems );
-        order = orderService.createOrder( order );
+        order = orderService.createOrder( order, customer.getUsername() );
 
         // Test NOT_FOUND case first
         mvc.perform( put( "/api/orders/999999" ).contentType( MediaType.APPLICATION_JSON )
@@ -319,7 +319,7 @@ public class OrderControllerTest {
         order.setPreparedBy( barista );
         order.setStatus( OrderStatus.PLACED );
         order.setOrderItems( orderItems );
-        order = orderService.createOrder( order );
+        order = orderService.createOrder( order, customer.getUsername() );
 
         mvc.perform( get( "/api/orders/queue?status=PLACED" ).accept( MediaType.APPLICATION_JSON ) )
                 .andExpect( status().isOk() ).andExpect( jsonPath( "$.length()" ).value( 1 ) )
@@ -370,7 +370,7 @@ public class OrderControllerTest {
         order.setCustomer( customer );
         order.setStatus( OrderStatus.PLACED );
         order.setOrderItems( orderItems );
-        order = orderService.createOrder( order );
+        order = orderService.createOrder( order, customer.getUsername() );
 
         mvc.perform( put( "/api/orders/" + order.getId() + "/prepare" ).accept( MediaType.APPLICATION_JSON ) )
                 .andExpect( status().isOk() ).andExpect( jsonPath( "$.status" ).value( "IN_PROGRESS" ) )
@@ -421,7 +421,7 @@ public class OrderControllerTest {
         order.setCustomer( customer );
         order.setStatus( OrderStatus.IN_PROGRESS );
         order.setOrderItems( orderItems );
-        order = orderService.createOrder( order );
+        order = orderService.createOrder( order, customer.getUsername() );
 
         mvc.perform( put( "/api/orders/" + order.getId() + "/ready" ).accept( MediaType.APPLICATION_JSON ) )
                 .andExpect( status().isOk() ).andExpect( jsonPath( "$.status" ).value( "READY" ) );
@@ -464,7 +464,7 @@ public class OrderControllerTest {
         order.setCustomer( customer );
         order.setStatus( OrderStatus.READY );
         order.setOrderItems( orderItems );
-        order = orderService.createOrder( order );
+        order = orderService.createOrder( order, customer.getUsername() );
 
         final Order existing = orderRepository.findById( order.getId() ).get();
         existing.setStatus( OrderStatus.READY );
@@ -511,7 +511,7 @@ public class OrderControllerTest {
         order.setCustomer( customer );
         order.setStatus( OrderStatus.PLACED );
         order.setOrderItems( orderItems );
-        order = orderService.createOrder( order );
+        order = orderService.createOrder( order, customer.getUsername() );
 
         mvc.perform( put( "/api/orders/" + order.getId() + "/cancel" ).accept( MediaType.APPLICATION_JSON ) )
                 .andExpect( status().isOk() ).andExpect( jsonPath( "$.status" ).value( "CANCELLED" ) );
@@ -555,7 +555,7 @@ public class OrderControllerTest {
             order.setCustomer( customer );
             order.setStatus( OrderStatus.PLACED );
             order.setOrderItems( orderItems );
-            orderService.createOrder( order );
+            orderService.createOrder( order, customer.getUsername() );
         }
 
         mvc.perform( get( "/api/orders/myorders" ).accept( MediaType.APPLICATION_JSON ) ).andExpect( status().isOk() )
@@ -606,7 +606,7 @@ public class OrderControllerTest {
         order.setCustomer( customer );
         order.setPreparedBy( barista );
         order.setOrderItems( new ArrayList<>( List.of( line ) ) );
-        order = orderService.createOrder( order );
+        order = orderService.createOrder( order, customer.getUsername() );
 
         // Change status to INVALID (READY)
         final Order existing = orderRepository.findById( order.getId() ).get();
@@ -653,7 +653,7 @@ public class OrderControllerTest {
         OrderDto order = new OrderDto();
         order.setCustomer( customer );
         order.setOrderItems( new ArrayList<>( List.of( line ) ) );
-        order = orderService.createOrder( order );
+        order = orderService.createOrder( order, customer.getUsername() );
 
         // Should fail because status != READY
         mvc.perform( put( "/api/orders/" + order.getId() + "/fulfill" ).accept( MediaType.APPLICATION_JSON ) )
@@ -694,7 +694,7 @@ public class OrderControllerTest {
         OrderDto order = new OrderDto();
         order.setCustomer( customer );
         order.setOrderItems( new ArrayList<>( List.of( line ) ) );
-        order = orderService.createOrder( order );
+        order = orderService.createOrder( order, customer.getUsername() );
 
         // Set to an invalid status
         final Order existing = orderRepository.findById( order.getId() ).get();

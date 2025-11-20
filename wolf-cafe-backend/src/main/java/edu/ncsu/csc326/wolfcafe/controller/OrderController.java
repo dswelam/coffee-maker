@@ -45,14 +45,18 @@ public class OrderController {
      *
      * @param orderDto
      *            The valid Order to be saved.
+     * @param authentication The authentication object of the requester.
      * @return ResponseEntity indicating success if the Order could be saved to
      *         the inventory, or an error if it could not be
      */
     @PreAuthorize ( "hasAnyRole('STAFF', 'ADMIN', 'CUSTOMER', 'ANONYMOUS')" )
     @PostMapping
-    public ResponseEntity<OrderDto> createOrder ( @RequestBody final OrderDto orderDto ) {
-        final OrderDto savedOrderDto = orderService.createOrder( orderDto );
-        return ResponseEntity.ok( savedOrderDto );
+    public ResponseEntity<OrderDto> createOrder ( @RequestBody final OrderDto orderDto,
+            final Authentication authentication ) {
+        // If the user is authenticated, set the customer username on the order
+        final String username = authentication.getName();
+        final OrderDto savedOrderDto = orderService.createOrder( orderDto, username );
+        return new ResponseEntity<>( savedOrderDto, HttpStatus.CREATED );
     }
 
     /**
