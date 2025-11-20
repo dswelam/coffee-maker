@@ -19,6 +19,20 @@ export const createOrder = (orderDto) => {
   });
 };
 
+
+// order queue listing 
+export const getOrdersByStatus = (stat) =>
+  axios.get(`${ORDER_API_BASE_URL}/queue?status=${stat}`, { headers: authHeader() });
+
+export const prepareOrderByStaff  = (id) =>
+  axios.put(`${ORDER_API_BASE_URL}/${id}/prepare`, {}, { headers: authHeader() });
+
+export const markReadyByStaff  = (id) =>
+  axios.put(`${ORDER_API_BASE_URL}/${id}/ready`, {}, { headers: authHeader() });
+
+export const fulfillOrderByStaff = (id) =>
+  axios.put(`${ORDER_API_BASE_URL}/${id}/fulfill`, {}, { headers: authHeader() });
+
 export const updateOrder = (id, orderDto) => {
   return axios.put(`${ORDER_API_BASE_URL}/${id}`, orderDto, {
     headers: {

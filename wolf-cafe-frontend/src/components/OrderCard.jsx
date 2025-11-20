@@ -38,38 +38,38 @@ const OrderCard = ({ order, refresh }) => {
         Status: <span className="font-bold">{order.status}</span>
       </p>
 
-      <div className="flex flex-wrap gap-2 mt-3">
+	  <div className="d-flex flex-wrap mt-3" style={{ gap: "8px" }}>
+	    {/* PICK UP ORDER */}
+	    {order.status === "READY" && (
+	      <button
+	        onClick={handleFulfill}
+	        className="btn btn-success"
+	      >
+	        Pick Up Order
+	      </button>
+	    )}
 
-        {/* PICK UP ORDER */}
-        {order.status === "READY" && (
-          <button
-            onClick={handleFulfill}
-            className="px-3 py-1 bg-green-600 text-white rounded"
-          >
-            Pick Up Order
-          </button>
-        )}
+	    {/* EDIT ORDER */}
+	    {order.status === "PLACED" && (
+	      <button
+	        onClick={handleEdit}
+	        className="btn btn-primary"
+	      >
+	        Edit Order
+	      </button>
+	    )}
 
-        {/* EDIT ORDER */}
-        {order.status === "PLACED" && (
-          <button
-            onClick={handleEdit}
-            className="px-3 py-1 bg-blue-600 text-white rounded"
-          >
-            Edit Order
-          </button>
-        )}
+	    {/* CANCEL ORDER */}
+	    {order.status === "PLACED" && (
+	      <button
+	        onClick={handleCancel}
+	        className="btn btn-danger"
+	      >
+	        Cancel Order
+	      </button>
+	    )}
+	  </div>
 
-        {/* CANCEL ORDER */}
-        {order.status === "PLACED" && (
-          <button
-            onClick={handleCancel}
-            className="px-3 py-1 bg-red-500 text-white rounded"
-          >
-            Cancel Order
-          </button>
-        )}
-      </div>
     </div>
   );
 };

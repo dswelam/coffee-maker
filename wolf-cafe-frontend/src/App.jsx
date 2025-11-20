@@ -13,10 +13,10 @@ import ListStaffComponent from './components/ListStaffComponent'
 import ListCustomerComponent from './components/ListCustomerComponent'
 import UserComponent from './components/UserComponent'
 import TaxRateComponent from './components/TaxRateComponent'
-
 import { isUserLoggedIn } from './services/AuthService'
-import OrderComponent from "./components/OrderComponent";
-import EditUserComponent from "./components/EditUserComponent";
+import OrderQueueComponent from "./components/OrderQueueComponent"
+import EditUserComponent from "./components/EditUserComponent"
+import OrderComponent from "./components/OrderComponent"
 
 
 function App() {
@@ -49,6 +49,7 @@ function App() {
 		<Route path='/customers' element={<AuthenticatedRoute><ListCustomerComponent /></AuthenticatedRoute>}></Route>
 		<Route path='/add-user' element={<AuthenticatedRoute><UserComponent /></AuthenticatedRoute>}></Route>
 		<Route path='/tax-rate' element={<AuthenticatedRoute><TaxRateComponent /></AuthenticatedRoute>}></Route>
+		<Route path='/order-queue' element={<AuthenticatedRoute><OrderQueueComponent /></AuthenticatedRoute>}></Route>
 		<Route path="/edit-user/:id" element={<AuthenticatedRoute><EditUserComponent /></AuthenticatedRoute>}></Route>
 	  </Routes>
 	  <FooterComponent />

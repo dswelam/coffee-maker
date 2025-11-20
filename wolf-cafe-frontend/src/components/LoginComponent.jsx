@@ -1,16 +1,17 @@
 import React, { useState, useEffect } from 'react'
-import { loginAPICall, saveLoggedInUser, storeToken } from '../services/AuthService'
+import { loginAPICall, saveLoggedInUser, storeToken, isAdminUser, isStaffUser, isCustomerUser } from '../services/AuthService'
 import { useNavigate } from 'react-router-dom'
 
 const LoginComponent = () => {
 
 	const [usernameOrEmail, setUsernameOrEmail] = useState('')
 	const [password, setPassword] = useState('')
-
 	const [errorMessage, setErrorMessage] = useState('')
-
-
 	const navigator = useNavigate()
+	
+	const isAdmin = isAdminUser()
+	const isStaff = isStaffUser()
+	const isCustomer = isCustomerUser()
 
 	useEffect(() => {
 		// prevent scrolling
@@ -41,7 +42,13 @@ const LoginComponent = () => {
 			storeToken(token)
 			saveLoggedInUser(usernameOrEmail, role)
 
-			navigator('/items')
+			if (role === "ROLE_ADMIN") {
+			    navigator("/items"); // admin
+			} else if (role === "ROLE_STAFF" || role == "ROLE_BARISTA") {
+			    navigator("/order-queue"); // staff
+			} else {
+			    navigator("/order"); // customers
+			}
 
 			window.location.reload(false)
 		}).catch(error => {
