@@ -95,8 +95,12 @@ const OrderQueueComponent = () => {
     <div className="container" style={{ paddingTop: "40px" }}>
       <h2 className="fw-bold text-center mb-4">Order Queue</h2>
 
-      {errorMsg && <div className="alert alert-danger text-center">{errorMsg}</div>}
-      {successMsg && <div className="alert alert-success text-center">{successMsg}</div>}
+      {errorMsg && (
+        <div className="alert alert-danger text-center">{errorMsg}</div>
+      )}
+      {successMsg && (
+        <div className="alert alert-success text-center">{successMsg}</div>
+      )}
 
       {STATUS_ORDER.map((status) => {
         const list = ordersByGroup[status] || [];
@@ -119,11 +123,27 @@ const OrderQueueComponent = () => {
                 >
                   <h5 className="fw-bold">Order #{order.id}</h5>
 
+                  {/* CUSTOMER NAME */}
                   <p className="mb-0">
                     <span className="fw-semibold">Customer:</span>{" "}
                     {order.customer?.name || "Unknown"}
                   </p>
 
+				  {/* PREPARED BY / FULFILLED BY */}
+				  {order.preparedBy &&
+				    ["IN_PROGRESS", "READY", "FULFILLED"].includes(order.status) && (
+				      <p className="mt-1 mb-0 fst-italic">
+				        <span className="fw-semibold">
+				          {order.status === "IN_PROGRESS"
+				            ? "Being prepared by:"
+				            : "Fulfilled by:"}
+				        </span>{" "}
+				        {order.preparedBy?.name || "Staff"}
+				      </p>
+				    )}
+
+
+                  {/* STATUS */}
                   <p className="mt-2 mb-0">
                     <span className="fw-semibold">Status:</span>{" "}
                     <span className={`badge ${getStatusColor(order.status)}`}>
@@ -131,6 +151,7 @@ const OrderQueueComponent = () => {
                     </span>
                   </p>
 
+                  {/* STATUS TRANSITION DROPDOWN */}
                   {getValidTransitions(order.status).length > 0 && (
                     <select
                       className="form-select mt-3"
@@ -149,7 +170,7 @@ const OrderQueueComponent = () => {
                     </select>
                   )}
 
-                  {/* Collapsible items list */}
+                  {/* ITEMS TOGGLE */}
                   <button
                     className="btn btn-outline-secondary mt-3"
                     onClick={() => toggleExpand(order.id)}
@@ -157,6 +178,7 @@ const OrderQueueComponent = () => {
                     {expandedOrders[order.id] ? "Hide Items" : "Show Items"}
                   </button>
 
+                  {/* COLLAPSED ITEMS LIST */}
                   {expandedOrders[order.id] && (
                     <ul className="list-group mt-2">
                       {order.orderItems.map((oi) => (

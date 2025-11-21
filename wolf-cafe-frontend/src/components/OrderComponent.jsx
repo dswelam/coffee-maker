@@ -1,250 +1,299 @@
-import React, { useEffect, useState } from "react"
-import { useNavigate } from "react-router-dom"
-import { getAllItems } from "../services/ItemService"
-import { createOrder } from "../services/OrderService"
-import { getCurrentUser } from "../services/AuthService"
-import { getUserById } from "../services/UserService"
+import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { getAllItems } from "../services/ItemService";
+import { createOrder } from "../services/OrderService";
+import { getCurrentUser, getTax } from "../services/AuthService";
 
 const OrderComponent = () => {
-  const navigate = useNavigate()
+	const navigate = useNavigate();
 
-  const [items, setItems] = useState([])
-  const [cart, setCart] = useState([])
-  const [tipPercent, setTipPercent] = useState(0)
-  const [customTip, setCustomTip] = useState("")
-  const [moneyGiven, setMoneyGiven] = useState("")
-  const [errors, setErrors] = useState({})
-  const [success, setSuccess] = useState("")
+	const [items, setItems] = useState([]);
+	const [cart, setCart] = useState([]);
+	const [tipPercent, setTipPercent] = useState(0);
+	const [customTip, setCustomTip] = useState("");
+	const [moneyGiven, setMoneyGiven] = useState("");
+	const [errors, setErrors] = useState({});
+	const [success, setSuccess] = useState("");
+	const [taxRate, setTaxRate] = useState(0);
 
-  const TAX_RATE = 0.0725
-  const round = (n) => Number(Number(n).toFixed(2))
+	const round = (n) => Number(Number(n).toFixed(2));
 
-  useEffect(() => {
-    getAllItems()
-      .then((res) => setItems(res.data))
-      .catch(() =>
-        setErrors((prev) => ({
-          ...prev,
-          api: "Could not load menu items."
-        }))
-      )
-  }, [])
+	// fetch menu items
+	useEffect(() => {
+		getAllItems()
+			.then((res) => setItems(res.data))
+			.catch(() =>
+				setErrors((prev) => ({ ...prev, api: "Could not load menu items." }))
+			);
 
-  /** Add item to cart **/
-  function addToCart(item, qty) {
-    const q = Number(qty)
-    if (!q || q <= 0) {
-      setErrors({ quantity: "Quantity must be a positive number." })
-      return
-    }
+		// fetch tax rate from API
+		getTax()
+			.then((res) => {
+				// res.data is the number from your API, e.g., 5.6
+				const rate = res.data ? res.data / 100 : 0.0725; // convert 5.6 → 0.056
+				setTaxRate(rate);
+			})
+			.catch(() => setTaxRate(0.0725));
+	}, []);
 
-    setErrors((prev) => ({ ...prev, quantity: null }))
-    setCart([...cart, { item, qty: q }])
-  }
+	// auto-hide messages
+	useEffect(() => {
+		if (success || Object.values(errors).some(Boolean)) {
+			const t = setTimeout(() => {
+				setSuccess("");
+				setErrors({});
+			}, 3000);
+			return () => clearTimeout(t);
+		}
+	}, [success, errors]);
 
-  /** CART CALCULATIONS **/
-  const calculateSubtotal = () =>
-    round(cart.reduce((sum, c) => sum + c.item.price * c.qty, 0))
-
-  const calculateTax = () => round(calculateSubtotal() * TAX_RATE)
-
-  const calculateTip = () => {
-    if (tipPercent > 0) return round(calculateSubtotal() * tipPercent)
-    if (customTip) return round(customTip)
-    return 0
-  }
-
-  const calculateTotal = () =>
-    round(calculateSubtotal() + calculateTax() + calculateTip())
-
-  /** Clear payment error when user types **/
-  useEffect(() => {
-    if (errors.payment && moneyGiven) {
-      if (round(moneyGiven) >= calculateTotal()) {
-        setErrors((prev) => ({ ...prev, payment: null }))
-      }
-    }
-  }, [moneyGiven, cart, tipPercent, customTip])
-
-  /** Build DTO & POST **/
-  async function placeOrder() {
-    const newErrors = {}
-    const total = calculateTotal()
-
-    // Payment validation
-    if (!moneyGiven || isNaN(moneyGiven)) {
-      newErrors.payment = "Enter a valid payment amount."
-      setErrors(newErrors)
-      return
-    }
-
-    if (round(moneyGiven) < total) {
-      newErrors.payment = "Insufficient payment."
-      setErrors(newErrors)
-      return
-    }
-
-    if (cart.length === 0) {
-      newErrors.cart = "Cart is empty."
-      setErrors(newErrors)
-      return
-    }
-
-
-	const current = getCurrentUser()
-	if (!current || !current.username) {
-	  setErrors({ auth: "You must be logged in." })
-	  return
+	function addToCart(item, qty) {
+		const q = Number(qty);
+		if (q < 0 || isNaN(q)) {
+			setErrors({ quantity: "Quantity must be zero or more." });
+			return;
+		}
+		setErrors((prev) => ({ ...prev, quantity: null }));
+		if (q === 0) return; // allow display 0 but don't add zero qty
+		setCart([...cart, { item, qty: q }]);
 	}
 
-	// Only send the IDs of items, backend will fetch the real ones
-	const orderDto = {
-		username: current.username,
-	  orderItems: cart.map((c) => ({
-	    quantity: c.qty,
-	    item: { id: c.item.id } 
-	  }))
+	const calculateSubtotal = () =>
+		round(cart.reduce((sum, c) => sum + c.item.price * c.qty, 0));
+	const calculateTax = () => round(calculateSubtotal() * taxRate);
+	const calculateTip = () => {
+		if (tipPercent > 0) return round(calculateSubtotal() * tipPercent);
+		if (customTip) return round(customTip);
+		return 0;
+	};
+	const calculateTotal = () =>
+		round(calculateSubtotal() + calculateTax() + calculateTip());
+
+	useEffect(() => {
+		if (errors.payment && moneyGiven) {
+			if (round(moneyGiven) >= calculateTotal()) {
+				setErrors((prev) => ({ ...prev, payment: null }));
+			}
+		}
+	}, [moneyGiven, cart, tipPercent, customTip]);
+
+	async function placeOrder() {
+		const total = calculateTotal();
+		const newErrors = {};
+
+		if (!moneyGiven || isNaN(moneyGiven)) {
+			newErrors.payment = "Enter a valid payment amount.";
+			setErrors(newErrors);
+			return;
+		}
+
+		if (round(moneyGiven) < total) {
+			newErrors.payment = "Insufficient payment.";
+			setErrors(newErrors);
+			return;
+		}
+
+		if (cart.length === 0) {
+			newErrors.cart = "Cart is empty.";
+			setErrors(newErrors);
+			return;
+		}
+
+		const current = getCurrentUser();
+		if (!current || !current.username) {
+			setErrors({ auth: "You must be logged in." });
+			return;
+		}
+
+		const orderDto = {
+			username: current.username,
+			orderItems: cart.map((c) => ({
+				quantity: c.qty,
+				item: { id: c.item.id },
+			})),
+		};
+
+		try {
+			await createOrder(orderDto);
+			const change = round(moneyGiven - total);
+			setSuccess(`Order placed! Change due: $${change}`);
+			setTimeout(() => navigate("/order"), 2000);
+		} catch {
+			setErrors({ api: "Error placing order." });
+		}
 	}
 
+	return (
+		<div className="container mt-4">
+			<h2 className="text-center fw-bold mb-1">Menu</h2>
+			<p className="text-center text-muted mb-4">
+				Select menu items to add to your cart. Checkout below.
+			</p>
 
-    try {
-      await createOrder(orderDto)
+			{/* MESSAGES */}
+			<div className="mb-3">
+				{errors.quantity && <div className="alert alert-danger">{errors.quantity}</div>}
+				{errors.payment && <div className="alert alert-danger">{errors.payment}</div>}
+				{errors.cart && <div className="alert alert-danger">{errors.cart}</div>}
+				{errors.api && <div className="alert alert-danger">{errors.api}</div>}
+				{errors.auth && <div className="alert alert-danger">{errors.auth}</div>}
+				{success && <div className="alert alert-success">{success}</div>}
+			</div>
 
-      const change = round(moneyGiven - total)
+			{/* MENU GRID */}
+			<div className="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 g-3 mb-4">
+				{items.map((item) => (
+					<div key={item.id} className="col">
+						<div className="card p-3 shadow-sm h-100 text-center d-flex flex-column justify-content-between">
 
-      setSuccess(`Order placed! Change due: $${change}`)
+							<div>
+								<h5 className="fw-bold">{item.name}</h5>
+								<p className="text-muted">${item.price.toFixed(2)}</p>
+							</div>
 
-      setTimeout(() => navigate("/"), 2000)
-    } catch (err) {
-      console.error(err)
-      setErrors({ api: "Error placing order." })
-    }
-  }
+							{/* QTY CONTROLS */}
+							<div className="d-flex justify-content-center align-items-center mt-3" style={{ gap: "8px" }}>
+								<button
+									className="btn btn-outline-secondary"
+									style={{ width: "36px", height: "36px" }}
+									onClick={() => {
+										const el = document.getElementById(`qty-${item.id}`);
+										const val = Number(el.value || 0);
+										el.value = Math.max(0, val - 1);
+									}}
+								>
+									-
+								</button>
 
-  return (
-    <div className="container mt-5">
-      <h2 className="text-center fw-bold mb-4">Build Your Order</h2>
+								<input
+									id={`qty-${item.id}`}
+									type="number"
+									min="0"
+									defaultValue="0"
+									className="form-control text-center"
+									style={{ maxWidth: "70px" }}
+								/>
 
-      {/* MENU */}
-      <h4>Menu</h4>
-      <ul className="list-group mb-4">
-        {items.map((item) => (
-          <li className="list-group-item d-flex justify-content-between" key={item.id}>
-            <span>
-              {item.name} — ${item.price.toFixed(2)}
-            </span>
-            <div>
-              <input
-                id={`qty-${item.id}`}
-                type="number"
-                min="1"
-                placeholder="Qty"
-                className="form-control d-inline-block"
-                style={{ width: "80px" }}
-              />
-              <button
-                className="btn btn-success ms-2"
-                onClick={() =>
-                  addToCart(item, document.getElementById(`qty-${item.id}`).value)
-                }
-              >
-                Add
-              </button>
-            </div>
-          </li>
-        ))}
-      </ul>
+								<button
+									className="btn btn-outline-secondary"
+									style={{ width: "36px", height: "36px" }}
+									onClick={() => {
+										const el = document.getElementById(`qty-${item.id}`);
+										const val = Number(el.value || 0);
+										el.value = val + 1;
+									}}
+								>
+									+
+								</button>
+							</div>
 
-      {/* CART */}
-      <h4>Your Cart</h4>
-      {cart.length === 0 ? (
-        <div className="text-muted mb-4">No items yet.</div>
-      ) : (
-        <ul className="list-group mb-4">
-          {cart.map((c, index) => (
-            <li className="list-group-item" key={index}>
-              {c.item.name} × {c.qty} — ${round(c.item.price * c.qty)}
-            </li>
-          ))}
-        </ul>
-      )}
+							<button
+								className="btn btn-success w-100 mt-3"
+								onClick={() =>
+									addToCart(item, document.getElementById(`qty-${item.id}`).value)
+								}
+							>
+								Add to Cart
+							</button>
+						</div>
+					</div>
+				))}
+			</div>
 
-      {/* TIP */}
-      <h4>Tip</h4>
-      <div className="d-flex mb-3">
-        <button
-          className="btn btn-outline-primary me-2"
-          onClick={() => {
-            setTipPercent(0.15)
-            setCustomTip("")
-          }}
-        >
-          15%
-        </button>
-        <button
-          className="btn btn-outline-primary me-2"
-          onClick={() => {
-            setTipPercent(0.2)
-            setCustomTip("")
-          }}
-        >
-          20%
-        </button>
-        <button
-          className="btn btn-outline-primary me-2"
-          onClick={() => {
-            setTipPercent(0.25)
-            setCustomTip("")
-          }}
-        >
-          25%
-        </button>
-      </div>
+			{/* CART */}
+			<h4 className="fw-bold">Your Cart</h4>
+			{cart.length === 0 ? (
+				<div className="text-muted mb-4">No items yet.</div>
+			) : (
+				<ul className="list-group mb-4">
+					{cart.map((c, index) => (
+						<li key={index} className="list-group-item">
+							{c.item.name} × {c.qty} — ${round(c.item.price * c.qty)}
+						</li>
+					))}
+				</ul>
+			)}
 
-      <input
-        className="form-control mb-4"
-        value={customTip}
-        placeholder="Custom Tip ($)"
-        onChange={(e) => {
-          setCustomTip(e.target.value)
-          setTipPercent(0)
-        }}
-      />
+			{/* BOTTOM ROW: TOTAL | TIP | PAYMENT */}
+			<div className="row g-4 mb-4">
 
-      {/* PAYMENT */}
-      <h4>Payment</h4>
-      <input
-        type="number"
-        className="form-control mb-4"
-        value={moneyGiven}
-        placeholder="Amount Given"
-        onChange={(e) => {
-          setMoneyGiven(e.target.value)
-          setErrors((prev) => ({ ...prev, payment: null }))
-        }}
-      />
+				{/* TOTALS */}
+				<div className="col-md-4">
+					<h4>Total</h4>
+					<div><strong>Tax</strong>: ${calculateTax()} ({(taxRate * 100).toFixed(2)}%)</div>
+					<div>Subtotal: ${calculateSubtotal()}</div>
+					<div>Tip: ${calculateTip()}</div>
+					<hr />
+					<div className="fw-bold fs-5">Total: ${calculateTotal()}</div>
+				</div>
 
-      {/* TOTAL */}
-      <h4>Total</h4>
-      <div className="mb-4">
-        Subtotal: ${calculateSubtotal()} <br />
-        Tax: ${calculateTax()} <br />
-        Tip: ${calculateTip()} <br />
-        <strong>Total: ${calculateTotal()}</strong>
-      </div>
+				{/* TIP */}
+				<div className="col-md-4">
+					<div className="d-flex justify-content-between align-items-center mb-2">
+						<h4 className="mb-0">Tip</h4>
+						<div>
+							<button
+								className="btn btn-outline-primary btn-sm me-1"
+								onClick={() => {
+									setTipPercent(0.15);
+									setCustomTip("" + round(calculateSubtotal() * 0.15));
+								}}
+							>
+								15%
+							</button>
+							<button
+								className="btn btn-outline-primary btn-sm me-1"
+								onClick={() => {
+									setTipPercent(0.2);
+									setCustomTip("" + round(calculateSubtotal() * 0.2));
+								}}
+							>
+								20%
+							</button>
+							<button
+								className="btn btn-outline-primary btn-sm"
+								onClick={() => {
+									setTipPercent(0.25);
+									setCustomTip("" + round(calculateSubtotal() * 0.25));
+								}}
+							>
+								25%
+							</button>
+						</div>
+					</div>
 
-      <button className="btn btn-primary w-100 mb-3" onClick={placeOrder}>
-        Place Order
-      </button>
-	  {/* ERRORS */}
-	  {errors.quantity && <div className="alert alert-danger">{errors.quantity}</div>}
-	  {errors.payment && <div className="alert alert-danger">{errors.payment}</div>}
-	  {errors.cart && <div className="alert alert-danger">{errors.cart}</div>}
-	  {errors.api && <div className="alert alert-danger">{errors.api}</div>}
-	  {errors.auth && <div className="alert alert-danger">{errors.auth}</div>}
-	  {success && <div className="alert alert-success">{success}</div>}
-    </div>
-  )
-}
+					<input
+						className="form-control"
+						value={customTip}
+						placeholder="Custom Tip ($)"
+						onChange={(e) => {
+							setCustomTip(e.target.value);
+							setTipPercent(0);
+						}}
+					/>
+				</div>
 
-export default OrderComponent
+				{/* PAYMENT */}
+				<div className="col-md-4">
+					<h4 className="mb-2">Payment</h4>
+					<input
+						type="number"
+						className="form-control"
+						value={moneyGiven}
+						placeholder="Amount Given"
+						onChange={(e) => {
+							setMoneyGiven(e.target.value);
+							setErrors((prev) => ({ ...prev, payment: null }));
+						}}
+					/>
+				</div>
+			</div>
+
+			<button className="btn btn-primary w-100 mb-3" onClick={placeOrder}>
+				Place Order
+			</button>
+		</div>
+	);
+};
+
+export default OrderComponent;
