@@ -33,6 +33,13 @@ export const markReadyByStaff  = (id) =>
 export const fulfillOrderByStaff = (id) =>
   axios.put(`${ORDER_API_BASE_URL}/${id}/fulfill`, {}, { headers: authHeader() });
 
+export const deleteOrder = (id) => {
+  return axios.delete(`${ORDER_API_BASE_URL}/${id}`, { headers: authHeader() });
+};
+
+export const getOrderById = (id) => axios.get(`${ORDER_API_BASE_URL}/${id}`);
+
+
 export const updateOrder = (id, orderDto) => {
   return axios.put(`${ORDER_API_BASE_URL}/${id}`, orderDto, {
     headers: {

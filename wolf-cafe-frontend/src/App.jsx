@@ -42,6 +42,7 @@ function App() {
 		<Route path='/update-item/:id' element={<AuthenticatedRoute><ItemComponent /></AuthenticatedRoute>}></Route>
 		<Route path='/my-orders' element={<AuthenticatedRoute><ViewOrdersComponent /></AuthenticatedRoute>} />
 		<Route path='/order' element={<AuthenticatedRoute><OrderComponent /></AuthenticatedRoute>}/>
+		<Route path='/edit-order/:orderId' element={<AuthenticatedRoute><OrderComponent /></AuthenticatedRoute>}/>
 		<Route path='/ingredients' element={<AuthenticatedRoute><ListIngredientsComponent /></AuthenticatedRoute>}></Route>
 		<Route path='/add-ingredient' element={<AuthenticatedRoute><IngredientComponent /></AuthenticatedRoute>}></Route>
 		<Route path='/update-ingredient/:ingredientName' element={<AuthenticatedRoute><IngredientComponent /></AuthenticatedRoute>}></Route>

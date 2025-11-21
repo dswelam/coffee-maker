@@ -135,7 +135,8 @@ const ListIngredientsComponent = () => {
 			>
 				<div className="card-header text-center border-0 mb-4 bg-white">
 					<h2 className="fw-bold text-dark mb-0">Inventory</h2>
-					<p className="text-secondary mt-2">Add or restock ingredients below</p>
+					<p className="text-secondary mt-2">Restock ingredients by filling out amount to add and clicking Submit All button</p>
+					<p className="text-secondary mt-2">To add ingredients fill inputs and click the green plus button</p>
 				</div>
 
 				<div className="card-body">

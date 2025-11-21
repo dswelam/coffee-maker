@@ -189,4 +189,14 @@ public class OrderController {
         return ResponseEntity.ok( orders );
     }
 
+    @PreAuthorize ( "hasAnyRole('CUSTOMER', 'STAFF', 'ADMIN')" )
+    @GetMapping ( "/{id}" )
+    public ResponseEntity<OrderDto> getOrder ( @PathVariable ( "id" ) final Long orderId ) {
+        final OrderDto order = orderService.getOrderById( orderId );
+        if ( order == null ) {
+            return new ResponseEntity<>( HttpStatus.NOT_FOUND );
+        }
+        return ResponseEntity.ok( order );
+    }
+
 }
