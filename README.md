@@ -3,7 +3,7 @@
 - [Additional User Role](https://github.com/ncstate-csc-coursework/csc326-2025-fall-tp-204-3/blob/main/wolf-cafe-backend/src/main/java/edu/ncsu/csc326/wolfcafe/config/Roles.java#L19)
 - [Anonymous Orders](https://github.com/ncstate-csc-coursework/csc326-2025-fall-tp-204-3/pull/107)
 - [Order History](https://github.com/ncstate-csc-coursework/csc326-2025-fall-tp-204-3/blob/main/wolf-cafe-frontend/src/components/ViewOrdersComponent.jsx)
-- [Badges](https://github.com/ncstate-csc-coursework/csc326-2025-fall-tp-204-3?tab=readme-ov-file#wolfcafe)
+- [Badges](https://github.com/ncstate-csc-coursework/csc326-2025-fall-tp-204-3/tree/2bb1e846a4bea5187e7c2fc174ff51ad0674a918?tab=readme-ov-file#wolfcafe)
 - UI Enhancements
 - [GitHub Projects](https://github.com/orgs/ncstate-csc-coursework/projects/43)
 
