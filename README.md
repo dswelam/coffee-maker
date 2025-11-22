@@ -1,3 +1,12 @@
+# Extra Credit
+- Automated Frontend Testing
+- Additional User Role
+- Anonymous Orders
+- Order History
+- [Badges](https://github.com/ncstate-csc-coursework/csc326-2025-fall-tp-204-3?tab=readme-ov-file#wolfcafe)
+- UI Enhancements
+- [GitHub Projects](https://github.com/orgs/ncstate-csc-coursework/projects/43)
+
 # WolfCafe
 ![Java](https://img.shields.io/badge/java-%23ED8B00.svg?style=for-the-badge&logo=openjdk&logoColor=white)
 ![Spring Boot](https://img.shields.io/badge/Spring%20Boot-6DB33F?style=for-the-badge&logo=spring&logoColor=white)
