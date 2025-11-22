@@ -4,7 +4,7 @@
 - [Anonymous Orders](https://github.com/ncstate-csc-coursework/csc326-2025-fall-tp-204-3/pull/107)
 - [Order History](https://github.com/ncstate-csc-coursework/csc326-2025-fall-tp-204-3/blob/main/wolf-cafe-frontend/src/components/ViewOrdersComponent.jsx)
 - [Badges](https://github.com/ncstate-csc-coursework/csc326-2025-fall-tp-204-3/tree/2bb1e846a4bea5187e7c2fc174ff51ad0674a918?tab=readme-ov-file#wolfcafe)
-- UI Enhancements
+- [UI Enhancements](https://github.com/ncstate-csc-coursework/csc326-2025-fall-tp-204-3/blob/main/wolf-cafe-frontend/src/components/ListStaffComponent.jsx#L76)
 - [GitHub Projects](https://github.com/orgs/ncstate-csc-coursework/projects/43)
 
 # WolfCafe
