@@ -1,8 +1,8 @@
 # Extra Credit
 - [Automated Frontend Testing](https://github.com/ncstate-csc-coursework/csc326-2025-fall-tp-204-3/pull/80)
 - [Additional User Role](https://github.com/ncstate-csc-coursework/csc326-2025-fall-tp-204-3/blob/main/wolf-cafe-backend/src/main/java/edu/ncsu/csc326/wolfcafe/config/Roles.java#L19)
-- Anonymous Orders
-- Order History
+- [Anonymous Orders](https://github.com/ncstate-csc-coursework/csc326-2025-fall-tp-204-3/pull/107)
+- [Order History](https://github.com/ncstate-csc-coursework/csc326-2025-fall-tp-204-3/blob/main/wolf-cafe-frontend/src/components/ViewOrdersComponent.jsx)
 - [Badges](https://github.com/ncstate-csc-coursework/csc326-2025-fall-tp-204-3?tab=readme-ov-file#wolfcafe)
 - UI Enhancements
 - [GitHub Projects](https://github.com/orgs/ncstate-csc-coursework/projects/43)
