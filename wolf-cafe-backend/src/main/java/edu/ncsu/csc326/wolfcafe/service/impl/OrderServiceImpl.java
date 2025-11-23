@@ -1,7 +1,9 @@
 package edu.ncsu.csc326.wolfcafe.service.impl;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,8 +13,10 @@ import edu.ncsu.csc326.wolfcafe.dto.InventoryDto;
 import edu.ncsu.csc326.wolfcafe.dto.ItemDto;
 import edu.ncsu.csc326.wolfcafe.dto.OrderDto;
 import edu.ncsu.csc326.wolfcafe.dto.OrderLineDto;
+import edu.ncsu.csc326.wolfcafe.entity.Item;
 import edu.ncsu.csc326.wolfcafe.entity.Order;
 import edu.ncsu.csc326.wolfcafe.entity.Order.OrderStatus;
+import edu.ncsu.csc326.wolfcafe.entity.OrderLine;
 import edu.ncsu.csc326.wolfcafe.entity.User;
 import edu.ncsu.csc326.wolfcafe.exception.ResourceNotFoundException;
 import edu.ncsu.csc326.wolfcafe.mapper.ItemMapper;
@@ -43,6 +47,15 @@ public class OrderServiceImpl implements OrderService {
     @Autowired
     private UserRepository   userRepository;
 
+    /**
+     * Creates a new order.
+     * @param orderDto
+     *           the order DTO
+     * @param username
+     *           the customer's username
+     *
+     * @return the created order DTO
+     */
     @Override
     public OrderDto createOrder ( final OrderDto orderDto, final String username ) {
         // Set the customer username on the order
@@ -78,6 +91,12 @@ public class OrderServiceImpl implements OrderService {
         return OrderMapper.mapToOrderDto( savedOrder );
     }
 
+    /**
+     * Checks if the inventory has sufficient ingredients for the item.
+     * @param inventoryDto the inventory DTO
+     * @param itemDto the item DTO
+     * @return true if the inventory has sufficient ingredients, false otherwise
+     */
     @Override
     public boolean checkInventory ( final InventoryDto inventoryDto, final ItemDto itemDto ) {
         InventoryDto updatedInventory = inventoryDto;
@@ -119,12 +138,13 @@ public class OrderServiceImpl implements OrderService {
         return true;
     }
 
-    @Override
-    public int placeOrder ( final Long itemId, final int tip, final int payment ) {
-        // TODO Auto-generated method stub
-        return 0;
-    }
-
+    /**
+     * Retrieves an order by its ID.
+     *
+     * @param orderId
+     *            the order ID
+     * @return the order DTO
+     */
     @Override
     public OrderDto getOrderById ( final Long orderId ) {
         final Order order = orderRepository.findById( orderId )
@@ -132,9 +152,17 @@ public class OrderServiceImpl implements OrderService {
         return OrderMapper.mapToOrderDto( order );
     }
 
+    /**
+     * Updates an existing order.
+     *
+     * @param orderId
+     *            the order ID
+     * @param orderDto
+     *            the updated order DTO
+     * @return the updated order DTO
+     */
     @Override
     public OrderDto updateOrder ( final Long orderId, final OrderDto orderDto ) {
-        // Find existing order or throw if not found
         final Order existing = orderRepository.findById( orderId )
                 .orElseThrow( () -> new ResourceNotFoundException( "Order does not exist with id " + orderId ) );
 
@@ -150,17 +178,79 @@ public class OrderServiceImpl implements OrderService {
         // Make sure we're updating the correct existing order
         updated.setId( existing.getId() );
         updated.setCustomer( existing.getCustomer() );
-        // Keep status as PLACED (editing should not secretly change it)
+        // Keep status as PLACED (editing should not change it)
         updated.setStatus( OrderStatus.PLACED );
+
+        // Build ingredient totals for existing order
+        final Map<String, Integer> existingTotals = new HashMap<>();
+        if ( existing.getOrderItems() != null ) {
+            for ( final OrderLine line : existing.getOrderItems() ) {
+                final Item item = line.getItem();
+                final int qty = line.getQuantity();
+                if ( item != null && item.getIngredients() != null ) {
+                    for ( final Map.Entry<String, Integer> ent : item.getIngredients().entrySet() ) {
+                        existingTotals.merge( ent.getKey(), ent.getValue() * qty, Integer::sum );
+                    }
+                }
+            }
+        }
+
+        // Build ingredient totals for updated order
+        final Map<String, Integer> updatedTotals = new HashMap<>();
+        if ( updated.getOrderItems() != null ) {
+            for ( final OrderLine line : updated.getOrderItems() ) {
+                final Item item = line.getItem();
+                final int qty = line.getQuantity();
+                if ( item != null && item.getIngredients() != null ) {
+                    for ( final Map.Entry<String, Integer> ent : item.getIngredients().entrySet() ) {
+                        updatedTotals.merge( ent.getKey(), ent.getValue() * qty, Integer::sum );
+                    }
+                }
+            }
+        }
+
+        // Load current inventory and create a mutable copy
+        final InventoryDto inventory = inventoryService.getInventory();
+        final Map<String, Integer> invMap = inventory.getIngredients() != null
+                ? new HashMap<>( inventory.getIngredients() )
+                : new HashMap<>();
+
+        // Process ingredients present in updated order (may be new or
+        // increased)
+        for ( final Map.Entry<String, Integer> ent : updatedTotals.entrySet() ) {
+            final String name = ent.getKey();
+            final int newAmt = ent.getValue();
+            final int oldAmt = existingTotals.getOrDefault( name, 0 );
+            final int delta = newAmt - oldAmt;
+            if ( delta > 0 ) {
+                final int currentInv = invMap.getOrDefault( name, 0 );
+                if ( currentInv < delta ) {
+                    throw new IllegalStateException( "Insufficient inventory for ingredient " + name );
+                }
+                invMap.put( name, currentInv - delta );
+            }
+            else if ( delta < 0 ) {
+                // returned to inventory
+                invMap.merge( name, -delta, Integer::sum );
+            }
+        }
+
+        // Process ingredients that were in the existing order but removed
+        // entirely in updated order
+        for ( final Map.Entry<String, Integer> ent : existingTotals.entrySet() ) {
+            final String name = ent.getKey();
+            if ( !updatedTotals.containsKey( name ) ) {
+                // entire amount returned
+                invMap.merge( name, ent.getValue(), Integer::sum );
+            }
+        }
+
+        // Persist inventory changes
+        inventory.setIngredients( invMap );
+        inventoryService.updateInventoryForOrder( inventory );
 
         final Order savedOrder = orderRepository.save( updated );
         return OrderMapper.mapToOrderDto( savedOrder );
-    }
-
-    @Override
-    public void deleteOrder ( final Long orderId ) {
-        // TODO Auto-generated method stub
-
     }
 
     /**
@@ -264,6 +354,29 @@ public class OrderServiceImpl implements OrderService {
         if ( order.getStatus() != OrderStatus.PLACED ) {
             throw new IllegalStateException( "Order can only be cancelled when it is in PLACED status" );
         }
+
+        // Load current inventory and merge returned quantities into it
+        final InventoryDto inventory = inventoryService.getInventory();
+        final Map<String, Integer> merged = new HashMap<>(
+                inventory.getIngredients() != null ? inventory.getIngredients() : Map.of() );
+
+        // Loop through each order line and add back the ingredients to
+        // inventory
+        for ( final OrderLine line : order.getOrderItems() ) {
+            final Item item = line.getItem();
+            final int qty = line.getQuantity();
+            for ( final Map.Entry<String, Integer> ent : item.getIngredients().entrySet() ) {
+                final String name = ent.getKey();
+                final int amount = ent.getValue() * qty;
+                merged.merge( name, amount, Integer::sum );
+            }
+        }
+
+        inventory.setIngredients( merged );
+
+        // use the same update method used when placing orders to persist
+        // changes
+        inventoryService.updateInventoryForOrder( inventory );
 
         order.setStatus( OrderStatus.CANCELLED );
 

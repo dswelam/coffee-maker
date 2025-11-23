@@ -97,22 +97,6 @@ public class Order {
     }
 
     /**
-     * Constructor that takes all properties for an Order EXCEPT for id
-     * @param customer the order customer
-     * @param orderItems the order items
-     * @param status the order status
-     * @param preparedBy the staff who prepared the order
-     */
-    public Order ( final User customer, final List<OrderLine> orderItems, final OrderStatus status,
-            final User preparedBy ) {
-        super();
-        this.customer = customer;
-        this.orderItems = orderItems;
-        this.status = status;
-        this.preparedBy = preparedBy;
-    }
-
-    /**
      * Gets the id
      * @return the id
      */

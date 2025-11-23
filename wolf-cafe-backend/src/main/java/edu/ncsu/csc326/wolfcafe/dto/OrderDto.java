@@ -63,27 +63,6 @@ public class OrderDto {
     }
 
     /**
-     * Constructor that takes all properties for an OrderDto EXCEPT for id
-     *
-     * @param customer
-     *            the order customer
-     * @param orderItems
-     *            the order items
-     * @param status
-     *            the order status
-     * @param preparedBy
-     *            the staff who prepared the order
-     */
-    public OrderDto ( final User customer, final List<OrderLineDto> orderItems, final OrderStatus status,
-            final User preparedBy ) {
-        super();
-        this.customer = customer;
-        this.orderItems = orderItems;
-        this.status = status;
-        this.preparedBy = preparedBy;
-    }
-
-    /**
      * Gets the id of the order
      *
      * @return the order id
