@@ -91,7 +91,6 @@ const EditUserComponent = () => {
 			],
 		};
 
-
 		try {
 			await updateUser(id, payload);
 			setSuccess("User updated!");

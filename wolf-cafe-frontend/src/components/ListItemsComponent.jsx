@@ -48,7 +48,7 @@ const ListItemsComponent = () => {
 				<div className="card-header text-center border-0 mb-4 bg-white">
 					<h2 className="fw-bold text-dark mb-0">Items</h2>
 					<p className="text-secondary mt-2">Click on Item Name to Update or Delete</p>
-					{(isAdmin || isStaff )&& (
+					{(isAdmin || isStaff) && (
 						<button className="btn btn-success mt-3 fw-bold" onClick={addNewItem}>
 							Add Item
 						</button>

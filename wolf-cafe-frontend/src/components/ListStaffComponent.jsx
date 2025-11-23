@@ -74,15 +74,14 @@ const ListStaffComponent = () => {
 					<h2 className="fw-bold text-dark mb-0">Staff</h2>
 					<p className="text-secondary mt-2">List of registered staff members</p>
 					<p className="text-secondary mt-2">Click on Staff's' username to update or delete</p>
-
-				</div>
-				<div className="mt-2 d-flex justify-content-center">
 					<button
-						className="btn btn-primary"
+						className="btn btn-success mt-2 fw-bold"
 						onClick={() => navigate('/add-user')}
 					>
 						Create New User
 					</button>
+				</div>
+				<div className="mt-2 d-flex justify-content-center">
 				</div>
 				<div className="card-body">
 					<table className="table table-bordered align-middle text-center">
