@@ -62,7 +62,7 @@ const OrderCard = ({ order, refresh }) => {
 				{/* PICK UP ORDER */}
 				{order.status === "READY" && (
 					<button onClick={handleFulfill} className="btn btn-success">
-						Pick Up Order
+						Confirm Pick Up 
 					</button>
 				)}
 

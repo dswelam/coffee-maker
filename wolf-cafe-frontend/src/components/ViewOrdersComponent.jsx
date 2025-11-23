@@ -81,10 +81,12 @@ const ViewOrdersComponent = () => {
 	return (
 		<div className="container" style={{ paddingTop: "40px" }}>
 			<h1 className="fw-bold text-center mb-2">My Orders</h1>
-			<p className="text-center text-muted mb-5">
+			<p className="text-center text-muted mb2">
 				You can only edit or cancel orders that are still placed.
 			</p>
-
+			<p className="text-center text-muted mb-2">
+				Once your order is mark as ready and you pick it up please click to confirm you received your order.
+			</p>
 			{/* PLACED */}
 			<div className="mb-5">
 				<h3 className="fw-bold mb-3">Orders You Just Placed</h3>
