@@ -9,7 +9,6 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -79,23 +78,6 @@ public class OrderController {
         }
         final OrderDto savedOrderDto = orderService.updateOrder( orderId, orderDto );
         return ResponseEntity.ok( savedOrderDto );
-    }
-
-    /**
-     * REST API method to allow deleting a Order from the CoffeeMaker's
-     * Inventory, by making a DELETE request to the API endpoint and indicating
-     * the order to delete (as a path variable)
-     *
-     * @param orderId
-     *            The id of the Order to delete
-     * @return Success if the order could be deleted; an error if the order does
-     *         not exist
-     */
-    @PreAuthorize ( "hasAnyRole('STAFF', 'ADMIN')" )
-    @DeleteMapping ( "{id}" )
-    public ResponseEntity<String> deleteOrder ( @PathVariable ( "id" ) final Long orderId ) {
-        orderService.deleteOrder( orderId );
-        return ResponseEntity.ok( "Order deleted successfully." );
     }
 
     /**

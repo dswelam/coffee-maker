@@ -40,19 +40,6 @@ public interface OrderService {
     public boolean checkInventory ( InventoryDto inventoryDto, ItemDto itemDto );
 
     /**
-     * Checks that the payment is sufficient and calculates the change
-     *
-     * @param itemId
-     *            the id of the item
-     * @param tip
-     *            the tip amount
-     * @param payment
-     *            the amount paid by the customer
-     * @return change to return to the user
-     */
-    public int placeOrder ( Long itemId, int tip, int payment );
-
-    /**
      * Get an order by its ID
      *
      * @param orderId
@@ -75,16 +62,6 @@ public interface OrderService {
      *             if the order doesn't exist
      */
     public OrderDto updateOrder ( Long orderId, OrderDto orderDto );
-
-    /**
-     * Delete an order by its ID
-     *
-     * @param orderId
-     *            id of the order to delete
-     * @throws ResourceNotFoundException
-     *             if the order doesn't exist
-     */
-    public void deleteOrder ( Long orderId );
 
     /**
      * List orders by their status

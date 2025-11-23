@@ -166,9 +166,9 @@ public class OrderServiceTest {
         assertEquals( createdOrder.getOrderItems().getFirst().getItem().getName(),
                 order.getOrderItems().getFirst().getItem().getName() );
         inventory = inventoryService.getInventory();
-        assertEquals(7, inventory.getIngredients().get("Chocolate"));
-        assertEquals(8, inventory.getIngredients().get("Sugar"));
-        assertEquals(9, inventory.getIngredients().get("Milk"));
+        assertEquals( 7, inventory.getIngredients().get( "Chocolate" ) );
+        assertEquals( 8, inventory.getIngredients().get( "Sugar" ) );
+        assertEquals( 9, inventory.getIngredients().get( "Milk" ) );
     }
 
     /**
@@ -224,12 +224,29 @@ public class OrderServiceTest {
 
         final OrderDto createdOrder = orderService.createOrder( order, customer.getUsername() );
 
-        // Update order status
+        // At this point inventory should have been decremented by one Tea:
+        // Tea Leaves: 10 - 2 = 8, Sugar: 10 - 1 = 9, Lemon: 10 - 1 = 9
+        final InventoryDto afterCreateInv = inventoryService.getInventory();
+        assertEquals( 8, afterCreateInv.getIngredients().get( "Tea Leaves" ) );
+        assertEquals( 9, afterCreateInv.getIngredients().get( "Sugar" ) );
+        assertEquals( 9, afterCreateInv.getIngredients().get( "Lemon" ) );
+
+        // Now update the order to increase quantity to 2 (adds one more Tea)
+        createdOrder.getOrderItems().getFirst().setQuantity( 2 );
         createdOrder.setStatus( OrderStatus.PLACED );
         final OrderDto updatedOrder = orderService.updateOrder( createdOrder.getId(), createdOrder );
 
+        // Verify order updated
         assertEquals( OrderStatus.PLACED, updatedOrder.getStatus() );
         assertEquals( "Tea", updatedOrder.getOrderItems().getFirst().getItem().getName() );
+        assertEquals( 2, updatedOrder.getOrderItems().getFirst().getQuantity() );
+
+        // After update, inventory should reflect additional deduction:
+        // Tea Leaves: 8 - 2 = 6, Sugar: 9 - 1 = 8, Lemon: 9 - 1 = 8
+        final InventoryDto afterUpdateInv = inventoryService.getInventory();
+        assertEquals( 6, afterUpdateInv.getIngredients().get( "Tea Leaves" ) );
+        assertEquals( 8, afterUpdateInv.getIngredients().get( "Sugar" ) );
+        assertEquals( 8, afterUpdateInv.getIngredients().get( "Lemon" ) );
     }
 
     @Test
@@ -649,4 +666,58 @@ public class OrderServiceTest {
         } );
     }
 
+    /**
+     * Test method for checking inventory after order cancellation
+     */
+    @Test
+    @Transactional
+    void testCancelOrderUpdatesInventory () {
+        // Setup: register customer
+        final RegisterDto customerRegister = new RegisterDto();
+        customerRegister.setName( "Fiona2" );
+        customerRegister.setUsername( "fiona2" );
+        customerRegister.setEmail( "fiona2@mail.com" );
+        customerRegister.setPassword( "password" );
+        authService.register( customerRegister );
+        final User customer = userRepository.findByUsername( customerRegister.getUsername() ).get();
+
+        // Create item
+        ItemDto item = new ItemDto();
+        item.setName( "Americano2" );
+        item.setPrice( 3.75 );
+        item.setIngredients( Map.of( "Coffee", 2, "Water", 1 ) );
+        item = itemService.addItem( item );
+
+        // Create inventory
+        InventoryDto inventory = new InventoryDto();
+        final Map<String, Integer> inventoryIngredients = new HashMap<>();
+        inventoryIngredients.put( "Coffee", 10 );
+        inventoryIngredients.put( "Water", 10 );
+        inventory.setIngredients( inventoryIngredients );
+        inventory = inventoryService.createInventory( inventory );
+
+        // Create order (quantity 1)
+        final OrderLineDto orderLine = new OrderLineDto();
+        orderLine.setItem( ItemMapper.mapToItem( itemService.getItemByName( "Americano2" ) ) );
+        orderLine.setQuantity( 1 );
+        final OrderDto order = new OrderDto();
+        order.setCustomer( customer );
+        order.setOrderItems( new ArrayList<>( List.of( orderLine ) ) );
+        order.setStatus( OrderStatus.PLACED );
+        final OrderDto createdOrder = orderService.createOrder( order, customer.getUsername() );
+
+        // Verify inventory after create (10 - 2 = 8, 10 - 1 = 9)
+        final InventoryDto afterCreate = inventoryService.getInventory();
+        assertEquals( 8, afterCreate.getIngredients().get( "Coffee" ) );
+        assertEquals( 9, afterCreate.getIngredients().get( "Water" ) );
+
+        // Cancel order
+        final OrderDto canceledOrder = orderService.cancelOrder( createdOrder.getId() );
+        assertEquals( OrderStatus.CANCELLED, canceledOrder.getStatus() );
+
+        // Verify inventory restored to original values (8 + 2 = 10, 9 + 1 = 10)
+        final InventoryDto afterCancel = inventoryService.getInventory();
+        assertEquals( 10, afterCancel.getIngredients().get( "Coffee" ) );
+        assertEquals( 10, afterCancel.getIngredients().get( "Water" ) );
+    }
 }
