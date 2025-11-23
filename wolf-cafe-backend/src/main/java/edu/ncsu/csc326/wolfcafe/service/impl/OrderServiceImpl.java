@@ -58,9 +58,12 @@ public class OrderServiceImpl implements OrderService {
      */
     @Override
     public OrderDto createOrder ( final OrderDto orderDto, final String username ) {
-        // Set the customer username on the order
-        final User customer = userRepository.findByUsername( username )
-                .orElseThrow( () -> new ResourceNotFoundException( "User does not exist with username " + username ) );
+        User customer = null;
+        // Handle anonymous users
+        if ( !"ANONYMOUS".equals( username ) ) {
+            customer = userRepository.findByUsername( username ).orElseThrow(
+                    () -> new ResourceNotFoundException( "User does not exist with username " + username ) );
+        }
         final InventoryDto inventory = inventoryService.getInventory();
 
         // Before creating the order, need to check if the inventory has
