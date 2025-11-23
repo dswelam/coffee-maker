@@ -65,9 +65,15 @@ const LoginComponent = () => {
 			className='d-flex justify-content-center align-items-center vh-50'
 		>
 			<div className='card shadow-lg p-5' style={{ width: '45rem', transform: 'scale(0.9)', backgroundColor: '#fff', borderRadius: '1rem' }}>
+
 				<div className='card-header text-center border-0 mb-3 bg-white'>
-					<h2 className='fw-bold mb-0 text-dark'>Welcome</h2>
-					<p className='text-secondary mt-2'>Sign in to continue</p>
+				<p className='text-secondary mt-2'>New Customer ? Use the Register button above</p>
+				<p className='text-secondary mt-2'>Want to Order without making an account ? Use the Order button above</p>
+
+				<div style={{ height: '2rem' }} /> 
+
+				<h2 className='fw-bold mb-0 text-dark'>Welcome</h2>
+				<p className='text-secondary mt-2'>Sign in to continue</p>
 				</div>
 
 				<div className='card-body'>
