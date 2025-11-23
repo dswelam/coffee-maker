@@ -36,13 +36,13 @@ const ListIngredientsComponent = () => {
 		}
 	}, [error]);
 
-	// Handle changing amounts in table inputs
+	// handle changing amounts in table inputs
 	const addAmounts = (name, value) => {
 		if (isNaN(value)) return;
 		setToAdd(prev => ({ ...prev, [name]: value }));
 	};
 
-	// Add new ingredient row
+	// add new ingredient row
 	const addIngredient = () => {
 		const name = newIngredient.trim();
 		const amountNum = Number(newAmount);

@@ -2,20 +2,20 @@ import React, { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { getAllItems } from "../services/ItemService";
 import { createOrder, getOrderById, updateOrder } from "../services/OrderService";
-import { getCurrentUser, getTax } from "../services/AuthService";
+import { getTax } from "../services/AuthService";
 
 const OrderComponent = () => {
-  const { orderId } = useParams();
-  const navigate = useNavigate();
+	const { orderId } = useParams();
+	const navigate = useNavigate();
 
-  const [items, setItems] = useState([]);
-  const [cart, setCart] = useState([]);
-  const [tipPercent, setTipPercent] = useState(0);
-  const [customTip, setCustomTip] = useState("");
-  const [moneyGiven, setMoneyGiven] = useState("");
-  const [errors, setErrors] = useState({});
-  const [success, setSuccess] = useState("");
-  const [taxRate, setTaxRate] = useState(0);
+	const [items, setItems] = useState([]);
+	const [cart, setCart] = useState([]);
+	const [tipPercent, setTipPercent] = useState(0);
+	const [customTip, setCustomTip] = useState("");
+	const [moneyGiven, setMoneyGiven] = useState("");
+	const [errors, setErrors] = useState({});
+	const [success, setSuccess] = useState("");
+	const [taxRate, setTaxRate] = useState(0);
 
 	const round = (n) => Number(Number(n).toFixed(2));
 
@@ -36,37 +36,36 @@ const OrderComponent = () => {
 			})
 			.catch(() => setTaxRate(0.0725));
 	}, []);
-	
-	// fetch existing order if editing
+
 	// fetch existing order if editing
 	useEffect(() => {
-	  const fetchOrder = async () => {
-	    if (!orderId) return;
-	    try {
-	      // Wait until items are loaded
-	      if (!items.length) return;
+		const fetchOrder = async () => {
+			if (!orderId) return;
+			try {
+				// Wait until items are loaded
+				if (!items.length) return;
 
-	      const res = await getOrderById(orderId);
-	      const order = res.data;
+				const res = await getOrderById(orderId);
+				const order = res.data;
 
-	      // map orderItems to cart
-	      const mappedCart = order.orderItems.map((oi) => {
-	        // match menu item by ID (coerce to number just in case)
-	        const menuItem = items.find((i) => Number(i.id) === Number(oi.item.id));
-	        return {
-	          item: menuItem || oi.item,
-	          qty: oi.quantity,
-	        };
-	      });
+				// map orderItems to cart
+				const mappedCart = order.orderItems.map((oi) => {
+					// match menu item by ID 
+					const menuItem = items.find((i) => Number(i.id) === Number(oi.item.id));
+					return {
+						item: menuItem || oi.item,
+						qty: oi.quantity,
+					};
+				});
 
-	      setCart(mappedCart);
-	    } catch (err) {
-	      console.error("Error loading order:", err);
-	      setErrors( "Could not load order for editing." );
-	    }
-	  };
+				setCart(mappedCart);
+			} catch (err) {
+				console.error("Error loading order:", err);
+				setErrors("Could not load order for editing.");
+			}
+		};
 
-	  fetchOrder();
+		fetchOrder();
 	}, [orderId, items]);
 
 
@@ -83,7 +82,7 @@ const OrderComponent = () => {
 	}, [success, errors]);
 
 	function removeFromCart(index) {
-	  setCart((prevCart) => prevCart.filter((_, i) => i !== index));
+		setCart((prevCart) => prevCart.filter((_, i) => i !== index));
 	}
 
 	function addToCart(item, qty) {
@@ -119,51 +118,51 @@ const OrderComponent = () => {
 	async function submitOrder() {
 		// check that cart has at least one item
 		if (cart.length === 0) {
-		    setErrors((prev) => ({ ...prev, cart: "Cart cannot be empty." }));
-		    return;
+			setErrors((prev) => ({ ...prev, cart: "Cart cannot be empty." }));
+			return;
 		}
 		// validate payment
 		const total = calculateTotal();
 		if (!moneyGiven) {
-		  setErrors((prev) => ({ ...prev, payment: "Payment cannot be empty." }));
-		  return;
+			setErrors((prev) => ({ ...prev, payment: "Payment cannot be empty." }));
+			return;
 		}
 		if (Number(moneyGiven) < total) {
-		  setErrors((prev) => ({ ...prev, payment: "Payment must be at least total amount." }));
-		  return;
+			setErrors((prev) => ({ ...prev, payment: "Payment must be at least total amount." }));
+			return;
 		}
-		
+
 		const orderDto = {
-	    orderItems: cart.map(c => ({
-	      quantity: c.qty,
-	      item: { id: c.item.id }
-	    }))
-	  };
+			orderItems: cart.map(c => ({
+				quantity: c.qty,
+				item: { id: c.item.id }
+			}))
+		};
 
-	  try {
-	    if (orderId) {
-	      // EDIT existing order
-	      await updateOrder(orderId, orderDto);
-	      setSuccess("Order updated successfully!");
-		  setTimeout(() => navigate("/my-orders"), 2000)
-	    } else {
-	      // NEW order
-	      await createOrder(orderDto);
-	      setSuccess("Order placed successfully!");
-		    setCart([]);
-			items.forEach(item => {
-			  const el = document.getElementById(`qty-${item.id}`);
-			  if (el) el.value = 0;
-			});
+		try {
+			if (orderId) {
+				// EDIT existing order
+				await updateOrder(orderId, orderDto);
+				setSuccess("Order updated successfully!");
+				setTimeout(() => navigate("/my-orders"), 2000)
+			} else {
+				// NEW order
+				await createOrder(orderDto);
+				setSuccess("Order placed successfully!");
+				setCart([]);
+				items.forEach(item => {
+					const el = document.getElementById(`qty-${item.id}`);
+					if (el) el.value = 0;
+				});
 
-		    setMoneyGiven("");
-		    setTipPercent(0);
-		    setCustomTip("");
-	    }
-	    setTimeout(() => navigate("/order"), 2000);
-	  } catch {
-	    setErrors({ api: "Error submitting order." });
-	  }
+				setMoneyGiven("");
+				setTipPercent(0);
+				setCustomTip("");
+			}
+			setTimeout(() => navigate("/order"), 2000);
+		} catch {
+			setErrors({ api: "Error submitting order." });
+		}
 	}
 
 	return (
@@ -239,19 +238,19 @@ const OrderComponent = () => {
 				<div className="text-muted mb-4">No items yet.</div>
 			) : (
 				<ul className="list-group mb-4">
-				  {cart.map((c, index) => (
-				    <li key={index} className="list-group-item d-flex justify-content-between align-items-center">
-				      <span>
-				        {c.item.name} × {c.qty} — ${round(c.item.price * c.qty)}
-				      </span>
-				      <button
-				        className="btn btn-sm btn-danger"
-				        onClick={() => removeFromCart(index)}
-				      >
-				        Delete
-				      </button>
-				    </li>
-				  ))}
+					{cart.map((c, index) => (
+						<li key={index} className="list-group-item d-flex justify-content-between align-items-center">
+							<span>
+								{c.item.name} × {c.qty} — ${round(c.item.price * c.qty)}
+							</span>
+							<button
+								className="btn btn-sm btn-danger"
+								onClick={() => removeFromCart(index)}
+							>
+								Delete
+							</button>
+						</li>
+					))}
 				</ul>
 
 			)}
@@ -262,12 +261,12 @@ const OrderComponent = () => {
 				{/* TOTALS */}
 				<div className="col-md-4">
 					<h4>Total</h4>
-					<div>
-					  Tax: ({(taxRate*100).toFixed(2)}%) ${calculateTax()}
-					</div>
 					<div>Subtotal: ${calculateSubtotal()}</div>
 					<div>
-					  Tip: {tipPercent > 0 && `(${(tipPercent*100).toFixed(0)}%) `}${calculateTip()}
+						Tax: ({(taxRate * 100).toFixed(2)}%) ${calculateTax()}
+					</div>
+					<div>
+						Tip: {tipPercent > 0 && `(${(tipPercent * 100).toFixed(0)}%) `}${calculateTip()}
 					</div>
 
 					<hr />
@@ -279,44 +278,45 @@ const OrderComponent = () => {
 					<div className="d-flex justify-content-between align-items-center mb-2">
 						<h4 className="mb-0">Tip</h4>
 						<div>
-						<button
-							className="btn btn-outline-primary btn-sm me-1"
-							onClick={() => {
-								setTipPercent(0.15);
-								setCustomTip("" + round(calculateSubtotal() * 0.15));
-							}}
-						>
-							15%
-						</button>
-						<button
-							className="btn btn-outline-primary btn-sm me-1"
-							onClick={() => {
-								setTipPercent(0.2);
-								setCustomTip("" + round(calculateSubtotal() * 0.2));
-							}}
-						>
-							20%
-						</button>
-						<button
-							className="btn btn-outline-primary btn-sm"
-							onClick={() => {
-								setTipPercent(0.25);
-								setCustomTip("" + round(calculateSubtotal() * 0.25));
-							}}
-						>
-							25%
-						</button>
+							<button
+								className="btn btn-outline-primary btn-sm me-1"
+								onClick={() => {
+									setTipPercent(0.15);
+									setCustomTip("" + round(calculateSubtotal() * 0.15));
+								}}
+							>
+								15%
+							</button>
+							<button
+								className="btn btn-outline-primary btn-sm me-1"
+								onClick={() => {
+									setTipPercent(0.2);
+									setCustomTip("" + round(calculateSubtotal() * 0.2));
+								}}
+							>
+								20%
+							</button>
+							<button
+								className="btn btn-outline-primary btn-sm"
+								onClick={() => {
+									setTipPercent(0.25);
+									setCustomTip("" + round(calculateSubtotal() * 0.25));
+								}}
+							>
+								25%
+							</button>
 
 						</div>
 					</div>
 
 					<input
 						className="form-control"
-						value={tipPercent * 100}
-						placeholder="Custom Tip ($)"
+						value={tipPercent === 0 ? "" : tipPercent * 100}
+						placeholder="Custom Tip (%)"
 						onChange={(e) => {
-							setCustomTip(e.target.value);
-							setTipPercent(0);
+							const p = Number(e.target.value) / 100;
+							if (!isNaN(p)) setTipPercent(p);
+							setCustomTip("" + round(calculateSubtotal() * p));
 						}}
 					/>
 
@@ -348,7 +348,7 @@ const OrderComponent = () => {
 			</div>
 
 			<button className="btn btn-primary w-100 mb-3" onClick={submitOrder}>
-			  {orderId ? "Update Order" : "Place Order"}
+				{orderId ? "Update Order" : "Place Order"}
 			</button>
 
 		</div>
