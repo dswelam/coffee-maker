@@ -1,6 +1,5 @@
 package edu.ncsu.csc326.wolfcafe.config;
 
-import lombok.AllArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -16,61 +15,73 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 
 import edu.ncsu.csc326.wolfcafe.security.JwtAuthenticationEntryPoint;
 import edu.ncsu.csc326.wolfcafe.security.JwtAuthenticationFilter;
+import lombok.AllArgsConstructor;
 
 /**
- * Details about roles and permissions.  This file should be edited
- * with any global roles/permissions for the application. 
+ * Details about roles and permissions. This file should be edited with any
+ * global roles/permissions for the application.
  */
 @Configuration
 @EnableMethodSecurity
 @AllArgsConstructor
 public class SpringSecurityConfig {
 
-	/** JWT authentication entry point for an authenticated user */
-    private JwtAuthenticationEntryPoint authenticationEntryPoint;
+    /** JWT authentication entry point for an authenticated user */
+    private final JwtAuthenticationEntryPoint authenticationEntryPoint;
 
     /** Filters for authentication */
-    private JwtAuthenticationFilter authenticationFilter;
+    private final JwtAuthenticationFilter     authenticationFilter;
 
     /**
      * Encodes passwords
+     *
      * @return object to encode passwords
      */
     @Bean
-    public static PasswordEncoder passwordEncoder() {
+    public static PasswordEncoder passwordEncoder () {
         return new BCryptPasswordEncoder();
     }
 
     /**
      * Create global permission structures for roles.
-     * @param http the security object
+     *
+     * @param http
+     *            the security object
      * @return the SecurityFilterChain with permission information
-     * @throws Exception if error
+     * @throws Exception
+     *             if error
      */
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-        http.csrf((csrf) -> csrf.disable())
-                .authorizeHttpRequests((authorize) -> {
-                    authorize.requestMatchers("/api/auth/**").permitAll();
-                    authorize.requestMatchers(HttpMethod.OPTIONS, "/**").permitAll(); //allows preflight requests
-                    authorize.anyRequest().authenticated();
-                }).httpBasic(Customizer.withDefaults());
+    public SecurityFilterChain securityFilterChain ( final HttpSecurity http ) throws Exception {
+        http.csrf( ( csrf ) -> csrf.disable() ).authorizeHttpRequests( ( authorize ) -> {
+            authorize.requestMatchers( "/api/auth/**" ).permitAll();
+            authorize.requestMatchers( "/api/items" ).permitAll();
+            authorize.requestMatchers( HttpMethod.POST, "/api/orders" ).permitAll();
+            authorize.requestMatchers( HttpMethod.OPTIONS, "/**" ).permitAll(); // allows
+                                                                                // preflight
+                                                                                // requests
+            authorize.anyRequest().authenticated();
+        } ).httpBasic( Customizer.withDefaults() );
 
-        http.exceptionHandling(exception -> exception.authenticationEntryPoint(authenticationEntryPoint));
+        http.exceptionHandling( exception -> exception.authenticationEntryPoint( authenticationEntryPoint ) );
 
-        http.addFilterBefore(authenticationFilter, UsernamePasswordAuthenticationFilter.class);
+        http.addFilterBefore( authenticationFilter, UsernamePasswordAuthenticationFilter.class );
 
         return http.build();
     }
 
     /**
      * Returns the AuthenticationManager for the project.
-     * @param configuration configuration information for authentication
+     *
+     * @param configuration
+     *            configuration information for authentication
      * @return AuthenticationManager
-     * @throws Exception if error
+     * @throws Exception
+     *             if error
      */
     @Bean
-    public AuthenticationManager authenticationManager(AuthenticationConfiguration configuration) throws Exception {
+    public AuthenticationManager authenticationManager ( final AuthenticationConfiguration configuration )
+            throws Exception {
         return configuration.getAuthenticationManager();
     }
 

@@ -49,12 +49,12 @@ public class OrderController {
      * @return ResponseEntity indicating success if the Order could be saved to
      *         the inventory, or an error if it could not be
      */
-    @PreAuthorize ( "hasAnyRole('STAFF', 'ADMIN', 'CUSTOMER', 'ANONYMOUS')" )
+    @CrossOrigin ( "*" )
     @PostMapping
     public ResponseEntity<OrderDto> createOrder ( @RequestBody final OrderDto orderDto,
             final Authentication authentication ) {
         // If the user is authenticated, set the customer username on the order
-        final String username = authentication.getName();
+        final String username = ( authentication != null ) ? authentication.getName() : "ANONYMOUS";
         final OrderDto savedOrderDto = orderService.createOrder( orderDto, username );
         return new ResponseEntity<>( savedOrderDto, HttpStatus.CREATED );
     }
