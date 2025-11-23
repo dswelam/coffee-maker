@@ -31,8 +31,9 @@ public class Order {
     private Long            id;
 
     /** Order customer */
-    @ManyToOne ( fetch = FetchType.LAZY, optional = false )
-    @JoinColumn ( name = "customer_id" )
+    @ManyToOne ( fetch = FetchType.LAZY, optional = true )
+    // Nullable true to allow for anonymous orders
+    @JoinColumn ( name = "customer_id", nullable = true )
     private User            customer;
 
     /** Order items
