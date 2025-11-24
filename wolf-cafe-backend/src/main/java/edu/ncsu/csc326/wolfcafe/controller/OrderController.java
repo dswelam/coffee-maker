@@ -54,7 +54,7 @@ public class OrderController {
     public ResponseEntity<OrderDto> createOrder ( @RequestBody final OrderDto orderDto,
             final Authentication authentication ) {
         // If the user is authenticated, set the customer username on the order
-        final String username = ( authentication != null ) ? authentication.getName() : "ANONYMOUS";
+        final String username = ( authentication != null ) ? authentication.getName() : "Anonymous User";
         final OrderDto savedOrderDto = orderService.createOrder( orderDto, username );
         return new ResponseEntity<>( savedOrderDto, HttpStatus.CREATED );
     }
@@ -171,6 +171,13 @@ public class OrderController {
         return ResponseEntity.ok( orders );
     }
 
+    /**
+     * REST API method to get an order by ID.
+     *
+     * @param orderId
+     *            ID of the order to retrieve
+     * @return The requested order
+     */
     @PreAuthorize ( "hasAnyRole('CUSTOMER', 'STAFF', 'ADMIN')" )
     @GetMapping ( "/{id}" )
     public ResponseEntity<OrderDto> getOrder ( @PathVariable ( "id" ) final Long orderId ) {
