@@ -41,7 +41,10 @@ export const getOrderById = (id) => axios.get(`${ORDER_API_BASE_URL}/${id}`);
 
 
 export const updateOrder = (id, orderDto) => {
-	return axios.put(`${ORDER_API_BASE_URL}/${id}`, orderDto, {
+	return axios.put(`${ORDER_API_BASE_URL}/${id}`, {
+		...orderDto,
+		status: orderDto.status || "PLACED" // fallback if missing
+	}, {
 		headers: {
 			"Content-Type": "application/json",
 			...authHeader(),
