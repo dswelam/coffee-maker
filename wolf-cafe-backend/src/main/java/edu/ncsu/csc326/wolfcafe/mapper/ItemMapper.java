@@ -1,5 +1,7 @@
 package edu.ncsu.csc326.wolfcafe.mapper;
 
+import java.util.HashMap;
+
 import edu.ncsu.csc326.wolfcafe.dto.ItemDto;
 import edu.ncsu.csc326.wolfcafe.entity.Item;
 
@@ -18,8 +20,12 @@ public class ItemMapper {
      * @return ItemDto object
      */
     public static ItemDto mapToItemDto ( final Item item ) {
-        return new ItemDto( item.getId(), item.getName(), item.getDescription(), item.getPrice(), item.getIngredients() );
-
+        final ItemDto dto = new ItemDto();
+        dto.setId( item.getId() );
+        dto.setName( item.getName() );
+        dto.setPrice( item.getPrice() );
+        dto.setIngredients( new HashMap<>( item.getIngredients() ) );
+        return dto;
     }
 
     /**
@@ -30,7 +36,8 @@ public class ItemMapper {
      * @return Item entity
      */
     public static Item mapToItem ( final ItemDto itemDto ) {
-        return new Item( itemDto.getId(), itemDto.getName(), itemDto.getDescription(), itemDto.getPrice(), itemDto.getIngredients() );
+        return new Item( itemDto.getId(), itemDto.getName(), itemDto.getDescription(), itemDto.getPrice(),
+                itemDto.getIngredients() );
     }
 
 }

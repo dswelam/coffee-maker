@@ -28,12 +28,12 @@ public class OrderLine {
     private Long    id;
 
     /** Order associated with this order line */
-    @ManyToOne ( optional = true, fetch = FetchType.LAZY )
+    @ManyToOne ( optional = true, fetch = FetchType.EAGER )
     @JoinColumn ( name = "order_id" )
     private Order   order;
 
     /** Item in the order line */
-    @ManyToOne ( optional = false, fetch = FetchType.LAZY )
+    @ManyToOne ( optional = false, fetch = FetchType.EAGER )
     @JoinColumn ( name = "item_id" )
     private Item    item;
 
