@@ -13,9 +13,7 @@ describe('Login page', () => {
     ).toBeInTheDocument()
 
     // Login form heading
-    expect(
-      screen.getByRole('heading', { name: /login form/i })
-    ).toBeInTheDocument()
+	expect(screen.getByRole('heading', { name: /welcome/i })).toBeInTheDocument()
 
     // Inputs
     expect(
@@ -27,7 +25,7 @@ describe('Login page', () => {
 
     // Submit button
     expect(
-      screen.getByRole('button', { name: /submit/i })
+      screen.getByRole('button', { name: /login/i })
     ).toBeInTheDocument()
 
     // Footer

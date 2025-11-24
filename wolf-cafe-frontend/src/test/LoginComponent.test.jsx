@@ -42,7 +42,7 @@ describe('LoginComponent', () => {
 
     // In the DOM you showed, button text is "Submit"
     expect(
-      screen.getByRole('button', { name: /submit/i })
+      screen.getByRole('button', { name: /login/i })
     ).toBeInTheDocument()
   })
 
@@ -75,7 +75,7 @@ describe('LoginComponent', () => {
     await userEvent.type(usernameInput, 'testuser')
     await userEvent.type(passwordInput, 'secret123')
 
-    const loginButton = screen.getByRole('button', { name: /submit/i })
+    const loginButton = screen.getByRole('button', { name: /login/i })
     await userEvent.click(loginButton)
 
     expect(loginAPICall).toHaveBeenCalledTimes(1)

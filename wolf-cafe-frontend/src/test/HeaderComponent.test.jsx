@@ -85,27 +85,27 @@ describe('HeaderComponent', () => {
     expect(screen.queryByRole('link', { name: /register/i })).toBeNull()
   })
 
-  it('shows Items and Logout when logged in as customer and calls logout when clicked', async () => {
-    isUserLoggedIn.mockReturnValue(true)
-    isAdminUser.mockReturnValue(false)
-    isStaffUser.mockReturnValue(false)
-    isCustomerUser.mockReturnValue(true)
+  it('shows Order and My Orders for logged-in customer', async () => {
+      isUserLoggedIn.mockReturnValue(true)
+      isAdminUser.mockReturnValue(false)
+      isStaffUser.mockReturnValue(false)
+      isCustomerUser.mockReturnValue(true)
 
-    renderHeader()
+      renderHeader()
 
-    // shared logged-in links
-    expect(
-      screen.getByRole('link', { name: /items/i })
-    ).toBeInTheDocument()
-    const logoutLink = screen.getByRole('link', { name: /logout/i })
-    expect(logoutLink).toBeInTheDocument()
+	  // shared logged-in links
+	  expect(screen.getByRole('link', { name: /^Order$/i })).toBeInTheDocument()
+	  expect(screen.getByRole('link', { name: /^My Orders$/i })).toBeInTheDocument()
 
-    // guest links hidden
-    expect(screen.queryByRole('link', { name: /^login$/i })).toBeNull()
-    expect(screen.queryByRole('link', { name: /register/i })).toBeNull()
+	  const logoutLink = screen.getByRole('link', { name: /logout/i })
+	  expect(logoutLink).toBeInTheDocument()
 
-    // clicking Logout calls logout()
-    await userEvent.click(logoutLink)
-    expect(logout).toHaveBeenCalled()
-  })
+	  // guest links hidden
+	  expect(screen.queryByRole('link', { name: /login/i })).toBeNull()
+	  expect(screen.queryByRole('link', { name: /register/i })).toBeNull()
+
+	  // clicking Logout calls logout()
+	  await userEvent.click(logoutLink)
+	  expect(logout).toHaveBeenCalled()
+    })
 })
