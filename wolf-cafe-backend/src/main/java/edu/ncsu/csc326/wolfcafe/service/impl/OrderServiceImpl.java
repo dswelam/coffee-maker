@@ -21,6 +21,7 @@ import edu.ncsu.csc326.wolfcafe.entity.User;
 import edu.ncsu.csc326.wolfcafe.exception.ResourceNotFoundException;
 import edu.ncsu.csc326.wolfcafe.mapper.ItemMapper;
 import edu.ncsu.csc326.wolfcafe.mapper.OrderMapper;
+import edu.ncsu.csc326.wolfcafe.repository.ItemRepository;
 import edu.ncsu.csc326.wolfcafe.repository.OrderRepository;
 import edu.ncsu.csc326.wolfcafe.repository.UserRepository;
 import edu.ncsu.csc326.wolfcafe.service.InventoryService;
@@ -46,6 +47,10 @@ public class OrderServiceImpl implements OrderService {
     /** Connection to the user repository to get user info */
     @Autowired
     private UserRepository   userRepository;
+
+    /** Connection to the item repository to get item info */
+    @Autowired
+    private ItemRepository   itemRepository;
 
     /**
      * Creates a new order.
@@ -83,6 +88,13 @@ public class OrderServiceImpl implements OrderService {
         }
         orderItems.removeAll( toRemove );
         orderDto.setOrderItems( orderItems );
+
+        // Fetch the full Item entity from DB for each order line
+        for ( final OrderLineDto orderLine : orderItems ) {
+            final Item item = itemRepository.findById( orderLine.getItem().getId() )
+                    .orElseThrow( () -> new ResourceNotFoundException( "Item not found" ) );
+            orderLine.setItem( item );
+        }
 
         // Deduct ingredients from inventory
         for ( final OrderLineDto orderLine : orderItems ) {
