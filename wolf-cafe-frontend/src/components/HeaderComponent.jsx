@@ -25,7 +25,6 @@ const HeaderComponent = () => {
 						<a href='http://localhost:3000' className='navbar-brand'
 							style={{ fontWeight: '800', fontSize: '2rem', display: 'flex', alignItems: 'center' }}
 						>
-
 							<img
 								src='/wolf-head.png'
 								alt='Wolf logo'
@@ -57,14 +56,14 @@ const HeaderComponent = () => {
 
 							{/* ORDER (customers only) */}
 							{
-							    isAuth && isCustomer &&
-							    <li className='nav-item'>
-							        <NavLink to='/order' className='nav-link'
-							            style={{ fontSize: '1.5rem', fontWeight: '600', marginLeft: '3rem' }}
-							        >Order</NavLink>
-							    </li>
+								(!isAuth || (isAuth && isCustomer)) &&
+								<li className='nav-item'>
+									<NavLink to='/order' className='nav-link'
+										style={{ fontSize: '1.5rem', fontWeight: '600', marginLeft: '3rem' }}
+									>Order</NavLink>
+								</li>
 							}
-										  
+
 							{/*STAFF OR ADMIN*/}
 							{
 								isAuth && isAdmin &&

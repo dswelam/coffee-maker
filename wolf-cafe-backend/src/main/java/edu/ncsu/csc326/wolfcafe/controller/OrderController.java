@@ -9,7 +9,6 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -50,12 +49,12 @@ public class OrderController {
      * @return ResponseEntity indicating success if the Order could be saved to
      *         the inventory, or an error if it could not be
      */
-    @PreAuthorize ( "hasAnyRole('STAFF', 'ADMIN', 'CUSTOMER', 'ANONYMOUS')" )
+    @CrossOrigin ( "*" )
     @PostMapping
     public ResponseEntity<OrderDto> createOrder ( @RequestBody final OrderDto orderDto,
             final Authentication authentication ) {
         // If the user is authenticated, set the customer username on the order
-        final String username = authentication.getName();
+        final String username = ( authentication != null ) ? authentication.getName() : "Anonymous User";
         final OrderDto savedOrderDto = orderService.createOrder( orderDto, username );
         return new ResponseEntity<>( savedOrderDto, HttpStatus.CREATED );
     }
@@ -79,23 +78,6 @@ public class OrderController {
         }
         final OrderDto savedOrderDto = orderService.updateOrder( orderId, orderDto );
         return ResponseEntity.ok( savedOrderDto );
-    }
-
-    /**
-     * REST API method to allow deleting a Order from the CoffeeMaker's
-     * Inventory, by making a DELETE request to the API endpoint and indicating
-     * the order to delete (as a path variable)
-     *
-     * @param orderId
-     *            The id of the Order to delete
-     * @return Success if the order could be deleted; an error if the order does
-     *         not exist
-     */
-    @PreAuthorize ( "hasAnyRole('STAFF', 'ADMIN')" )
-    @DeleteMapping ( "{id}" )
-    public ResponseEntity<String> deleteOrder ( @PathVariable ( "id" ) final Long orderId ) {
-        orderService.deleteOrder( orderId );
-        return ResponseEntity.ok( "Order deleted successfully." );
     }
 
     /**
@@ -187,6 +169,23 @@ public class OrderController {
         final String username = auth.getName();
         final List<OrderDto> orders = orderService.getCustomersOrders( username );
         return ResponseEntity.ok( orders );
+    }
+
+    /**
+     * REST API method to get an order by ID.
+     *
+     * @param orderId
+     *            ID of the order to retrieve
+     * @return The requested order
+     */
+    @PreAuthorize ( "hasAnyRole('CUSTOMER', 'STAFF', 'ADMIN')" )
+    @GetMapping ( "/{id}" )
+    public ResponseEntity<OrderDto> getOrder ( @PathVariable ( "id" ) final Long orderId ) {
+        final OrderDto order = orderService.getOrderById( orderId );
+        if ( order == null ) {
+            return new ResponseEntity<>( HttpStatus.NOT_FOUND );
+        }
+        return ResponseEntity.ok( order );
     }
 
 }

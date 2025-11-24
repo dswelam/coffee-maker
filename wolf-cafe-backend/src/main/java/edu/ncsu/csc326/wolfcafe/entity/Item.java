@@ -9,6 +9,7 @@ import jakarta.persistence.CollectionTable;
 import jakarta.persistence.Column;
 import jakarta.persistence.ElementCollection;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -51,7 +52,7 @@ public class Item {
     private double               price;
 
     /** List of ingredients and their initial amounts */
-    @ElementCollection
+    @ElementCollection ( fetch = FetchType.EAGER )
     @CollectionTable ( name = "item_ingredients", joinColumns = @JoinColumn ( name = "item_id" ) )
     @MapKeyColumn ( name = "ingredient_name" )
     @Column ( name = "ingredient_amount" )

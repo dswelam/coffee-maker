@@ -238,11 +238,20 @@ public class OrderControllerTest {
         item.setIngredients( ingredients );
         item = itemService.addItem( item );
 
+        // Create inventory so updates have sufficient stock
+        final InventoryDto inventory = new InventoryDto();
+        final Map<String, Integer> inventoryIngredients = new HashMap<>();
+        inventoryIngredients.put( "Chocolate", 10 );
+        inventoryIngredients.put( "Sugar", 10 );
+        inventoryIngredients.put( "Milk", 10 );
+        inventory.setIngredients( inventoryIngredients );
+        inventoryService.createInventory( inventory );
+
         // Create order
         final OrderLineDto orderLine = new OrderLineDto();
         orderLine.setItem( ItemMapper.mapToItem( itemService.getItemByName( "Coffee" ) ) );
         orderLine.setQuantity( 1 );
-        List<OrderLineDto> orderItems = new ArrayList<>();
+        final List<OrderLineDto> orderItems = new ArrayList<>();
         orderItems.add( orderLine );
 
         OrderDto order = new OrderDto();
@@ -257,17 +266,8 @@ public class OrderControllerTest {
                 .content( TestUtils.asJsonString( order ) ).accept( MediaType.APPLICATION_JSON ) )
                 .andExpect( status().isNotFound() );
 
-        // Check if order items exist and add them if not
-        if ( order.getOrderItems() == null || order.getOrderItems().isEmpty() ) {
-            orderLine.setQuantity( 2 );
-            orderItems = new ArrayList<>();
-            orderItems.add( orderLine );
-            order.setOrderItems( orderItems );
-        }
-        else {
-            // Update existing order quantity
-            order.getOrderItems().get( 0 ).setQuantity( 2 );
-        }
+        // Update existing order quantity to 2
+        order.getOrderItems().get( 0 ).setQuantity( 2 );
 
         mvc.perform( put( "/api/orders/" + order.getId() ).contentType( MediaType.APPLICATION_JSON )
                 .content( TestUtils.asJsonString( order ) ).accept( MediaType.APPLICATION_JSON ) )

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import { loginAPICall, saveLoggedInUser, storeToken, isAdminUser, isStaffUser, isCustomerUser } from '../services/AuthService'
+import { loginAPICall, saveLoggedInUser, storeToken } from '../services/AuthService'
 import { useNavigate } from 'react-router-dom'
 
 const LoginComponent = () => {
@@ -8,16 +8,11 @@ const LoginComponent = () => {
 	const [password, setPassword] = useState('')
 	const [errorMessage, setErrorMessage] = useState('')
 	const navigator = useNavigate()
-	
-	const isAdmin = isAdminUser()
-	const isStaff = isStaffUser()
-	const isCustomer = isCustomerUser()
 
 	useEffect(() => {
 		// prevent scrolling
 		document.body.style.overflow = 'hidden'
 
-		// cleanup when component unmounts
 		return () => {
 			document.body.style.overflow = 'auto'
 		}
@@ -43,11 +38,11 @@ const LoginComponent = () => {
 			saveLoggedInUser(usernameOrEmail, role)
 
 			if (role === "ROLE_ADMIN") {
-			    navigator("/items"); // admin
+				navigator("/items"); // admin
 			} else if (role === "ROLE_STAFF" || role == "ROLE_BARISTA") {
-			    navigator("/order-queue"); // staff
+				navigator("/order-queue"); // staff
 			} else {
-			    navigator("/order"); // customers
+				navigator("/order"); // customers
 			}
 
 			window.location.reload(false)
@@ -70,9 +65,15 @@ const LoginComponent = () => {
 			className='d-flex justify-content-center align-items-center vh-50'
 		>
 			<div className='card shadow-lg p-5' style={{ width: '45rem', transform: 'scale(0.9)', backgroundColor: '#fff', borderRadius: '1rem' }}>
+
 				<div className='card-header text-center border-0 mb-3 bg-white'>
-					<h2 className='fw-bold mb-0 text-dark'>Welcome</h2>
-					<p className='text-secondary mt-2'>Sign in to continue</p>
+				<p className='text-secondary mt-2'>New Customer ? Use the Register button above</p>
+				<p className='text-secondary mt-2'>Want to Order without making an account ? Use the Order button above</p>
+
+				<div style={{ height: '2rem' }} /> 
+
+				<h2 className='fw-bold mb-0 text-dark'>Welcome</h2>
+				<p className='text-secondary mt-2'>Sign in to continue</p>
 				</div>
 
 				<div className='card-body'>

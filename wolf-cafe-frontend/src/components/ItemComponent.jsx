@@ -4,7 +4,6 @@ import { getItemById, saveItem, updateItem, deleteItemById } from '../services/I
 import { useNavigate, useParams } from 'react-router-dom'
 import { getInventory } from '../services/InventoryService';
 
-
 const ItemComponent = () => {
 
 	const [name, setName] = useState('')
@@ -65,7 +64,7 @@ const ItemComponent = () => {
 		console.log(item)
 
 		const newErrors = {};
-		{/* JaredH error checking for inputs*/ }
+		{/* error checking for inputs*/ }
 		if (!name.trim()) newErrors.name = "Name is required.";
 		if (!description.trim()) newErrors.description = "Description is required.";
 		if (!price || isNaN(price) || Number(price) <= 0)
@@ -88,7 +87,7 @@ const ItemComponent = () => {
 			}).catch(error => {
 				console.error(error)
 
-				{/*JaredH Error printing for duplicate name*/ }
+				{/* Error printing for duplicate name*/ }
 				if (error.response?.status === 401) {
 					setErrors({ name: "An item with that name already exists." });
 				} else {
@@ -98,7 +97,7 @@ const ItemComponent = () => {
 		}
 	}
 
-	{/* Added - JaredH, delete button logic for item update page  */ }
+	{/* delete button logic for item update page  */ }
 	function deleteItem() {
 		const confirmDelete = window.confirm('Are you sure you want to delete this item?');
 		if (!confirmDelete) return;
@@ -115,7 +114,7 @@ const ItemComponent = () => {
 			});
 	}
 
-	{/* Edited - JaredH, added Back Button  */ }
+	{/* added Back Button  */ }
 	const pageTitle = () => (
 		<div className="text-center mb-4" style={{ paddingTop: '40px' }}>
 			<button
@@ -132,7 +131,7 @@ const ItemComponent = () => {
 
 	return (
 		<div className="d-flex justify-content-center align-items-start" style={{ paddingTop: '40px' }}>
-		  <div className="card shadow-lg p-5" style={{ width: '45rem', backgroundColor: '#fff', borderRadius: '1rem', transform: 'scale(0.9)' }}>
+			<div className="card shadow-lg p-5" style={{ width: '45rem', backgroundColor: '#fff', borderRadius: '1rem', transform: 'scale(0.9)' }}>
 				{pageTitle()}
 
 				{errors.general && <div className="alert alert-danger text-center">{errors.general}</div>}
@@ -160,26 +159,26 @@ const ItemComponent = () => {
 					<div className="mb-3">
 						<label className="form-label fw-semibold">Ingredients</label>
 						<div style={{ maxHeight: '200px', overflowY: 'auto', border: '1px solid #ccc', padding: '8px' }}>
-						  {allIngredients.map(ing => (
-						    <div key={ing} className="d-flex align-items-center mb-2">
-						      <span style={{ width: "150px" }}>{ing}</span>
+							{allIngredients.map(ing => (
+								<div key={ing} className="d-flex align-items-center mb-2">
+									<span style={{ width: "150px" }}>{ing}</span>
 
-						      <input
-						        type="number"
-						        min="0"
-						        className="form-control"
-						        style={{ width: "80px" }}
-						        value={ingredientAmounts[ing] || ""}
-						        onChange={e => {
-						          const val = e.target.value;
-						          setIngredientAmounts(prev => ({
-						            ...prev,
-						            [ing]: val === "" ? "" : Number(val)
-						          }));
-						        }}
-						      />
-						    </div>
-						  ))}
+									<input
+										type="number"
+										min="0"
+										className="form-control"
+										style={{ width: "80px" }}
+										value={ingredientAmounts[ing] || ""}
+										onChange={e => {
+											const val = e.target.value;
+											setIngredientAmounts(prev => ({
+												...prev,
+												[ing]: val === "" ? "" : Number(val)
+											}));
+										}}
+									/>
+								</div>
+							))}
 						</div>
 
 					</div>

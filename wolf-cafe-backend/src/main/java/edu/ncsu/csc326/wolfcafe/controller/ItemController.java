@@ -77,7 +77,7 @@ public class ItemController {
      *
      * @return a list of all items
      */
-    @PreAuthorize ( "hasAnyRole('ADMIN', 'STAFF', 'CUSTOMER', 'ANONYMOUS', 'BARISTA')" )
+    @CrossOrigin ( "*" )
     @GetMapping
     public ResponseEntity<List<ItemDto>> getAllItems () {
         final List<ItemDto> items = itemService.getAllItems();

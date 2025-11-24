@@ -31,8 +31,9 @@ public class Order {
     private Long            id;
 
     /** Order customer */
-    @ManyToOne ( fetch = FetchType.LAZY, optional = false )
-    @JoinColumn ( name = "customer_id" )
+    @ManyToOne ( fetch = FetchType.LAZY, optional = true )
+    // Nullable true to allow for anonymous orders
+    @JoinColumn ( name = "customer_id", nullable = true )
     private User            customer;
 
     /** Order items
@@ -89,22 +90,6 @@ public class Order {
             final User preparedBy ) {
         super();
         this.id = id;
-        this.customer = customer;
-        this.orderItems = orderItems;
-        this.status = status;
-        this.preparedBy = preparedBy;
-    }
-
-    /**
-     * Constructor that takes all properties for an Order EXCEPT for id
-     * @param customer the order customer
-     * @param orderItems the order items
-     * @param status the order status
-     * @param preparedBy the staff who prepared the order
-     */
-    public Order ( final User customer, final List<OrderLine> orderItems, final OrderStatus status,
-            final User preparedBy ) {
-        super();
         this.customer = customer;
         this.orderItems = orderItems;
         this.status = status;
