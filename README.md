@@ -1,12 +1,3 @@
-# Extra Credit
-- [Automated Frontend Testing](https://github.com/ncstate-csc-coursework/csc326-2025-fall-tp-204-3/pull/80)
-- [Additional User Role](https://github.com/ncstate-csc-coursework/csc326-2025-fall-tp-204-3/blob/main/wolf-cafe-backend/src/main/java/edu/ncsu/csc326/wolfcafe/config/Roles.java#L19)
-- [Anonymous Orders](https://github.com/ncstate-csc-coursework/csc326-2025-fall-tp-204-3/pull/107)
-- [Order History](https://github.com/ncstate-csc-coursework/csc326-2025-fall-tp-204-3/blob/main/wolf-cafe-frontend/src/components/ViewOrdersComponent.jsx)
-- [Badges](https://github.com/ncstate-csc-coursework/csc326-2025-fall-tp-204-3/tree/2bb1e846a4bea5187e7c2fc174ff51ad0674a918?tab=readme-ov-file#wolfcafe)
-- [UI Enhancements](https://github.com/ncstate-csc-coursework/csc326-2025-fall-tp-204-3/wiki/UI-Enhancements-Extra-Credit-List)
-- [GitHub Projects](https://github.com/orgs/ncstate-csc-coursework/projects/43)
-
 # WolfCafe
 ![Java](https://img.shields.io/badge/java-%23ED8B00.svg?style=for-the-badge&logo=openjdk&logoColor=white)
 ![Spring Boot](https://img.shields.io/badge/Spring%20Boot-6DB33F?style=for-the-badge&logo=spring&logoColor=white)
