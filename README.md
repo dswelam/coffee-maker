@@ -20,6 +20,205 @@
 ![Security](https://img.shields.io/badge/security-JWT-green?style=for-the-badge)
 ![Authentication](https://img.shields.io/badge/auth-role%20based-blue?style=for-the-badge)
 
+## Architecture & Technologies
+
+### Backend
+- Java 21
+- Spring Boot 3
+- Spring Web
+- Spring Data JPA
+- Spring Security
+- JWT Authentication (jjwt)
+- MySQL
+- Lombok
+- ModelMapper
+- Maven
+- JUnit & Mockito
+
+### Frontend
+- React 18
+- React Router
+- Axios
+- Bootstrap
+- Vite
+- Vitest + Testing Library
+
+---
+
+## Project Structure
+
+### Backend Structure
+Location:
+
+```text
+wolf-cafe-backend/src/main/java/edu/ncsu/csc326/wolfcafe
+````
+
+The backend follows a layered Spring Boot architecture.
+
+### `controller/`
+
+Contains REST API endpoints.
+
+Examples:
+
+* `AuthController`
+* `ItemController`
+* `OrderController`
+
+### `service/` and `service/impl/`
+
+Contains business logic interfaces and implementations.
+
+### `repository/`
+
+Spring Data JPA repositories using `JpaRepository`.
+
+### `entity/`
+
+Database entity models.
+
+Examples:
+
+* `User`
+* `Role`
+* `Item`
+* `Inventory`
+* `Order`
+* `OrderLine`
+* `Tax`
+
+### `dto/`
+
+Data Transfer Objects used for API request/response payloads.
+
+### `mapper/`
+
+Handles DTO ↔ entity conversions.
+
+### `security/` and `config/`
+
+Contains:
+
+* JWT authentication filters/providers
+* Spring Security configuration
+* role initialization/bootstrap setup
+
+### `exception/`
+
+Global and domain-specific exception handling.
+
+
+## Backend Configuration
+
+Configuration template:
+
+```text
+wolf-cafe-backend/src/main/resources/application.properties.template
+```
+
+---
+
+## Backend Testing
+
+Backend tests are located in:
+
+```text
+wolf-cafe-backend/src/test/java/
+```
+
+Tests are grouped by:
+
+* controller
+* service
+* repository
+
+using JUnit and Mockito.
+
+---
+
+## Frontend Structure
+
+Location:
+
+```text
+wolf-cafe-frontend/src
+```
+
+The frontend follows a feature-oriented React architecture.
+
+### `components/`
+
+Contains UI and page components for:
+
+* orders
+* items
+* ingredients
+* users
+* authentication
+* queue management
+* tax management
+
+### `services/`
+
+Contains API service wrappers organized by domain.
+
+Examples:
+
+* `AuthService`
+* `OrderService`
+* `ItemService`
+
+### `App.jsx`
+
+Defines application routes and protected routes.
+
+### `main.jsx`
+
+Application bootstrap and rendering entry point.
+
+---
+
+## Frontend Testing
+
+Frontend tests are located in:
+
+```text
+wolf-cafe-frontend/src/test
+```
+
+using:
+
+* Vitest
+* React Testing Library
+
+---
+
+# High Level System Flow
+
+```text
+React Frontend Components
+        ↓
+Axios Service Layer
+        ↓
+Spring Boot REST Controllers
+        ↓
+Service Layer Business Logic
+        ↓
+Repositories / JPA Entities
+        ↓
+MySQL Database
+```
+
+Authentication is JWT-based with role authorization using:
+
+```java
+@PreAuthorize
+```
+
+Roles and default admin accounts are initialized during application startup through configuration setup classes.
+
+
 ## Install Lombok
 Lombok is a library that lets us use annotations to automatically generate getters, setters, and constructors.  For Lombok to work in Eclipse (and other IDEs like IntelliJ or VS Code), you need to set up Lombok with the IDE in addition to including in the pom.xml file.
 
